@@ -1,10 +1,14 @@
 package name.bluearchivehalo
 
+import com.google.common.collect.ImmutableMap
 import com.google.common.primitives.Floats.max
 import name.bluearchivehalo.mixin.BeaconLevelGetter
+import name.bluearchivehalo.mixin.GameRendererProgramGetter
 import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.client.render.*
 import net.minecraft.client.render.VertexFormat.DrawMode
+import net.minecraft.client.render.VertexFormats.COLOR_ELEMENT
+import net.minecraft.client.render.VertexFormats.POSITION_ELEMENT
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
 import net.minecraft.client.util.math.MatrixStack
@@ -23,21 +27,15 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
         val segments = entity.beamSegments.ifEmpty { return }
         val world = entity.world ?: return
-        val fullBright = LightmapTextureManager.pack(15, 15)
-        val renderLayer = MyMultiPhase.myLayer()
-        val vertexConsumer = vertexConsumers.getBuffer(renderLayer)
+        val vertexConsumer = vertexConsumers.getBuffer(MyMultiPhase.myLayer)
         val rand = LocalRandom(seed(entity))
         val cycleTicks = 400
         val rotation = ((world.time % cycleTicks + rand.nextInt(cycleTicks) + tickDelta) * 2 * PI / cycleTicks).toFloat()
-        val split = splitSegments(segments.map { it.color.run {
-            val color = ArgbFloat(1f,get(0),get(1),get(2)).mix(ArgbFloat.white,0.2f)
-            Segment(color,it.height)
-        } },20,1)
-        val parse = parseSegments(split[0])
+        val color = ArgbFloat(segments.last().color).mix(ArgbFloat.white,0.3f)
         matrices.stack {
-            matrices.translate(0.5, 200.0, 0.5)
+            matrices.translate(0.5, 20.0, 0.5)
             matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation))
-            renderHorizontalCircleRing(matrices, vertexConsumer, 200f, 1f, fullBright, OverlayTexture.DEFAULT_UV,parse)
+            renderHorizontalCircleRing(matrices, vertexConsumer, 5f, 1f){color}
         }
     }
 
@@ -45,81 +43,11 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
 
 
     companion object {
-        class Segment(val color:ArgbFloat,val height:Int){
-            fun changeHeight(newHeight:Int) = Segment(color,newHeight)
-        }
-        fun splitSegments(segmentsList:List<Segment>,perHeight:Int,count:Int):List<List<Segment>>{
-            val segments = segmentsList.toMutableList()
-            segments.ifEmpty { return listOf() }
-            //信标本身去除
-            val first = segments[0]
-            if(first.height <= 1) segments.removeAt(0)
-            else segments[0] = first.changeHeight(first.height - 1)
-
-
-            var totalH = 0
-            val result = mutableListOf<List<Segment>>()
-            val subList = mutableListOf<Segment>()
-            var curIndex = 0
-            while(curIndex in segments.indices){
-                val cur = segments[curIndex]
-                (totalH + cur.height).let {
-                    if(it < perHeight){
-                        curIndex++
-                        totalH = it
-                        subList += cur
-                    } else if(it == perHeight) {
-                        curIndex++
-                        totalH = 0
-                        subList += cur
-                        result += subList.toList()
-                        subList.clear()
-                    } else if(it > perHeight) {
-                        val consume = perHeight - totalH
-                        segments[curIndex] = cur.changeHeight(cur.height - consume)
-                        totalH = 0
-                        subList += cur.changeHeight(consume)
-                        result += subList.toList()
-                        subList.clear()
-                    }
-                }
-            }
-            if(subList.isNotEmpty()){
-                val remain = perHeight - subList.sumOf { it.height }
-                if(remain > 0) subList[subList.lastIndex] = subList.last().run { Segment(color, height + remain) }
-                result += subList
-            }
-            if(result.size >= count) return result.take(count)
-            val segment = Segment(result.last().last().color,perHeight)
-            val list = listOf(segment)
-            return result + List(count - result.size){ list }
-        }
-        fun parseSegments(segments:List<Segment>):(Double)->ArgbFloat {
-            val total = segments.sumOf { it.height }
-            fun result(it:Double):ArgbFloat{
-                if (segments.size == 1) return segments.first().color
-                val place = it * total
-                var prevNode = 0
-                var prevColor = segments.last().color
-                segments.forEach {
-                    val nextNode = prevNode + it.height
-                    if(place < nextNode) {
-                        val offset = place - prevNode
-                        if(offset < 0.5f) return prevColor.mix(it.color,0.5f + offset.toFloat())
-                        if(nextNode - place > 0.5f) return it.color
-                    }
-                    prevNode = nextNode
-                    prevColor = it.color
-                }
-                return segments.last().color.mix(segments.first().color,(place - total + 0.5f).toFloat())
-            }
-            return ::result
-        }
-
         inline fun MatrixStack.stack(block:()->Unit){ push();block();pop() }
         val BeaconBlockEntity.level get() = (this as BeaconLevelGetter).level
         fun seed(entity: BeaconBlockEntity) = entity.level * 9439L + entity.pos.run { (x*31+y)*31+z }
         class ArgbFloat(val a:Float,val r:Float,val g:Float,val b:Float){
+            constructor(arr:FloatArray):this(1f,arr[0],arr[1],arr[2])
             companion object {
                 val white = ArgbFloat(1f,1f,1f,1f)
             }
@@ -140,31 +68,19 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             }
         }
         class AngleInfo(
-            val x1:Float,val x2:Float,val z1:Float,val z2:Float,val u1:Float,val u2:Float,val v1:Float,val v2:Float,val color:Int
+            val x1:Float,val x2:Float,val z1:Float,val z2:Float,val color:Int
         ){
-            fun vertexInner(consumer:VertexConsumer, modelMatrix:Matrix4f, light: Int, overlay: Int,normalY:Float){
-                consumer.vertex(modelMatrix, x1, 0f, z1)
-                    .color(color)
-                    .texture(u1, v1)
-                    .overlay(overlay)
-                    .light(light)
-                    .normal(0f,normalY,0f)
-                    .next()
+            fun vertexInner(consumer: VertexConsumer, modelMatrix: Matrix4f){
+                consumer.vertex(modelMatrix, x1, 0f, z1).color(color).next()
             }
-            fun vertexOuter(consumer:VertexConsumer, modelMatrix:Matrix4f, light: Int, overlay: Int,normalY:Float){
-                consumer.vertex(modelMatrix, x2, 0f, z2)
-                    .color(color)
-                    .texture(u2, v2)
-                    .overlay(overlay)
-                    .light(light)
-                    .normal(0f,normalY,0f)
-                    .next()
+            fun vertexOuter(consumer: VertexConsumer, modelMatrix: Matrix4f){
+                consumer.vertex(modelMatrix, x2, 0f, z2).color(color).next()
             }
         }
         fun renderHorizontalCircleRing(
             matrices: MatrixStack, consumer: VertexConsumer,
             radius: Float, thickness: Float,
-            light: Int, overlay: Int,colorBy0to1:(Double)->ArgbFloat
+            colorBy0to1: (Double) -> ArgbFloat
         ) {
             val segments = (radius).toInt()
             val modelMatrix = matrices.peek().positionMatrix
@@ -177,13 +93,12 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             }.map {
                 val cos = cos(it).toFloat()
                 val sin = sin(it).toFloat()
-                val cycle = (radius*it / thickness).toFloat()
                 val alpha = max(0.33f,1f - (it*2/PI).toFloat())
                 AngleInfo(radiusInner*cos,radiusOuter*cos,radiusInner*sin,radiusOuter*sin,
-                    0f,1f,cycle,cycle,colorBy0to1(it / (2*PI)).alpha(alpha).toInt())
+                    colorBy0to1(it / (2*PI)).alpha(alpha).toInt())
             }.forEach {
-                it.vertexInner(consumer,modelMatrix, light, overlay,-1f)
-                it.vertexOuter(consumer, modelMatrix, light, overlay,-1f)
+                it.vertexInner(consumer, modelMatrix)
+                it.vertexOuter(consumer, modelMatrix)
             }
         }
 
@@ -216,16 +131,16 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
                     overlay, layering, target, texturing, writeMaskState, colorLogic, lineWidth)
             }
             companion object {
-                fun myLayer():RenderLayer{
+                val myLayer:RenderLayer = run{
                     val par = Phases().apply {
-                        program = BEACON_BEAM_PROGRAM
-//                        texture = Texture(BEAM_TEXTURE, false,true)
+                        program = ShaderProgram { GameRendererProgramGetter.getPositionColorShaderProgram() }
                         writeMaskState = ALL_MASK
                         cull = DISABLE_CULLING
                         transparency = TRANSLUCENT_TRANSPARENCY
                     }
-                    return MyMultiPhase("beacon_halo", VertexFormats.POSITION_COLOR_LIGHT,
-                        DrawMode.TRIANGLE_STRIP, 2097152, false, false,par)
+                    val vertexFormat = VertexFormat(ImmutableMap.builder<String,VertexFormatElement>().put("Position", POSITION_ELEMENT).put("Color", COLOR_ELEMENT).build())
+                    MyMultiPhase("beacon_halo", vertexFormat,
+                        DrawMode.TRIANGLE_STRIP, 2097152, false, true,par)
                 }
             }
         }
