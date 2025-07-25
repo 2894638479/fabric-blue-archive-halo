@@ -23,6 +23,7 @@
 		]
 	},
 	"mixins": [
+		"blue-archive-halo-client.mixin.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.16.14",
