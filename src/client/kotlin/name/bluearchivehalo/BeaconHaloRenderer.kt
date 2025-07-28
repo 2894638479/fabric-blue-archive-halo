@@ -1,10 +1,10 @@
 package name.bluearchivehalo
 
 import com.google.common.collect.ImmutableMap
-import com.google.common.primitives.Floats.max
 import name.bluearchivehalo.mixin.BeaconLevelGetter
 import name.bluearchivehalo.mixin.GameRendererProgramGetter
 import net.minecraft.block.entity.BeaconBlockEntity
+import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.*
 import net.minecraft.client.render.VertexFormat.DrawMode
 import net.minecraft.client.render.VertexFormats.COLOR_ELEMENT
@@ -13,11 +13,10 @@ import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.util.math.RotationAxis
+import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.random.LocalRandom
 import org.joml.Matrix4f
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.*
 
 class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlockEntityRenderer(ctx) {
     override fun render(
@@ -27,16 +26,57 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
         val segments = entity.beamSegments.ifEmpty { return }
         val world = entity.world ?: return
-        val vertexConsumer = vertexConsumers.getBuffer(MyMultiPhase.myLayer)
         val rand = LocalRandom(seed(entity))
-        val cycleTicks = 400
-        val rotation = ((world.time % cycleTicks + rand.nextInt(cycleTicks) + tickDelta) * 2 * PI / cycleTicks).toFloat()
-        val color = ArgbFloat(segments.last().color).mix(ArgbFloat.white,0.3f)
-        matrices.stack {
-            matrices.translate(0.5, 20.0, 0.5)
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation))
-            renderHorizontalCircleRing(matrices, vertexConsumer, 5f, 1f){color}
+        fun ring(r:Float,cycleTicks:Int,color:ArgbFloat,height:Float,thickness:Float){
+            val rotation = if(cycleTicks != 0) ((world.time % cycleTicks + rand.nextInt(abs(cycleTicks)) + tickDelta) * 2 * PI / cycleTicks).toFloat() else 0f
+            val angleCount = run {
+                val cameraPos = MinecraftClient.getInstance().gameRenderer.camera.pos
+                val entityPos = entity.pos.toCenterPos()
+                val distance = entityPos.add(0.0,height.toDouble(),0.0).distanceTo(cameraPos)
+                if(distance <= (height + r)) r.toInt()
+                else max(10,(r - (distance - height - r)/5).toInt())
+            }
+            matrices.stack {
+                matrices.translate(0.5, rand.nextDouble() + height, 0.5)
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation))
+                renderHorizontalCircleRing(matrices, vertexConsumers, r,thickness,angleCount,cycleTicks < 0){color}
+            }
         }
+        fun color(index:Int):ArgbFloat{
+            var sum = 0
+            segments.forEach {
+                sum += it.height
+                if(sum > index) return ArgbFloat(it.color)
+            }
+            return ArgbFloat(segments.last().color)
+        }
+        when(entity.level){
+            0 -> return
+            1 -> {
+                ring(150f,400,color(1),200f,2f)
+            }
+            2 -> {
+                ring(130f,400,color(2),225f,2f)
+                ring(200f,300,color(1),225f,2f)
+            }
+            3 -> {
+                ring(130f,-400,color(3),225f,2f)
+                ring(200f,250,color(2),225f,2f)
+                ring(215f,300,color(1),225f,2f)
+            }
+            4 -> {
+                ring(100f,400,color(5),250f,2f)
+                ring(200f,300,color(4),250f,2f)
+                ring(215f,-400,color(3),250f,2f)
+                ring(300f,250,color(2),250f,2f)
+                ring(315f,330,color(1),250f,2f)
+            }
+            else -> error("unsupported beacon level:${entity.level}")
+        }
+    }
+
+    override fun isInRenderDistance(beaconBlockEntity: BeaconBlockEntity?, vec3d: Vec3d?): Boolean {
+        return true
     }
 
 
@@ -68,37 +108,41 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             }
         }
         class AngleInfo(
-            val x1:Float,val x2:Float,val z1:Float,val z2:Float,val color:Int
+            val cos:Float,val sin:Float,val color:Int
         ){
-            fun vertexInner(consumer: VertexConsumer, modelMatrix: Matrix4f){
-                consumer.vertex(modelMatrix, x1, 0f, z1).color(color).next()
-            }
-            fun vertexOuter(consumer: VertexConsumer, modelMatrix: Matrix4f){
-                consumer.vertex(modelMatrix, x2, 0f, z2).color(color).next()
+            fun vertex(consumer: VertexConsumer,modelMatrix: Matrix4f,radius:Float,y:Float = 0f){
+                consumer.vertex(modelMatrix,radius*cos,y,radius*sin).color(color).next()
             }
         }
         fun renderHorizontalCircleRing(
-            matrices: MatrixStack, consumer: VertexConsumer,
-            radius: Float, thickness: Float,
+            matrices: MatrixStack, consumerProvider: VertexConsumerProvider,
+            radius: Float, thickness: Float, segmentCount:Int, reverseRotation:Boolean,
             colorBy0to1: (Double) -> ArgbFloat
         ) {
-            val segments = (radius).toInt()
+            val consumer = consumerProvider.getBuffer(MyMultiPhase.myLayer)
             val modelMatrix = matrices.peek().positionMatrix
             val radiusInner = radius - thickness/2
             val radiusOuter = radius + thickness/2
+            val viewHeight = thickness * 2 / 3
 
 
-            (0..segments).map {
-                2 * PI * it / segments
+            val angles = (0..segmentCount).map {
+                2 * PI * it / segmentCount
             }.map {
                 val cos = cos(it).toFloat()
                 val sin = sin(it).toFloat()
                 val alpha = max(0.33f,1f - (it*2/PI).toFloat())
-                AngleInfo(radiusInner*cos,radiusOuter*cos,radiusInner*sin,radiusOuter*sin,
-                    colorBy0to1(it / (2*PI)).alpha(alpha).toInt())
-            }.forEach {
-                it.vertexInner(consumer, modelMatrix)
-                it.vertexOuter(consumer, modelMatrix)
+                val color = colorBy0to1(it / (2*PI)).alpha(alpha).toInt()
+                if(reverseRotation) AngleInfo(sin,cos,color)
+                else AngleInfo(cos,sin,color)
+            }
+            angles.forEach {
+                it.vertex(consumer, modelMatrix, radiusInner)
+                it.vertex(consumer, modelMatrix, radiusOuter)
+            }
+            angles.forEach {
+                it.vertex(consumer, modelMatrix, radius, 0.1f)
+                it.vertex(consumer, modelMatrix, radius, viewHeight)
             }
         }
 
@@ -134,7 +178,6 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
                 val myLayer:RenderLayer = run{
                     val par = Phases().apply {
                         program = ShaderProgram { GameRendererProgramGetter.getPositionColorShaderProgram() }
-                        writeMaskState = ALL_MASK
                         cull = DISABLE_CULLING
                         transparency = TRANSLUCENT_TRANSPARENCY
                     }
