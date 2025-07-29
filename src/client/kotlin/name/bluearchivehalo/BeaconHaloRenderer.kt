@@ -76,7 +76,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
     }
 
     override fun isInRenderDistance(beaconBlockEntity: BeaconBlockEntity?, vec3d: Vec3d?): Boolean {
-        return true
+        return beaconBlockEntity?.isRemoved == false
     }
 
 
