@@ -3,6 +3,7 @@ package name.bluearchivehalo
 import com.google.common.collect.ImmutableMap
 import name.bluearchivehalo.mixin.BeaconLevelGetter
 import name.bluearchivehalo.mixin.GameRendererProgramGetter
+import net.minecraft.block.Blocks
 import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.*
@@ -42,15 +43,17 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
                 renderHorizontalCircleRing(matrices, vertexConsumers, r,thickness,angleCount,cycleTicks < 0){color}
             }
         }
+        val levelShrink = entity.levelShrink
         fun color(index:Int):ArgbFloat{
             var sum = 0
             segments.forEach {
                 sum += it.height
-                if(sum > index) return ArgbFloat(it.color)
+                if(sum > (index + levelShrink)) return ArgbFloat(it.color)
             }
             return ArgbFloat(segments.last().color)
         }
-        when(entity.level){
+
+        when(entity.level - levelShrink){
             0 -> return
             1 -> {
                 ring(150f,400,color(1),200f,2f)
@@ -75,6 +78,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         }
     }
 
+    override fun getRenderDistance() =  Int.MAX_VALUE
     override fun isInRenderDistance(beaconBlockEntity: BeaconBlockEntity?, vec3d: Vec3d?): Boolean {
         return beaconBlockEntity?.isRemoved == false
     }
@@ -85,6 +89,18 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
     companion object {
         inline fun MatrixStack.stack(block:()->Unit){ push();block();pop() }
         val BeaconBlockEntity.level get() = (this as BeaconLevelGetter).level
+        val BeaconBlockEntity.levelShrink : Int get() {
+            var shrink = 0
+            val world = world ?: return 0
+            val pos = pos ?: return 0
+            val level = level
+            while(shrink < level){
+                val block = world.getBlockState(pos.add(0,shrink + 1,0))
+                val shrinkLevel = block.isOf(Blocks.GLASS) || block.isOf(Blocks.GLASS_PANE)
+                if(shrinkLevel) shrink++ else break
+            }
+            return shrink
+        }
         fun seed(entity: BeaconBlockEntity) = entity.level * 9439L + entity.pos.run { (x*31+y)*31+z }
         class ArgbFloat(val a:Float,val r:Float,val g:Float,val b:Float){
             constructor(arr:FloatArray):this(1f,arr[0],arr[1],arr[2])
