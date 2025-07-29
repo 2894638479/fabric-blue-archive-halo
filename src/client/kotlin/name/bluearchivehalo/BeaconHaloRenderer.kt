@@ -34,7 +34,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
                 val entityPos = entity.pos.toCenterPos()
                 val distance = entityPos.add(0.0,height.toDouble(),0.0).distanceTo(cameraPos)
                 if(distance <= (height + r)) r.toInt()
-                else max(10,(r - (distance - height - r)/5).toInt())
+                else max(10,((height + r)*r / distance).toInt())
             }
             matrices.stack {
                 matrices.translate(0.5, rand.nextDouble() + height, 0.5)
