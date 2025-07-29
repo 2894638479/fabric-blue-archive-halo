@@ -3,15 +3,15 @@
 	"id": "blue-archive-halo",
 	"version": "${version}",
 	"name": "Blue Archive Halo",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "仿碧蓝档案光环",
 	"authors": [
-		"Me!"
+		"2894638479"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/blue-archive-halo/icon.png",
 	"environment": "*",
 	"entrypoints": {
