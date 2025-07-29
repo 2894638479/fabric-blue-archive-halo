@@ -1,6 +1,5 @@
 package name.bluearchivehalo
 
-import com.google.common.collect.ImmutableMap
 import name.bluearchivehalo.mixin.BeaconLevelGetter
 import name.bluearchivehalo.mixin.GameRendererProgramGetter
 import net.minecraft.block.Blocks
@@ -8,8 +7,6 @@ import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.*
 import net.minecraft.client.render.VertexFormat.DrawMode
-import net.minecraft.client.render.VertexFormats.COLOR_ELEMENT
-import net.minecraft.client.render.VertexFormats.POSITION_ELEMENT
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
 import net.minecraft.client.util.math.MatrixStack
@@ -104,6 +101,12 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         fun seed(entity: BeaconBlockEntity) = entity.level * 9439L + entity.pos.run { (x*31+y)*31+z }
         class ArgbFloat(val a:Float,val r:Float,val g:Float,val b:Float){
             constructor(arr:FloatArray):this(1f,arr[0],arr[1],arr[2])
+            constructor(int:Int):this(
+                ((int shr 24) and 255) / 255f,
+                ((int shr 16) and 255) / 255f,
+                ((int shr 8) and 255) / 255f,
+                (int and 255) / 255f,
+            )
             companion object {
                 val white = ArgbFloat(1f,1f,1f,1f)
             }
@@ -127,7 +130,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             val cos:Float,val sin:Float,val color:Int
         ){
             fun vertex(consumer: VertexConsumer,modelMatrix: Matrix4f,radius:Float,y:Float = 0f){
-                consumer.vertex(modelMatrix,radius*cos,y,radius*sin).color(color).next()
+                consumer.vertex(modelMatrix,radius*cos,y,radius*sin).color(color)
             }
         }
         fun renderHorizontalCircleRing(
@@ -197,7 +200,8 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
                         cull = DISABLE_CULLING
                         transparency = TRANSLUCENT_TRANSPARENCY
                     }
-                    val vertexFormat = VertexFormat(ImmutableMap.builder<String,VertexFormatElement>().put("Position", POSITION_ELEMENT).put("Color", COLOR_ELEMENT).build())
+                    val vertexFormat = VertexFormat.builder().add("Position", VertexFormatElement.POSITION)
+                        .add("Color", VertexFormatElement.COLOR).build()
                     MyMultiPhase("beacon_halo", vertexFormat,
                         DrawMode.TRIANGLE_STRIP, 2097152, false, true,par)
                 }
