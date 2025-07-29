@@ -13,10 +13,11 @@ import net.minecraft.client.render.VertexFormats.POSITION_ELEMENT
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.util.math.RotationAxis
+import net.minecraft.util.math.Matrix4f
+import net.minecraft.util.math.Quaternion
 import net.minecraft.util.math.Vec3d
+import net.minecraft.util.math.Vec3f
 import net.minecraft.util.math.random.LocalRandom
-import org.joml.Matrix4f
 import kotlin.math.*
 
 class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlockEntityRenderer(ctx) {
@@ -32,14 +33,14 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             val rotation = if(cycleTicks != 0) ((world.time % cycleTicks + rand.nextInt(abs(cycleTicks)) + tickDelta) * 2 * PI / cycleTicks).toFloat() else 0f
             val angleCount = run {
                 val cameraPos = MinecraftClient.getInstance().gameRenderer.camera.pos
-                val entityPos = entity.pos.toCenterPos()
-                val distance = entityPos.add(0.0,height.toDouble(),0.0).distanceTo(cameraPos)
+                val entityPos = entity.pos.run { Vec3d(x+0.5,y+0.5,z+0.5) }
+                val distance = entityPos.add(0.0, height.toDouble(), 0.0).distanceTo(cameraPos)
                 if(distance <= (height + r)) r.toInt()
                 else max(10,((height + r)*r / distance).toInt())
             }
             matrices.stack {
                 matrices.translate(0.5, rand.nextDouble() + height, 0.5)
-                matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation))
+                matrices.multiply(Quaternion(Vec3f.POSITIVE_Y,rotation,false))
                 renderHorizontalCircleRing(matrices, vertexConsumers, r,thickness,angleCount,cycleTicks < 0){color}
             }
         }
@@ -126,7 +127,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         class AngleInfo(
             val cos:Float,val sin:Float,val color:Int
         ){
-            fun vertex(consumer: VertexConsumer,modelMatrix: Matrix4f,radius:Float,y:Float = 0f){
+            fun vertex(consumer: VertexConsumer, modelMatrix: Matrix4f, radius:Float, y:Float = 0f){
                 consumer.vertex(modelMatrix,radius*cos,y,radius*sin).color(color).next()
             }
         }
@@ -175,7 +176,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
                 { phases.list.forEach { it.endDrawing() } }){
             private class Phases {
                 var texture = NO_TEXTURE
-                var program = NO_PROGRAM
+                var shader = NO_SHADER
                 var transparency = NO_TRANSPARENCY
                 var depthTest = LEQUAL_DEPTH_TEST
                 var cull = ENABLE_CULLING
@@ -186,14 +187,13 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
                 var texturing = DEFAULT_TEXTURING
                 var writeMaskState = ALL_MASK
                 var lineWidth = FULL_LINE_WIDTH
-                var colorLogic = NO_COLOR_LOGIC
-                val list get() = listOf(texture, program, transparency, depthTest, cull, lightmap,
-                    overlay, layering, target, texturing, writeMaskState, colorLogic, lineWidth)
+                val list get() = listOf(texture, shader, transparency, depthTest, cull, lightmap,
+                    overlay, layering, target, texturing, writeMaskState, lineWidth)
             }
             companion object {
                 val myLayer:RenderLayer = run{
                     val par = Phases().apply {
-                        program = ShaderProgram { GameRendererProgramGetter.getPositionColorShaderProgram() }
+                        shader = Shader { GameRendererProgramGetter.getPositionColorShaderProgram() }
                         cull = DISABLE_CULLING
                         transparency = TRANSLUCENT_TRANSPARENCY
                     }
