@@ -1,10 +1,10 @@
 package name.bluearchivehalo
 
 import name.bluearchivehalo.mixin.BeaconLevelGetter
-import name.bluearchivehalo.mixin.GameRendererProgramGetter
 import net.minecraft.block.Blocks
 import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gl.ShaderProgramKeys
 import net.minecraft.client.render.*
 import net.minecraft.client.render.VertexFormat.DrawMode
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
@@ -196,7 +196,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             companion object {
                 val myLayer:RenderLayer = run{
                     val par = Phases().apply {
-                        program = ShaderProgram { GameRendererProgramGetter.getPositionColorShaderProgram() }
+                        program = ShaderProgram(ShaderProgramKeys.POSITION_COLOR)
                         cull = DISABLE_CULLING
                         transparency = TRANSLUCENT_TRANSPARENCY
                     }

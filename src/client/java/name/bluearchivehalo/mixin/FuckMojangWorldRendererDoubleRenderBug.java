@@ -12,7 +12,7 @@ import java.util.List;
 
 @Mixin(value = WorldRenderer.class,priority = 1)
 public class FuckMojangWorldRendererDoubleRenderBug {
-    @Redirect(method = "render",at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/chunk/ChunkBuilder$ChunkData;getBlockEntities()Ljava/util/List;"))
+    @Redirect(method = "renderBlockEntities",at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/chunk/ChunkBuilder$ChunkData;getBlockEntities()Ljava/util/List;"))
     List<BlockEntity> fuckDoubleRender(ChunkBuilder.ChunkData instance){
         List<BlockEntity> list = instance.getBlockEntities();
         if(!list.isEmpty()){
