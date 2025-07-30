@@ -17,7 +17,7 @@ import net.minecraft.util.math.Matrix4f
 import net.minecraft.util.math.Quaternion
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.Vec3f
-import net.minecraft.util.math.random.LocalRandom
+import net.minecraft.world.gen.random.SimpleRandom
 import kotlin.math.*
 
 class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlockEntityRenderer(ctx) {
@@ -28,7 +28,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
         val segments = entity.beamSegments.ifEmpty { return }
         val world = entity.world ?: return
-        val rand = LocalRandom(seed(entity))
+        val rand = SimpleRandom(seed(entity))
         fun ring(r:Float,cycleTicks:Int,color:ArgbFloat,height:Float,thickness:Float){
             val rotation = if(cycleTicks != 0) ((world.time % cycleTicks + rand.nextInt(abs(cycleTicks)) + tickDelta) * 2 * PI / cycleTicks).toFloat() else 0f
             val angleCount = run {
@@ -153,6 +153,9 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
                 if(reverseRotation) AngleInfo(sin,cos,color)
                 else AngleInfo(cos,sin,color)
             }
+            repeat(2) {
+                angles.firstOrNull()?.vertex(consumer, modelMatrix, radiusInner)
+            }
             angles.forEach {
                 it.vertex(consumer, modelMatrix, radiusInner)
                 it.vertex(consumer, modelMatrix, radiusOuter)
@@ -160,6 +163,9 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             angles.forEach {
                 it.vertex(consumer, modelMatrix, radius, 0.1f)
                 it.vertex(consumer, modelMatrix, radius, viewHeight)
+            }
+            repeat(2) {
+                angles.lastOrNull()?.vertex(consumer, modelMatrix, radius, viewHeight)
             }
         }
 
