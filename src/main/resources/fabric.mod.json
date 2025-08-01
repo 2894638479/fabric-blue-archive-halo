@@ -25,6 +25,7 @@
 	"mixins": [
 		"blue-archive-halo-client.mixin.json"
 	],
+	"accessWidener": "bahalo.accesswidener",
 	"depends": {
 		"fabricloader": ">=0.16.14",
 		"minecraft": "~1.19.2",
