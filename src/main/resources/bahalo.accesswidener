@@ -1,0 +1,32 @@
+accessWidener	v2	named
+
+accessible class net/minecraft/client/render/RenderPhase$ShaderProgram
+accessible field net/minecraft/block/entity/BeaconBlockEntity level I
+accessible class net/minecraft/client/render/RenderLayer$MultiPhaseParameters
+accessible method net/minecraft/client/render/RenderLayer$MultiPhaseParameters$Builder <init> ()V
+accessible class net/minecraft/client/render/RenderLayer$MultiPhase
+accessible class net/minecraft/client/render/RenderPhase$Texture
+
+accessible field net/minecraft/client/render/RenderLayer$MultiPhaseParameters phases Lcom/google/common/collect/ImmutableList;
+accessible method net/minecraft/client/render/RenderPhase$TextureBase getId ()Ljava/util/Optional;
+
+accessible field net/minecraft/client/render/RenderLayer$MultiPhaseParameters texture Lnet/minecraft/client/render/RenderPhase$TextureBase;
+accessible field net/minecraft/client/render/RenderLayer$MultiPhase affectedOutline Ljava/util/Optional;
+accessible field net/minecraft/client/render/RenderLayer$MultiPhase phases Lnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;
+accessible field net/minecraft/client/render/RenderLayer vertexFormat Lnet/minecraft/client/render/VertexFormat;
+accessible field net/minecraft/client/render/RenderLayer drawMode Lnet/minecraft/client/render/VertexFormat$DrawMode;
+accessible field net/minecraft/client/render/RenderLayer expectedBufferSize I
+accessible field net/minecraft/client/render/RenderLayer hasCrumbling Z
+accessible field net/minecraft/client/render/RenderLayer translucent Z
+accessible field net/minecraft/client/render/RenderPhase beginAction Ljava/lang/Runnable;
+accessible field net/minecraft/client/render/RenderPhase endAction Ljava/lang/Runnable;
+
+mutable field net/minecraft/client/render/RenderLayer$MultiPhase affectedOutline Ljava/util/Optional;
+mutable field net/minecraft/client/render/RenderLayer$MultiPhase phases Lnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;
+mutable field net/minecraft/client/render/RenderLayer vertexFormat Lnet/minecraft/client/render/VertexFormat;
+mutable field net/minecraft/client/render/RenderLayer drawMode Lnet/minecraft/client/render/VertexFormat$DrawMode;
+mutable field net/minecraft/client/render/RenderLayer expectedBufferSize I
+mutable field net/minecraft/client/render/RenderLayer hasCrumbling Z
+mutable field net/minecraft/client/render/RenderLayer translucent Z
+mutable field net/minecraft/client/render/RenderPhase beginAction Ljava/lang/Runnable;
+mutable field net/minecraft/client/render/RenderPhase endAction Ljava/lang/Runnable;

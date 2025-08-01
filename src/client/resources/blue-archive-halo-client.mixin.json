@@ -2,13 +2,11 @@
   "required": true,
   "package": "name.bluearchivehalo.mixin",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [
-    "BeaconLevelGetter"
-  ],
   "injectors": {
     "defaultRequire": 1
   },
   "client": [
-    "FuckMojangWorldRendererDoubleRenderBug"
+    "FuckMojangWorldRendererDoubleRenderBug",
+    "MultiPhaseMixin"
   ]
 }
