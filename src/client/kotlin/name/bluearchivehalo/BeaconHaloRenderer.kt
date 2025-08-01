@@ -1,15 +1,13 @@
 package name.bluearchivehalo
 
-import com.google.common.collect.ImmutableMap
-import name.bluearchivehalo.mixin.BeaconLevelGetter
-import name.bluearchivehalo.mixin.GameRendererProgramGetter
+import name.bluearchivehalo.BeaconHaloRenderer.Companion.ArgbFloat.Companion.white
+import name.bluearchivehalo.BlueArchiveHaloClient.texture
 import net.minecraft.block.Blocks
 import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.render.*
-import net.minecraft.client.render.VertexFormat.DrawMode
-import net.minecraft.client.render.VertexFormats.COLOR_ELEMENT
-import net.minecraft.client.render.VertexFormats.POSITION_ELEMENT
+import net.minecraft.client.render.RenderLayer
+import net.minecraft.client.render.VertexConsumer
+import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
 import net.minecraft.client.util.math.MatrixStack
@@ -25,12 +23,20 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         entity: BeaconBlockEntity, tickDelta: Float, matrices: MatrixStack,
         vertexConsumers: VertexConsumerProvider, light: Int, overlay: Int
     ) {
-        super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
         val segments = entity.beamSegments.ifEmpty { return }
         val world = entity.world ?: return
         val rand = SimpleRandom(seed(entity))
         fun ring(r:Float,cycleTicks:Int,color:ArgbFloat,height:Float,thickness:Float){
-            val rotation = if(cycleTicks != 0) ((world.time % cycleTicks + rand.nextInt(abs(cycleTicks)) + tickDelta) * 2 * PI / cycleTicks).toFloat() else 0f
+            val rotation = run {
+                if(cycleTicks == 0) 0.0
+                else {
+                    val abs = cycleTicks.absoluteValue
+                    val mod = world.time % cycleTicks + tickDelta
+                    val rad = mod / abs * 2 * PI
+                    if(cycleTicks > 0) rad
+                    else 2*PI - rad
+                }
+            }.toFloat()
             val angleCount = run {
                 val cameraPos = MinecraftClient.getInstance().gameRenderer.camera.pos
                 val entityPos = entity.pos.run { Vec3d(x+0.5,y+0.5,z+0.5) }
@@ -45,17 +51,16 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             }
         }
         val levelShrink = entity.levelShrink
-        fun color(index:Int):ArgbFloat{
+        fun color(index:Int,mixWhite:Float = 0.3f):ArgbFloat{
             var sum = 0
             segments.forEach {
                 sum += it.height
-                if(sum > (index + levelShrink)) return ArgbFloat(it.color)
+                if(sum > (index + levelShrink)) return ArgbFloat(it.color).mix(white,mixWhite)
             }
-            return ArgbFloat(segments.last().color)
+            return ArgbFloat(segments.last().color).mix(white,mixWhite)
         }
-
         when(entity.level - levelShrink){
-            0 -> return
+            0 -> {}
             1 -> {
                 ring(150f,400,color(1),200f,2f)
             }
@@ -77,6 +82,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             }
             else -> error("unsupported beacon level:${entity.level}")
         }
+        super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
     }
 
     override fun getRenderDistance() =  Int.MAX_VALUE
@@ -89,7 +95,6 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
 
     companion object {
         inline fun MatrixStack.stack(block:()->Unit){ push();block();pop() }
-        val BeaconBlockEntity.level get() = (this as BeaconLevelGetter).level
         val BeaconBlockEntity.levelShrink : Int get() {
             var shrink = 0
             val world = world ?: return 0
@@ -127,7 +132,11 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         class AngleInfo(
             val cos:Float,val sin:Float,val color:Int
         ){
-            fun vertex(consumer: VertexConsumer, modelMatrix: Matrix4f, radius:Float, y:Float = 0f){
+            class Scope(val consumer: VertexConsumer,val modelMatrix: Matrix4f){
+                fun AngleInfo.vertex(radius:Float,y:Float = 0f) = vertex(consumer,modelMatrix,radius,y)
+                fun AngleInfo.vertex2(radius:Float,y:Float = 0f) = repeat(2) { vertex(consumer, modelMatrix, radius, y) }
+            }
+            fun vertex(consumer: VertexConsumer,modelMatrix: Matrix4f,radius:Float,y:Float){
                 consumer.vertex(modelMatrix,radius*cos,y,radius*sin).color(color).next()
             }
         }
@@ -136,7 +145,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             radius: Float, thickness: Float, segmentCount:Int, reverseRotation:Boolean,
             colorBy0to1: (Double) -> ArgbFloat
         ) {
-            val consumer = consumerProvider.getBuffer(MyMultiPhase.myLayer)
+            val consumer = consumerProvider.getBuffer(RenderLayer.getBeaconBeam(texture,true))
             val modelMatrix = matrices.peek().positionMatrix
             val radiusInner = radius - thickness/2
             val radiusOuter = radius + thickness/2
@@ -148,65 +157,26 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             }.map {
                 val cos = cos(it).toFloat()
                 val sin = sin(it).toFloat()
-                val alpha = max(0.33f,1f - (it*2/PI).toFloat())
+                val rawAlpha = if(reverseRotation) 1 + (it - 2*PI)*2/PI else 1 - it*2/PI
+                val alpha = max(0.33f,rawAlpha.toFloat())
                 val color = colorBy0to1(it / (2*PI)).alpha(alpha).toInt()
-                if(reverseRotation) AngleInfo(sin,cos,color)
-                else AngleInfo(cos,sin,color)
+                AngleInfo(cos,sin,color)
             }
-            repeat(2) {
-                angles.firstOrNull()?.vertex(consumer, modelMatrix, radiusInner)
-            }
-            angles.forEach {
-                it.vertex(consumer, modelMatrix, radiusInner)
-                it.vertex(consumer, modelMatrix, radiusOuter)
-            }
-            angles.forEach {
-                it.vertex(consumer, modelMatrix, radius, 0.1f)
-                it.vertex(consumer, modelMatrix, radius, viewHeight)
-            }
-            repeat(2) {
-                angles.lastOrNull()?.vertex(consumer, modelMatrix, radius, viewHeight)
-            }
-        }
-
-        class MyMultiPhase private constructor(
-            name: String,
-            vertexFormat: VertexFormat,
-            drawMode: DrawMode,
-            expectedBufferSize: Int,
-            hasCrumbling: Boolean,
-            translucent: Boolean,
-            phases: Phases
-        ) : RenderLayer(name, vertexFormat, drawMode, expectedBufferSize, hasCrumbling, translucent,
-                { phases.list.forEach { it.startDrawing() } },
-                { phases.list.forEach { it.endDrawing() } }){
-            private class Phases {
-                var texture = NO_TEXTURE
-                var shader = NO_SHADER
-                var transparency = NO_TRANSPARENCY
-                var depthTest = LEQUAL_DEPTH_TEST
-                var cull = ENABLE_CULLING
-                var lightmap = DISABLE_LIGHTMAP
-                var overlay = DISABLE_OVERLAY_COLOR
-                var layering = NO_LAYERING
-                var target = MAIN_TARGET
-                var texturing = DEFAULT_TEXTURING
-                var writeMaskState = ALL_MASK
-                var lineWidth = FULL_LINE_WIDTH
-                val list get() = listOf(texture, shader, transparency, depthTest, cull, lightmap,
-                    overlay, layering, target, texturing, writeMaskState, lineWidth)
-            }
-            companion object {
-                val myLayer:RenderLayer = run{
-                    val par = Phases().apply {
-                        shader = Shader { GameRendererProgramGetter.getPositionColorShaderProgram() }
-                        cull = DISABLE_CULLING
-                        transparency = TRANSLUCENT_TRANSPARENCY
-                    }
-                    val vertexFormat = VertexFormat(ImmutableMap.builder<String,VertexFormatElement>().put("Position", POSITION_ELEMENT).put("Color", COLOR_ELEMENT).build())
-                    MyMultiPhase("beacon_halo", vertexFormat,
-                        DrawMode.TRIANGLE_STRIP, 2097152, false, true,par)
+            AngleInfo.Scope(consumer,modelMatrix).run {
+                angles.firstOrNull()?.vertex2(radiusInner)
+                angles.forEach {
+                    it.vertex(radiusInner)
+                    it.vertex(radiusOuter)
                 }
+                angles.forEach {
+                    it.vertex(radiusOuter)
+                    it.vertex(radius, viewHeight)
+                }
+                angles.forEach {
+                    it.vertex(radius, viewHeight)
+                    it.vertex(radiusInner)
+                }
+                angles.lastOrNull()?.vertex2(radiusInner)
             }
         }
     }
