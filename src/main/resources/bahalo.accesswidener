@@ -1,6 +1,5 @@
 accessWidener	v2	named
 
-accessible class net/minecraft/client/render/RenderPhase$ShaderProgram
 accessible field net/minecraft/block/entity/BeaconBlockEntity level I
 accessible class net/minecraft/client/render/RenderLayer$MultiPhaseParameters
 accessible method net/minecraft/client/render/RenderLayer$MultiPhaseParameters$Builder <init> ()V
