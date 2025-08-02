@@ -7,6 +7,6 @@
   },
   "client": [
     "FuckMojangWorldRendererDoubleRenderBug",
-    "MultiPhaseMixin"
+    "RenderPipelinesMixin"
   ]
 }

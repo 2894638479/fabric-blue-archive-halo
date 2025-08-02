@@ -17,10 +17,15 @@ import net.minecraft.util.math.random.LocalRandom
 import org.joml.Matrix4f
 import kotlin.math.*
 
-class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlockEntityRenderer(ctx) {
+class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlockEntityRenderer<BeaconBlockEntity>(ctx) {
     override fun render(
-        entity: BeaconBlockEntity, tickDelta: Float, matrices: MatrixStack,
-        vertexConsumers: VertexConsumerProvider, light: Int, overlay: Int
+        entity: BeaconBlockEntity,
+        tickDelta: Float,
+        matrices: MatrixStack,
+        vertexConsumers: VertexConsumerProvider,
+        light: Int,
+        overlay: Int,
+        cameraPos: Vec3d
     ) {
         val segments = entity.beamSegments.ifEmpty { return }
         val world = entity.world ?: return
@@ -81,7 +86,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             }
             else -> error("unsupported beacon level:${entity.level}")
         }
-        super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
+        super.render(entity,tickDelta,matrices,vertexConsumers,light,overlay,cameraPos)
     }
 
     override fun getRenderDistance() =  Int.MAX_VALUE
