@@ -23,7 +23,7 @@ public class RenderPipelinesMixin {
     private static void changeBeaconBeamTranslucentPipeline(RenderPipeline pipeline, CallbackInfoReturnable<RenderPipeline> cir){
         if(pipeline.getLocation().equals(Identifier.ofVanilla("pipeline/beacon_beam_translucent"))){
             RenderPipeline.Snippet snippet = RenderPipeline
-                    .builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
+                    .builder(RenderPipelines.TRANSFORMS_AND_PROJECTION_SNIPPET)
                     .withVertexShader("core/rendertype_beacon_beam")
                     .withFragmentShader("core/rendertype_beacon_beam")
                     .withSampler("Sampler0")

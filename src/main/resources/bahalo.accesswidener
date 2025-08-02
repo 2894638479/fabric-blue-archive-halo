@@ -7,6 +7,3 @@ accessible class net/minecraft/client/render/RenderLayer$MultiPhase
 accessible field net/minecraft/client/render/RenderLayer$MultiPhase pipeline Lcom/mojang/blaze3d/pipeline/RenderPipeline;
 
 mutable field net/minecraft/client/render/RenderLayer$MultiPhase pipeline Lcom/mojang/blaze3d/pipeline/RenderPipeline;
-
-
-accessible field net/minecraft/client/gl/RenderPipelines MATRICES_COLOR_SNIPPET Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;
