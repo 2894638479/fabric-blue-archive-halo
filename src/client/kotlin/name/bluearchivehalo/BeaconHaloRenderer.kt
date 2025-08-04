@@ -2,6 +2,13 @@ package name.bluearchivehalo
 
 import name.bluearchivehalo.BeaconHaloRenderer.Companion.ArgbFloat.Companion.white
 import name.bluearchivehalo.BlueArchiveHaloClient.texture
+import name.bluearchivehalo.config.Config
+import name.bluearchivehalo.config.LevelConfig
+import name.bluearchivehalo.config.RingStyle
+import name.bluearchivehalo.config.RingStyle.Companion.FLAT
+import name.bluearchivehalo.config.RingStyle.Companion.PULSE
+import name.bluearchivehalo.config.RingStyle.Companion.SPACING
+import name.bluearchivehalo.config.RingStyle.Companion.STATIC
 import net.minecraft.block.Blocks
 import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.client.MinecraftClient
@@ -26,7 +33,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         val segments = entity.beamSegments.ifEmpty { return }
         val world = entity.world ?: return
         val rand = SimpleRandom(seed(entity))
-        fun ring(r:Float,cycleTicks:Int,color:ArgbFloat,height:Float,thickness:Float){
+        fun ring(r:Float,cycleTicks:Int,color:ArgbFloat,height:Float,thickness:Float,style: RingStyle){
             val rotation = run {
                 if(cycleTicks == 0) 0.0
                 else {
@@ -44,43 +51,55 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
                 if(distance <= (height + r)) r.toInt()
                 else max(10,((height + r)*r / distance).toInt())
             }
+            val colorBy0to1:(Double)-> ArgbFloat = when(style){
+                PULSE -> {
+                    val baseAlpha = Config.instance.baseAlpha.get
+                    val pulseTail = Config.instance.pulseTail.get
+                    val b = (1-baseAlpha)/pulseTail
+                    {
+                        val pulseAlpha = if(cycleTicks<0) 1-b*(1-it) else 1-b*it
+                        val alpha = max(Config.instance.baseAlpha.get,pulseAlpha.toFloat())
+                        color.alpha(alpha)
+                    }
+                }
+                SPACING -> {
+                    val spaceCount = Config.instance.spacingCount.get
+                    val alpha1 = Config.instance.spacingMidAlpha.get
+                    val alpha2 = Config.instance.spacingAlpha.get
+                    {
+                        val bl = ((it*spaceCount*2).toInt() % 2) != 0
+                        color.alpha(if(bl) alpha2 else alpha1)
+                    }
+                }
+                FLAT -> { color.alpha(Config.instance.baseAlpha.get).run{{this}} }
+                STATIC -> {{color}}
+                else -> return
+            }
             matrices.stack {
                 matrices.translate(0.5, rand.nextDouble() + height, 0.5)
                 matrices.multiply(Quaternion(Vec3f.POSITIVE_Y,rotation,false))
                 renderHorizontalCircleRing(matrices, vertexConsumers, r,thickness,angleCount,cycleTicks < 0){color}
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation))
+                renderHorizontalCircleRing(matrices, vertexConsumers, r,thickness,angleCount,colorBy0to1)
             }
         }
         val levelShrink = entity.levelShrink
-        fun color(index:Int,mixWhite:Float = 0.3f):ArgbFloat{
+        fun color(index:Int):ArgbFloat{
             var sum = 0
+            val mixWhite = Config.instance.mixWhite.get
             segments.forEach {
                 sum += it.height
                 if(sum > (index + levelShrink)) return ArgbFloat(it.color).mix(white,mixWhite)
             }
             return ArgbFloat(segments.last().color).mix(white,mixWhite)
         }
-        when(entity.level - levelShrink){
-            0 -> {}
-            1 -> {
-                ring(150f,400,color(1),200f,2f)
+        val renderLevel = entity.level - levelShrink
+        if (renderLevel > 0){
+            val conf = Config.instance.levels.get[renderLevel] ?: LevelConfig(renderLevel)
+            conf.rings.get.forEach {
+                val colorFrom = (renderLevel - it.ringIndex)*conf.colorSpacing.get
+                ring(it.radius.get,it.rotateCycle.get,color(colorFrom),conf.height.get,it.width.get,it.style.get)
             }
-            2 -> {
-                ring(130f,400,color(2),225f,2f)
-                ring(200f,300,color(1),225f,2f)
-            }
-            3 -> {
-                ring(130f,-400,color(3),225f,2f)
-                ring(200f,250,color(2),225f,2f)
-                ring(215f,300,color(1),225f,2f)
-            }
-            4 -> {
-                ring(100f,400,color(5),250f,2f)
-                ring(200f,300,color(4),250f,2f)
-                ring(215f,-400,color(3),250f,2f)
-                ring(300f,250,color(2),250f,2f)
-                ring(315f,330,color(1),250f,2f)
-            }
-            else -> error("unsupported beacon level:${entity.level}")
         }
         super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
     }
@@ -142,7 +161,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         }
         fun renderHorizontalCircleRing(
             matrices: MatrixStack, consumerProvider: VertexConsumerProvider,
-            radius: Float, thickness: Float, segmentCount:Int, reverseRotation:Boolean,
+            radius: Float, thickness: Float, segmentCount:Int,
             colorBy0to1: (Double) -> ArgbFloat
         ) {
             val consumer = consumerProvider.getBuffer(RenderLayer.getBeaconBeam(texture,true))
@@ -157,9 +176,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             }.map {
                 val cos = cos(it).toFloat()
                 val sin = sin(it).toFloat()
-                val rawAlpha = if(reverseRotation) 1 + (it - 2*PI)*2/PI else 1 - it*2/PI
-                val alpha = max(0.33f,rawAlpha.toFloat())
-                val color = colorBy0to1(it / (2*PI)).alpha(alpha).toInt()
+                val color = colorBy0to1(it / (2*PI)).toInt()
                 AngleInfo(cos,sin,color)
             }
             AngleInfo.Scope(consumer,modelMatrix).run {
