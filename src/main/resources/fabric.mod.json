@@ -20,6 +20,12 @@
 				"value": "name.bluearchivehalo.BlueArchiveHaloClient",
 				"adapter": "kotlin"
 			}
+		],
+		"modmenu": [
+			{
+				"value": "name.bluearchivehalo.BlueArchiveHaloModMenu",
+				"adapter": "kotlin"
+			}
 		]
 	},
 	"mixins": [
@@ -34,6 +40,6 @@
 		"fabric-language-kotlin": "*"
 	},
 	"suggests": {
-		"another-mod": "*"
+		"another-mod": "modmenu"
 	}
 }
