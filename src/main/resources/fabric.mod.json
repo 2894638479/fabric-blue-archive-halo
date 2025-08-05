@@ -14,7 +14,7 @@
 	},
 	"license": "MIT",
 	"icon": "assets/blue-archive-halo/icon.png",
-	"environment": "*",
+	"environment": "client",
 	"entrypoints": {
 		"client": [
 			{
