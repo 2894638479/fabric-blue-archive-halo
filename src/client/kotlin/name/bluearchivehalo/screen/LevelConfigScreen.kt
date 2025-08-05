@@ -14,7 +14,7 @@ import kotlin.math.roundToInt
 class LevelConfigScreen(parent: Screen,val levelConf: LevelConfig): MyScreen(
     Text.of("信标等级${levelConf.level} 环数${levelConf.size}"),parent) {
     override fun init() {
-        val listWidget = object: ElementListWidget<WidgetEntry>(client,width,height - 67, 32, height - 35, 25){
+        val listWidget = object: ElementListWidget<WidgetEntry>(client,width,height - 67, 32, height - 35){
             init {
                 centerListVertically = false
                 setRenderBackground(false)
