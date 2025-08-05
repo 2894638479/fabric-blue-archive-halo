@@ -78,8 +78,6 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             matrices.stack {
                 matrices.translate(0.5, rand.nextDouble() + height, 0.5)
                 matrices.multiply(Quaternion(Vec3f.POSITIVE_Y,rotation,false))
-                renderHorizontalCircleRing(matrices, vertexConsumers, r,thickness,angleCount,cycleTicks < 0){color}
-                matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation))
                 renderHorizontalCircleRing(matrices, vertexConsumers, r,thickness,angleCount,colorBy0to1)
             }
         }

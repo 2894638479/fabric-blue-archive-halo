@@ -4,11 +4,11 @@ import name.bluearchivehalo.config.Conf
 import name.bluearchivehalo.config.Config
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.screen.ScreenTexts
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.gui.widget.SliderWidget
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
@@ -55,7 +55,7 @@ open class MyScreen(title: Text, val parent:Screen): Screen(title) {
     }.also { it.active = client?.world != null } tooltip "清空界面，便于预览（仅游戏内）"
 
 
-    val done get() = ButtonWidget(0,0,200,20,ScreenTexts.DONE) {
+    val done get() = ButtonWidget(0,0,200,20, ScreenTexts.DONE) {
         close()
     }
 
