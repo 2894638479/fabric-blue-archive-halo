@@ -3,13 +3,14 @@
 	"id": "blue-archive-halo",
 	"version": "${version}",
 	"name": "Blue Archive Halo",
-	"description": "仿碧蓝档案光环",
+	"description": "仿碧蓝档案光环。支持多数光影，安装modmenu以进入配置页面",
 	"authors": [
 		"2894638479"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://www.bilibili.com/video/BV12Q8XzpEeC",
+		"sources": "https://github.com/2894638479/fabric-blue-archive-halo",
+		"issues": "https://github.com/2894638479/fabric-blue-archive-halo/issues"
 	},
 	"license": "MIT",
 	"icon": "assets/blue-archive-halo/icon.png",
@@ -40,6 +41,8 @@
 		"fabric-language-kotlin": "*"
 	},
 	"suggests": {
-		"another-mod": "modmenu"
+		"modmenu": "*",
+		"bigbeacons": "*",
+		"better_beacons": "*"
 	}
 }
