@@ -19,7 +19,7 @@ open class MyScreen(title: Text, val parent:Screen): Screen(title) {
     override fun shouldPause() = pause
     override fun close() { client?.setScreen(parent) }
     override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
-        renderBackground(context)
+        renderBackground(context,mouseX,mouseY,delta)
         super.render(context, mouseX, mouseY, delta)
         context.drawCenteredTextWithShadow(textRenderer,title,width / 2, 15, 16777215)
     }
@@ -36,7 +36,7 @@ open class MyScreen(title: Text, val parent:Screen): Screen(title) {
                 MinecraftClient.getInstance().options.hudHidden = rememberHudStatus
                 super.close()
             }
-            override fun renderBackground(context: DrawContext) {}
+            override fun renderBackground(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {}
             override fun init() {
                 val left = width/2 - 155
                 addDrawableChild(pauseButton.also {
