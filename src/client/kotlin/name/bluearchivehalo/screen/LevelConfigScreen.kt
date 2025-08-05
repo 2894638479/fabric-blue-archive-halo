@@ -1,12 +1,12 @@
 package name.bluearchivehalo.screen
 
 import name.bluearchivehalo.config.LevelConfig
-import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.gui.widget.ElementListWidget
 import net.minecraft.client.gui.widget.SliderWidget
+import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.Text
 import kotlin.math.roundToInt
 
@@ -31,23 +31,25 @@ class LevelConfigScreen(parent: Screen,val levelConf: LevelConfig): MyScreen(
             Text.of("颜色采样间隔:${levelConf.colorSpacing.get}")
         }.apply {
             width = 145
-            setPosition(left,0)
+            x = left
+            y = 0
             tooltip("光环根据光柱颜色染色，从外圈到内圈分别为1,2,3,4...格的光柱颜色。如果采样间隔为2则染上2,4,6,8...格的光柱颜色，依此类推。")
         }
         val heightSlider = slider(levelConf.height,levelConf.heightRange){
             Text.of("光环高度:${levelConf.height.get.toInt()}")
         }.apply {
             width = 145
-            setPosition(left + 150,0)
+            x = left + 150
+            y = 0
         }
 
         listWidget.addEntry(WidgetEntry(mutableListOf(colorSpacing,heightSlider)))
         levelConf.rings.get.forEach {
-            val typeButton = ButtonWidget.builder(Text.of(it.style.get.text)){ button ->
+            val typeButton = ButtonWidget(left,0,50,20,Text.of(it.style.get.text)){ button ->
                 it.style.field = it.style.get.next
                 button.message = Text.of(it.style.get.text)
                 button tooltip it.style.get.description
-            }.position(left,0).size(50,20).build() tooltip it.style.get.description
+            } tooltip it.style.get.description
             val radius = slider(it.radius,5f..it.maxRadius){Text.of("半径${it.radius.get.toInt()}")}.apply {
                 x = left + 55
                 y = 0
@@ -78,18 +80,20 @@ class LevelConfigScreen(parent: Screen,val levelConf: LevelConfig): MyScreen(
         addDrawableChild(listWidget)
         addDrawableChild(previewButton.also {
             it.width = 150
-            it.setPosition(left,height-32)
+            it.x = left
+            it.y = height-32
         })
         addDrawableChild(done.also {
             it.width = 150
-            it.setPosition(left + 160,height - 32)
+            it.x = left + 160
+            it.y = height-32
         })
         super.init()
     }
 
     class WidgetEntry(val widgets: MutableList<ClickableWidget>): ElementListWidget.Entry<WidgetEntry>() {
         override fun render(
-            context: DrawContext,
+            matrices: MatrixStack,
             index: Int,
             y: Int,
             x: Int,
@@ -102,7 +106,7 @@ class LevelConfigScreen(parent: Screen,val levelConf: LevelConfig): MyScreen(
         ) {
             this.widgets.forEach { widget ->
                 widget.y = y
-                widget.render(context, mouseX, mouseY, tickDelta)
+                widget.render(matrices, mouseX, mouseY, tickDelta)
             }
         }
         override fun children() = this.widgets
