@@ -19,7 +19,6 @@ open class MyScreen(title: Text, val parent:Screen): Screen(title) {
     override fun shouldPause() = pause
     override fun close() { client?.setScreen(parent) }
     override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
-        renderBackground(context,mouseX,mouseY,delta)
         super.render(context, mouseX, mouseY, delta)
         context.drawCenteredTextWithShadow(textRenderer,title,width / 2, 15, 16777215)
     }
