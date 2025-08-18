@@ -84,6 +84,12 @@ fun <T: Comparable<T>> rangeConstraint(range: ClosedRange<T>):(T)->T = {
     else if(it > range.endInclusive) range.endInclusive
     else it
 }
+fun <T: Comparable<T>> rangeConstraint(range:()-> ClosedRange<T>):(T)->T = {
+    val range = range()
+    if(it < range.start) range.start
+    else if(it > range.endInclusive) range.endInclusive
+    else it
+}
 
 @Serializable(with = LevelConfig.Serializer::class)
 class LevelConfig(val level:Int){
@@ -98,11 +104,14 @@ class LevelConfig(val level:Int){
             }
     }
     val size:Int get() = ringCount(level)
+    val maxRadius get() = level*50 + 100f
+    fun maxRadius(index:Int) = if(size == 0) maxRadius else maxRadius/size*(index+1)
 
-    val rings = Conf(MutableList(size){ RingConfig(it) }){
+    val rings = Conf(MutableList(size){ RingConfig(it,maxRadius(it)) }){
+        it.forEach { it.maxRadius = maxRadius(it.ringIndex) }
         if(it.size != size || (it.filterIndexed { index,it-> it.ringIndex != index }.isNotEmpty()))
             MutableList(size){ index ->
-                it.firstOrNull { it.ringIndex == index } ?: RingConfig(index)
+                it.firstOrNull { it.ringIndex == index } ?: RingConfig(index,maxRadius(index))
             }
         else it
     }
@@ -129,11 +138,10 @@ class LevelConfig(val level:Int){
 }
 
 @Serializable(with = RingConfig.Serializer::class)
-class RingConfig(val ringIndex:Int){
-    val maxRadius get() = 150 + ringIndex * 50f
+class RingConfig(val ringIndex:Int,var maxRadius: Float){
 
     val radius = Conf(if(ringIndex%2 == 0) 95 + ringIndex*50f else 55 + ringIndex*50f,
-        rangeConstraint(5f..maxRadius))
+        rangeConstraint{5f..maxRadius})
 
     val rotateCycle = Conf(Random(ringIndex).nextInt(300,400),
         rangeConstraint(-10000..10000))
@@ -145,12 +153,13 @@ class RingConfig(val ringIndex:Int){
     class Serializer: SerializerWrapper<RingConfig, Serializer.Desc>("RingConfig",Desc()){
         class Desc: Descriptor<RingConfig>() {
             val index = "index" from {ringIndex}
+            val maxRadius = "maxRadius" from {maxRadius}
             val radius = "r" from {radius.field}
             val rotateCycle = "cycle" from {rotateCycle.field}
             val width = "width" from {width.field}
             val style = "style" from {style.field?.value}
         }
-        override fun Desc.generate() = RingConfig(index.orElse(0)).also {
+        override fun Desc.generate() = RingConfig(index.orElse(0),maxRadius.orElse(1000f)).also {
             it.radius set radius
             it.rotateCycle set rotateCycle
             it.width set width
