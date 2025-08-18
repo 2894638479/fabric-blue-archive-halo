@@ -93,7 +93,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         if (renderLevel > 0){
             val conf = Config.instance.levels.get[renderLevel] ?: LevelConfig(renderLevel)
             conf.rings.get.forEach {
-                val colorFrom = (renderLevel - it.ringIndex)*conf.colorSpacing.get
+                val colorFrom = (conf.size - it.ringIndex)*conf.colorSpacing.get
                 ring(it.radius.get,it.rotateCycle.get,color(colorFrom),conf.height.get,it.width.get,it.style.get)
             }
         }
