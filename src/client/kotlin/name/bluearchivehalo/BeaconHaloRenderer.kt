@@ -110,6 +110,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
     companion object {
         inline fun MatrixStack.stack(block:()->Unit){ push();block();pop() }
         val BeaconBlockEntity.levelShrink : Int get() {
+            BlueArchiveHaloClient.shrinker?.let { return it(this) }
             var shrink = 0
             val world = world ?: return 0
             val pos = pos ?: return 0
