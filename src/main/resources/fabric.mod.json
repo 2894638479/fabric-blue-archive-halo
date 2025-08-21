@@ -38,7 +38,7 @@
 		"minecraft": "~1.19.2",
 		"java": ">=17",
 		"fabric-api": "*",
-		"fabric-language-kotlin": "*"
+		"fabric-language-kotlin": ">=${fabric_kotlin_version}"
 	},
 	"suggests": {
 		"modmenu": "*",

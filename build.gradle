@@ -46,14 +46,17 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
 	modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
-	implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1"
+	implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:${project.kotlin_serialization_version}"
 }
 
 processResources {
 	inputs.property "version", project.version
-
+    inputs.property "fabric_kotlin_version", project.fabric_kotlin_version
 	filesMatching("fabric.mod.json") {
-		expand "version": inputs.properties.version
+		expand (
+                "version": inputs.properties.version,
+                "fabric_kotlin_version": inputs.properties.fabric_kotlin_version
+        )
 	}
 }
 
