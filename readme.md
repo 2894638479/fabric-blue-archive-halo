@@ -1,5 +1,10 @@
 纯客户端模组，同时修复了信标光束会重复渲染的bug。
 
+### forge版本仓库
+[forge-blue-archive-halo](https://github.com/2894638479/forge-blue-archive-halo)
+
+# 光影适配
+兼容大部分光影。可以调节透明度达到合适的显示效果。如果某光影无法出现渐变效果，是光影自身问题。
 
 # 显示规则：
 ### 等级
