@@ -1,11 +1,10 @@
 plugins {
-	id 'fabric-loom' version "${loom_version}"
-	id 'maven-publish'
+    id "dev.architectury.loom" version "${loom_version}"
 	id "org.jetbrains.kotlin.jvm" version "2.1.10"
 	id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.10'
 }
 
-version = project.mod_version + '-' + project.minecraft_version
+version = project.mod_version + '-' + project.minecraft_version + "-forge"
 group = project.maven_group
 
 base {
@@ -13,51 +12,38 @@ base {
 }
 
 repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
-	maven {
-		url "https://maven.terraformersmc.com"
-	}
+    mavenCentral()
+    maven { url = "https://repo.spongepowered.org/maven" }
+    maven { url = 'https://thedarkcolour.github.io/KotlinForForge/' }
 }
 
 loom {
-	splitEnvironmentSourceSets()
-
-	mods {
-		"blue-archive-halo" {
-			sourceSet sourceSets.main
-			sourceSet sourceSets.client
-		}
-	}
-
 	accessWidenerPath = file("src/main/resources/bahalo.accesswidener")
+    forge {
+        convertAccessWideners = true
+        mixinConfig "blue-archive-halo-client.mixin.json"
+    }
+}
+
+sourceSets {
+    main {
+        java { srcDirs = ["src/main/java","src/client/java"] }
+        kotlin { srcDirs = ["src/main/kotlin","src/client/kotlin"] }
+        resources { srcDirs = ["src/main/resources","src/client/resources"] }
+    }
 }
 
 dependencies {
-	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    minecraft "net.minecraft:minecraft:${minecraft_version}"
+    forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    mappings "net.fabricmc:yarn:$yarn_mappings:v2"
 
-	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
-	modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
-	implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:${project.kotlin_serialization_version}"
-}
-
-processResources {
-	inputs.property "version", project.version
-    inputs.property "fabric_kotlin_version", project.fabric_kotlin_version
-	filesMatching("fabric.mod.json") {
-		expand (
-                "version": inputs.properties.version,
-                "fabric_kotlin_version": inputs.properties.fabric_kotlin_version
-        )
-	}
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:2.1.10"
+    implementation "thedarkcolour:kotlinforforge:$kff_version"
+    compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlin_serialization_version"
+    compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlin_serialization_version"
+    compileOnly "org.spongepowered:mixin:0.8.5"
+    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -80,28 +66,35 @@ java {
 	targetCompatibility = JavaVersion.VERSION_17
 }
 
-jar {
-	inputs.property "archivesName", project.base.archivesName
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
+            forge_version: forge_version, forge_version_range: forge_version_range,
+            mod_version: mod_version, kff_version: kff_version,
+    ]
+    inputs.properties replaceProperties
 
-	from("LICENSE") {
-		rename { "${it}_${inputs.properties.archivesName}"}
-	}
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
 }
 
-// configure the maven publication
-publishing {
-	publications {
-		create("mavenJava", MavenPublication) {
-			artifactId = project.archives_base_name
-			from components.java
-		}
-	}
+// Example for how to get properties into the manifest for reading at runtime.
+tasks.named('jar', Jar).configure {
+    from("LICENSE") {
+        rename { "${it}_${archives_base_name}"}
+    }
+    manifest {
+        attributes([
+                'Specification-Title'     : archives_base_name,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
 
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
-	}
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
