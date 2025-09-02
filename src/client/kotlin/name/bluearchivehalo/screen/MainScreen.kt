@@ -10,7 +10,7 @@ import net.minecraft.text.Text
 
 
 
-class MainScreen(parent: Screen): MyScreen(Text.of("光环设置"),parent) {
+class MainScreen(parent: Screen?): MyScreen(Text.of("光环设置"),parent) {
     override fun close() {
         client?.setScreen(parent)
         Config.save()
