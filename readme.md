@@ -1,7 +1,12 @@
 纯客户端模组，同时修复了信标光束会重复渲染的bug。
 
-### forge版本仓库
+# forge版本仓库
 [forge-blue-archive-halo](https://github.com/2894638479/forge-blue-archive-halo)
+
+由于多分支维护比architectury框架更方便，上述仓库已经废弃。forge在本仓库中单独的分支中进行适配。
+
+neoforge由于使用yarn mapping时无法正确处理mixin,适配受阻。
+
 
 # 光影适配
 兼容大部分光影。可以调节透明度达到合适的显示效果。如果某光影无法出现渐变效果，是光影自身问题。
