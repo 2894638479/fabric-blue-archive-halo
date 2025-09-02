@@ -1,8 +1,5 @@
 package name.bluearchivehalo
 
-import net.fabricmc.api.ClientModInitializer
-import net.fabricmc.fabric.impl.client.rendering.BlockEntityRendererRegistryImpl
-import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.client.gl.ShaderProgramKeys
@@ -10,21 +7,20 @@ import net.minecraft.client.render.*
 import net.minecraft.client.render.RenderLayer.MultiPhase
 import net.minecraft.client.render.RenderLayer.MultiPhaseParameters
 import net.minecraft.client.render.VertexFormat.DrawMode
+import net.minecraft.client.render.block.entity.BlockEntityRendererFactories
 import net.minecraft.util.Identifier
 import java.util.*
 
 
-object BlueArchiveHaloClient : ClientModInitializer {
+object BlueArchiveHaloClient {
 	val id = "blue-archive-halo"
     var shrinker:((BeaconBlockEntity) -> Int)? = null
         private set
-	override fun onInitializeClient() {
-		BlockEntityRendererRegistryImpl.register(
+	fun onInitializeClient() {
+        BlockEntityRendererFactories.register(
 			BlockEntityType.BEACON,
 			::BeaconHaloRenderer
 		)
-        val shrinkers = FabricLoader.getInstance().getEntrypoints("blue_archive_halo_beacon_level_shrinker",Function1::class.java)
-        shrinkers.firstOrNull()?.let { shrinker = it as ((BeaconBlockEntity) -> Int) }
 	}
 	val texture = Identifier.of(id,"textures/pure_white.png")
 	fun MultiPhase.modifyMultiPhase (

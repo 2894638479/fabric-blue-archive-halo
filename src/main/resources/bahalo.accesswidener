@@ -30,3 +30,8 @@ mutable field net/minecraft/client/render/RenderLayer hasCrumbling Z
 mutable field net/minecraft/client/render/RenderLayer translucent Z
 mutable field net/minecraft/client/render/RenderPhase beginAction Ljava/lang/Runnable;
 mutable field net/minecraft/client/render/RenderPhase endAction Ljava/lang/Runnable;
+
+accessible field net/minecraft/client/render/RenderPhase TRANSLUCENT_TRANSPARENCY Lnet/minecraft/client/render/RenderPhase$Transparency;
+accessible field net/minecraft/client/render/RenderPhase DISABLE_LIGHTMAP Lnet/minecraft/client/render/RenderPhase$Lightmap;
+accessible field net/minecraft/client/render/RenderPhase ENABLE_CULLING Lnet/minecraft/client/render/RenderPhase$Cull;
+
