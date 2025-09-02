@@ -13,7 +13,7 @@ import net.minecraft.text.Text
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 
-open class MyScreen(title: Text, val parent:Screen): Screen(title) {
+open class MyScreen(title: Text, val parent:Screen?): Screen(title) {
     var pause = true
     override fun shouldPause() = pause
     override fun close() { client?.setScreen(parent) }

@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import name.bluearchivehalo.SerializerWrapper
 import name.bluearchivehalo.config.RingStyle.Companion.PULSE
-import net.fabricmc.loader.api.FabricLoader
+import net.minecraftforge.fml.loading.FMLPaths
 import java.io.File
 import kotlin.io.path.pathString
 import kotlin.properties.ReadWriteProperty
@@ -16,7 +16,7 @@ import kotlin.text.set
 class Config {
     companion object {
         val fileName = "blue-archive-halo-config.json"
-        val filePath = FabricLoader.getInstance().configDir.resolve(fileName)
+        val filePath = FMLPaths.CONFIGDIR.get().resolve(fileName)
         val file get() = File(filePath.pathString)
         val json = Json {
             ignoreUnknownKeys = true
@@ -24,7 +24,7 @@ class Config {
         }
         fun load() = json.decodeFromString<Config>(try{ file.readText() } catch (_: Throwable){"{}"})
         val instance by lazy { load() }
-        fun save() = file.writeText(json.encodeToString(instance))
+        fun save() = file.writeText(json.encodeToString(Serializer(),instance))
     }
 
     val levels = Conf(mutableMapOf<Int,LevelConfig>()){
