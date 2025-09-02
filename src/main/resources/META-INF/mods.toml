@@ -1,0 +1,29 @@
+modLoader = "kotlinforforge"
+loaderVersion = "[${kff_version},)"
+issueTrackerURL = "https://github.com/2894638479/fabric-blue-archive-halo/issues"
+license = "MIT"
+
+[[mods]]
+modId = "blue_archive_halo"
+version = "${mod_version}"
+displayName = "Blue Archive Halo"
+authors = "2894638479"
+description = '''
+仿碧蓝档案光环。支持多数光影，有配置页面
+'''
+logoFile = "icon.png"
+
+
+[[dependencies.blue_archive_halo]]
+modId = "forge"
+mandatory = true
+versionRange = "${forge_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.blue_archive_halo]]
+modId = "minecraft"
+mandatory = true
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
