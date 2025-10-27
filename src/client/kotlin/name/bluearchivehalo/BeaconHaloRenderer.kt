@@ -14,9 +14,12 @@ import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.VertexConsumer
-import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
+import net.minecraft.client.render.block.entity.state.BeaconBlockEntityRenderState
+import net.minecraft.client.render.command.ModelCommandRenderer
+import net.minecraft.client.render.command.OrderedRenderCommandQueue
+import net.minecraft.client.render.state.CameraRenderState
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.util.math.RotationAxis
 import net.minecraft.util.math.Vec3d
@@ -24,25 +27,46 @@ import net.minecraft.util.math.random.LocalRandom
 import org.joml.Matrix4f
 import kotlin.math.*
 
-class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlockEntityRenderer<BeaconBlockEntity>(ctx) {
-    override fun render(
+class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlockEntityRenderer<BeaconBlockEntity>() {
+    class RenderState : BeaconBlockEntityRenderState() {
+        var level = 0
+        var levelShrink = 0
+        var tickDelta = 0f
+    }
+
+    override fun updateRenderState(
         entity: BeaconBlockEntity,
+        state: BeaconBlockEntityRenderState,
         tickDelta: Float,
-        matrices: MatrixStack,
-        vertexConsumers: VertexConsumerProvider,
-        light: Int,
-        overlay: Int,
-        cameraPos: Vec3d
+        vec3d: Vec3d,
+        crumblingOverlayCommand: ModelCommandRenderer.CrumblingOverlayCommand?
     ) {
+        super.updateRenderState(entity, state, tickDelta, vec3d, crumblingOverlayCommand)
+        (state as? RenderState)?.let {
+            it.tickDelta = tickDelta
+            it.level = entity.level
+            it.levelShrink = entity.levelShrink
+        }
+    }
+
+    override fun createRenderState() = RenderState()
+
+    override fun render(
+        entity: BeaconBlockEntityRenderState,
+        matrices: MatrixStack,
+        queue: OrderedRenderCommandQueue,
+        cameraState: CameraRenderState
+    ) {
+        if(entity !is RenderState) return
         val segments = entity.beamSegments.ifEmpty { return }
-        val world = entity.world ?: return
+        val world = MinecraftClient.getInstance().world ?: return
         val rand = LocalRandom(seed(entity))
         fun ring(r:Float,cycleTicks:Int,color:ArgbFloat,height:Float,thickness:Float,style: RingStyle){
             val rotation = run {
                 if(cycleTicks == 0) 0.0
                 else {
                     val abs = cycleTicks.absoluteValue
-                    val mod = world.time % cycleTicks + tickDelta
+                    val mod = world.time % cycleTicks + entity.tickDelta
                     val rad = mod / abs * 2 * PI
                     if(cycleTicks > 0) rad
                     else 2*PI - rad
@@ -82,7 +106,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             matrices.stack {
                 matrices.translate(0.5, rand.nextDouble() + height, 0.5)
                 matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation))
-                renderHorizontalCircleRing(matrices, vertexConsumers, r,thickness,angleCount,colorBy0to1)
+                renderHorizontalCircleRing(matrices, queue, r,thickness,angleCount,colorBy0to1)
             }
         }
         val levelShrink = entity.levelShrink
@@ -103,7 +127,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
                 ring(it.radius.get,it.rotateCycle.get,color(colorFrom),conf.height.get,it.width.get,it.style.get)
             }
         }
-        super.render(entity,tickDelta,matrices,vertexConsumers,light,overlay,cameraPos)
+        super.render(entity,matrices,queue,cameraState)
     }
 
     override fun getRenderDistance() =  Int.MAX_VALUE
@@ -129,7 +153,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             }
             return shrink
         }
-        fun seed(entity: BeaconBlockEntity) = entity.level * 9439L + entity.pos.run { (x*31+y)*31+z }
+        fun seed(entity: RenderState) = entity.level * 9439L + entity.pos.run { (x*31+y)*31+z }
         class ArgbFloat(val a:Float,val r:Float,val g:Float,val b:Float){
             constructor(arr:FloatArray):this(1f,arr[0],arr[1],arr[2])
             constructor(int:Int):this(
@@ -169,12 +193,11 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             }
         }
         fun renderHorizontalCircleRing(
-            matrices: MatrixStack, consumerProvider: VertexConsumerProvider,
+            matrices: MatrixStack, queue: OrderedRenderCommandQueue,
             radius: Float, thickness: Float, segmentCount:Int,
             colorBy0to1: (Double) -> ArgbFloat
-        ) {
-            val consumer = consumerProvider.getBuffer(RenderLayer.getBeaconBeam(texture,true))
-            val modelMatrix = matrices.peek().positionMatrix
+        ) = queue.submitCustom(matrices,RenderLayer.getBeaconBeam(texture,true)) { entry, consumer ->
+            val modelMatrix = entry.positionMatrix
             val radiusInner = radius - thickness/2
             val radiusOuter = radius + thickness/2
             val viewHeight = thickness * 2 / 3

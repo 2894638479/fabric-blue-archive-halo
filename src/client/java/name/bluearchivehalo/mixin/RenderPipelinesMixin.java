@@ -32,7 +32,7 @@ public class RenderPipelinesMixin {
             RenderPipeline pipeline1 = RenderPipeline
                     .builder(snippet)
                     .withLocation("pipeline/beacon_beam_translucent")
-                    .withDepthWrite(true)
+                    .withDepthWrite(false)
                     .withBlend(BlendFunction.TRANSLUCENT).build();
             PIPELINES.put(pipeline1.getLocation(),pipeline1);
             cir.setReturnValue(pipeline1);

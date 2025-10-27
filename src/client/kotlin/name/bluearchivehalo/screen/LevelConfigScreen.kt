@@ -87,18 +87,7 @@ class LevelConfigScreen(parent: Screen,val levelConf: LevelConfig): MyScreen(
     }
 
     class WidgetEntry(val widgets: MutableList<ClickableWidget>): ElementListWidget.Entry<WidgetEntry>() {
-        override fun render(
-            context: DrawContext,
-            index: Int,
-            y: Int,
-            x: Int,
-            entryWidth: Int,
-            entryHeight: Int,
-            mouseX: Int,
-            mouseY: Int,
-            hovered: Boolean,
-            tickDelta: Float
-        ) {
+        override fun render(context: DrawContext, mouseX: Int, mouseY: Int, hovered: Boolean, tickDelta: Float) {
             this.widgets.forEach { widget ->
                 widget.y = y
                 widget.render(context, mouseX, mouseY, tickDelta)
