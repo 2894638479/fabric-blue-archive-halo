@@ -21,18 +21,18 @@ public class RenderPipelinesMixin {
 
     @Inject(method = "register",at = @At("HEAD"),cancellable = true)
     private static void changeBeaconBeamTranslucentPipeline(RenderPipeline pipeline, CallbackInfoReturnable<RenderPipeline> cir){
-        if(pipeline.getLocation().equals(Identifier.ofVanilla("pipeline/beacon_beam_translucent"))){
+        if(pipeline.getLocation().equals(Identifier.ofVanilla("pipeline/beacon_beam_opaque"))){
             RenderPipeline.Snippet snippet = RenderPipeline
                     .builder(RenderPipelines.TRANSFORMS_AND_PROJECTION_SNIPPET)
                     .withVertexShader("core/rendertype_beacon_beam")
                     .withFragmentShader("core/rendertype_beacon_beam")
                     .withSampler("Sampler0")
-                    .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLE_STRIP)
+                    .withVertexFormat(VertexFormats.POSITION_COLOR_TEXTURE_LIGHT, VertexFormat.DrawMode.QUADS)
                     .buildSnippet();
             RenderPipeline pipeline1 = RenderPipeline
                     .builder(snippet)
                     .withLocation("pipeline/beacon_beam_translucent")
-                    .withDepthWrite(false)
+                    .withDepthWrite( true)
                     .withBlend(BlendFunction.TRANSLUCENT).build();
             PIPELINES.put(pipeline1.getLocation(),pipeline1);
             cir.setReturnValue(pipeline1);

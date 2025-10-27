@@ -12,6 +12,7 @@ import name.bluearchivehalo.config.RingStyle.Companion.STATIC
 import net.minecraft.block.Blocks
 import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.render.LightmapTextureManager
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.VertexConsumer
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
@@ -189,14 +190,14 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
                 fun AngleInfo.vertex2(radius:Float,y:Float = 0f) = repeat(2) { vertex(consumer, modelMatrix, radius, y) }
             }
             fun vertex(consumer: VertexConsumer,modelMatrix: Matrix4f,radius:Float,y:Float){
-                consumer.vertex(modelMatrix,radius*cos,y,radius*sin).color(color)
+                consumer.vertex(modelMatrix,radius*cos,y,radius*sin).color(color).texture(0.5f,0.5f).light(LightmapTextureManager.MAX_LIGHT_COORDINATE)
             }
         }
         fun renderHorizontalCircleRing(
             matrices: MatrixStack, queue: OrderedRenderCommandQueue,
             radius: Float, thickness: Float, segmentCount:Int,
             colorBy0to1: (Double) -> ArgbFloat
-        ) = queue.submitCustom(matrices,RenderLayer.getBeaconBeam(texture,true)) { entry, consumer ->
+        ) = queue.submitCustom(matrices,RenderLayer.getBeaconBeam(texture,false)) { entry, consumer ->
             val modelMatrix = entry.positionMatrix
             val radiusInner = radius - thickness/2
             val radiusOuter = radius + thickness/2
@@ -214,14 +215,26 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             AngleInfo.Scope(consumer,modelMatrix).run {
                 angles.firstOrNull()?.vertex2(radiusInner)
                 angles.forEach {
+                    it.vertex(radiusOuter)
+                    it.vertex(radiusInner)
                     it.vertex(radiusInner)
                     it.vertex(radiusOuter)
                 }
+                angles.lastOrNull()?.vertex2(radiusInner)
+
+                angles.firstOrNull()?.vertex2(radiusOuter)
                 angles.forEach {
+                    it.vertex(radius, viewHeight)
+                    it.vertex(radiusOuter)
                     it.vertex(radiusOuter)
                     it.vertex(radius, viewHeight)
                 }
+                angles.lastOrNull()?.vertex2(radiusOuter)
+
+                angles.firstOrNull()?.vertex2(radiusInner)
                 angles.forEach {
+                    it.vertex(radiusInner)
+                    it.vertex(radius, viewHeight)
                     it.vertex(radius, viewHeight)
                     it.vertex(radiusInner)
                 }
