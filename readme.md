@@ -3,9 +3,10 @@
 # forge版本仓库
 [forge-blue-archive-halo](https://github.com/2894638479/forge-blue-archive-halo)
 
-由于多分支维护比architectury框架更方便，上述仓库已经废弃。forge在本仓库中单独的分支中进行适配。
+由于多分支维护比architectury框架更方便，上述仓库已经废弃。forge 以及 neoforge 在本仓库中单独的分支中进行适配。
 
-neoforge由于使用yarn mapping时无法正确处理mixin,适配受阻。
+
+使用[architectury loom](https://github.com/architectury/architectury-loom)进行了yarn映射以及access widener的兼容
 
 
 # 光影适配
