@@ -1,16 +1,29 @@
-纯客户端模组，同时修复了信标光束会重复渲染的bug。
+本模组为原生fabric模组，使用yarn mapping。目前已经适配原生forge和neoforge
 
 # forge版本仓库
-[forge-blue-archive-halo](https://github.com/2894638479/forge-blue-archive-halo)
+[已废弃的forge仓库](https://github.com/2894638479/forge-blue-archive-halo)
 
-由于多分支维护比architectury框架更方便，上述仓库已经废弃。forge 以及 neoforge 在本仓库中单独的分支中进行适配。
+由于多分支维护比architectury框架更方便，上述仓库已经废弃。forge 以及 neoforge 都在本仓库中单独的分支中进行维护。
 
 
 使用[architectury loom](https://github.com/architectury/architectury-loom)进行了yarn映射以及access widener的兼容
 
 
 # 光影适配
-兼容大部分光影。可以调节透明度达到合适的显示效果。如果某光影无法出现渐变效果，是光影自身问题。
+兼容大部分光影。可以调节透明度达到合适的显示效果。如果某光影无法出现渐变效果，请按照下列步骤排查后反馈。
+### 光影问题自查
+请做如下步骤后再来反馈光影问题：
+- 把 **视野距离** 调到最大，看光环是否出现
+  - 如调大后就出现了，说明可能是 **迷雾/Fog** 导致视距外的部分无法显示
+  - 如：complementary，需要把 **光影设置-大气-雾气-边界迷雾** 关闭
+  - 如：make up，需要把 **光影设置-高级设置-雾-启用雾** 关闭
+  - 如：rethinking voxels，需要把 **光影设置-Atmosphere-Fog-Border Fog** 关闭
+  - 也可以通过Distant Horizons等模组直接扩大视野距离
+- 观察光影是否能渲染出 **原版光柱外层的半透明皮**
+  - 如果显示不出，是光影自身问题所致，只能牺牲一些样式
+  - 如：bliss，把 **基本不透明度** 调到最大或者把光环样式调为 **不透明** 即可显示
+  - 如：photon，同上
+- 如果都显示不出，请在issue中反馈，虽然反馈了大概率也是光影自身问题，我不一定能修好
 
 # 显示规则：
 ### 等级
