@@ -14,6 +14,7 @@ import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.LightmapTextureManager
 import net.minecraft.client.render.RenderLayer
+import net.minecraft.client.render.RenderLayers
 import net.minecraft.client.render.VertexConsumer
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
@@ -74,7 +75,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
                 }
             }.toFloat()
             val angleCount = run {
-                val cameraPos = MinecraftClient.getInstance().gameRenderer.camera.pos
+                val cameraPos = MinecraftClient.getInstance().gameRenderer.camera.cameraPos
                 val entityPos = entity.pos.toCenterPos()
                 val distance = entityPos.add(0.0,height.toDouble(),0.0).distanceTo(cameraPos)
                 if(distance <= (height + r)) r.toInt()
@@ -197,7 +198,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             matrices: MatrixStack, queue: OrderedRenderCommandQueue,
             radius: Float, thickness: Float, segmentCount:Int,
             colorBy0to1: (Double) -> ArgbFloat
-        ) = queue.submitCustom(matrices,RenderLayer.getBeaconBeam(texture,false)) { entry, consumer ->
+        ) = queue.submitCustom(matrices, RenderLayers.beaconBeam(texture,false)) { entry, consumer ->
             val modelMatrix = entry.positionMatrix
             val radiusInner = radius - thickness/2
             val radiusOuter = radius + thickness/2
