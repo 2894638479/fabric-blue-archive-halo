@@ -5,6 +5,8 @@ import kotlinx.serialization.json.Json
 import name.bluearchivehalo.SerializerWrapper
 import name.bluearchivehalo.config.RingStyle.Companion.PULSE
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.text.Text
+import net.minecraft.text.Text.translatable
 import java.io.File
 import kotlin.io.path.pathString
 import kotlin.properties.ReadWriteProperty
@@ -179,17 +181,17 @@ value class RingStyle(val value:Int){
     val isValid get() = value in 0..3
     val next get() = RingStyle((value+1) % 4)
     val text get() = when(this){
-        PULSE -> "脉冲"
-        SPACING -> "间隔"
-        FLAT -> "平凡"
-        STATIC -> "不透明"
-        else -> "未知"
+        PULSE -> Text.translatable("config.radar")
+        SPACING -> Text.translatable("config.pulse")
+        FLAT -> Text.translatable("config.flat")
+        STATIC -> Text.translatable("config.static")
+        else -> Text.translatable("config.unknown")
     }
     val description get() = when(this){
-        PULSE -> "脉冲旋转效果。高亮部分由不透明度控制。脉冲最尖端不透明度为1"
-        SPACING -> "像虚线一样，间隔亮灭"
-        FLAT -> "只有半透明底色，无其他效果"
-        STATIC -> "只有不透明底色，无其他效果"
-        else -> "未知效果"
+        PULSE -> Text.translatable("config.radar_description")
+        SPACING -> Text.translatable("config.pulse_description")
+        FLAT -> Text.translatable("config.flat_description")
+        STATIC -> Text.translatable("config.static_description")
+        else -> Text.translatable("config.unknown_description")
     }
 }
