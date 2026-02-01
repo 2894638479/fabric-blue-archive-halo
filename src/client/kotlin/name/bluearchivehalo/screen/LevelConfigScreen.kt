@@ -32,7 +32,7 @@ class LevelConfigScreen(parent: Screen,val levelConf: LevelConfig): MyScreen(
         }.apply {
             width = 145
             setPosition(left,0)
-            tooltip_2(Text.translatable("screen.level_config_screen.color_spacing_tooltip"))
+            tooltip(Text.translatable("screen.level_config_screen.color_spacing_tooltip"))
         }
         val heightSlider = slider(levelConf.height,levelConf.heightRange){
             Text.translatable("screen.level_config_screen.height_slider", levelConf.height.get.toInt())
@@ -46,8 +46,8 @@ class LevelConfigScreen(parent: Screen,val levelConf: LevelConfig): MyScreen(
             val typeButton = ButtonWidget.builder(it.style.get.text){ button ->
                 it.style.field = it.style.get.next
                 button.message = it.style.get.text
-                button tooltip_2 it.style.get.description
-            }.position(left,0).size(50,20).build() tooltip_2 it.style.get.description
+                button tooltip it.style.get.description
+            }.position(left,0).size(50,20).build() tooltip it.style.get.description
             val radius = slider(it.radius,5f..it.maxRadius){Text.translatable("screen.level_config_screen.radius", it.radius.get.toInt())}.apply {
                 x = left + 55
                 y = 0

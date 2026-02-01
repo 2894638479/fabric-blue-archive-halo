@@ -20,12 +20,12 @@ class MainScreen(parent: Screen): MyScreen(Text.translatable("screen.main_screen
     }
     val chooseLevel = ButtonWidget.builder(Text.translatable("screen.main_screen.choose_level")){
         client?.setScreen(LevelChooseScreen(this))
-    }.build() tooltip_2 Text.translatable("screen.main_screen.choose_level_tooltip")
+    }.build() tooltip Text.translatable("screen.main_screen.choose_level_tooltip")
     val baseAlpha = slider(conf.baseAlpha,0f..1f) { Text.translatable("screen.main_screen.base_alpha") }
-    val mixWhite = slider(conf.mixWhite,0f..1f) { Text.translatable("screen.main_screen.mix_white") } tooltip_2 Text.translatable("screen.main_screen.mix_white_tooltip")
+    val mixWhite = slider(conf.mixWhite,0f..1f) { Text.translatable("screen.main_screen.mix_white") } tooltip Text.translatable("screen.main_screen.mix_white_tooltip")
     val pulseTail = slider(conf.pulseTail,0.1f..1f) { Text.translatable("screen.main_screen.pulse_tail") }
-    val spacingMidAlpha = slider(conf.spacingMidAlpha,0f..1f) { Text.translatable("screen.main_screen.spacing_mid_alpha") } tooltip_2 Text.translatable("screen.main_screen.spacing_mid_alpha_tooltip")
-    val spacingAlpha = slider(conf.spacingAlpha,0f..1f) { Text.translatable("screen.main_screen.spacing_alpha") } tooltip_2 Text.translatable("screen.main_screen.spacing_alpha_tooltip")
+    val spacingMidAlpha = slider(conf.spacingMidAlpha,0f..1f) { Text.translatable("screen.main_screen.spacing_mid_alpha") } tooltip Text.translatable("screen.main_screen.spacing_mid_alpha_tooltip")
+    val spacingAlpha = slider(conf.spacingAlpha,0f..1f) { Text.translatable("screen.main_screen.spacing_alpha") } tooltip Text.translatable("screen.main_screen.spacing_alpha_tooltip")
     val spacingCount = slider(conf.spacingCount,4..20) { Text.translatable("screen.main_screen.spacing_count", conf.spacingCount.get) }
 
 

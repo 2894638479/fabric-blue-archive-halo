@@ -16,7 +16,7 @@ class LevelChooseScreen(parent: Screen): MyScreen(Text.translatable("screen.leve
             val button = ButtonWidget.builder(Text.translatable("screen.level_choose_screen.buttons", level, ringCount(level))){
                 client?.setScreen(LevelConfigScreen(this,conf.getLevelConf(level)))
             }.build()
-            if(level > 4) button tooltip_2 Text.translatable("screen.level_choose_screen.modded_grades_tooltip")
+            if(level > 4) button tooltip Text.translatable("screen.level_choose_screen.modded_grades_tooltip")
             adder.add(button)
         }
         adder.add(done,2, adder.copyPositioner().marginTop(6))

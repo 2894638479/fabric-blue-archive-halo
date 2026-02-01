@@ -27,7 +27,7 @@ open class MyScreen(title: Text, val parent:Screen): Screen(title) {
     val pauseButton get() = ButtonWidget.builder(Text.translatable("screen.my_screen.pause_button")){
         pause = !pause
         it.message = if(pause) Text.translatable("screen.my_screen.pause_button") else Text.translatable("screen.my_screen.running")
-    }.width(200).build() tooltip_2 Text.translatable("screen.my_screen.view_dynamic_effects")
+    }.width(200).build() tooltip Text.translatable("screen.my_screen.view_dynamic_effects")
 
     val previewButton get() = ButtonWidget.builder(Text.translatable("screen.my_screen.preview_button")){
         client?.setScreen(object : MyScreen(Text.translatable("screen.my_screen.view_angle_tip"),this){
@@ -51,7 +51,7 @@ open class MyScreen(title: Text, val parent:Screen): Screen(title) {
                 super.init()
             }
         })
-    }.width(200).build().also { it.active = client?.world != null } tooltip_2 Text.translatable("screen.my_screen.preview_button_tooltip")
+    }.width(200).build().also { it.active = client?.world != null } tooltip Text.translatable("screen.my_screen.preview_button_tooltip")
 
 
     val done get() = ButtonWidget.builder(ScreenTexts.DONE) {
@@ -82,7 +82,5 @@ open class MyScreen(title: Text, val parent:Screen): Screen(title) {
             }
         }
     }
-    infix fun ClickableWidget.tooltip(string:String) = apply { tooltip = Tooltip.of(Text.of(string)) }
-    infix fun ClickableWidget.tooltip_2(string: MutableText?) = apply { tooltip = Tooltip.of(string) }
-
+    infix fun ClickableWidget.tooltip(string: MutableText?) = apply { tooltip = Tooltip.of(string) }
 }
