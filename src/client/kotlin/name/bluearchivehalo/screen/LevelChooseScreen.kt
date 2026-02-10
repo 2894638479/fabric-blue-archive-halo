@@ -7,16 +7,16 @@ import net.minecraft.client.gui.widget.GridWidget
 import net.minecraft.client.gui.widget.SimplePositioningWidget
 import net.minecraft.text.Text
 
-class LevelChooseScreen(parent: Screen): MyScreen(Text.of("分等级设置"),parent) {
+class LevelChooseScreen(parent: Screen): MyScreen(Text.translatable("screen.level_choose_screen.title"),parent) {
     override fun init() {
         val gridWidget = GridWidget()
         gridWidget.mainPositioner.marginX(5).marginBottom(4).alignHorizontalCenter()
         val adder = gridWidget.createAdder(2)
         for (level in 1..16){
-            val button = ButtonWidget.builder(Text.of("信标等级${level}  环数${ringCount(level)}")){
+            val button = ButtonWidget.builder(Text.translatable("screen.level_choose_screen.buttons", level, ringCount(level))){
                 client?.setScreen(LevelConfigScreen(this,conf.getLevelConf(level)))
             }.build()
-            if(level > 4) button tooltip "原版没有的等级，需要与其他服务端模组联动生效"
+            if(level > 4) button tooltip Text.translatable("screen.level_choose_screen.modded_grades_tooltip")
             adder.add(button)
         }
         adder.add(done,2, adder.copyPositioner().marginTop(6))

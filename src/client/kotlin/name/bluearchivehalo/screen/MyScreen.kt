@@ -10,6 +10,7 @@ import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.gui.widget.SliderWidget
 import net.minecraft.screen.ScreenTexts
+import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
@@ -23,13 +24,13 @@ open class MyScreen(title: Text, val parent:Screen): Screen(title) {
         super.render(context, mouseX, mouseY, delta)
         context.drawCenteredTextWithShadow(textRenderer,title,width / 2, 15, 16777215)
     }
-    val pauseButton get() = ButtonWidget.builder(Text.of("暂停中")){
+    val pauseButton get() = ButtonWidget.builder(Text.translatable("screen.my_screen.pause_button")){
         pause = !pause
-        it.message = Text.of(if(pause) "暂停中" else "运行中")
-    }.width(200).build() tooltip "查看动态效果（会运行游戏内时间）"
+        it.message = if(pause) Text.translatable("screen.my_screen.pause_button") else Text.translatable("screen.my_screen.running")
+    }.width(200).build() tooltip Text.translatable("screen.my_screen.view_dynamic_effects")
 
-    val previewButton get() = ButtonWidget.builder(Text.of("预览")){
-        client?.setScreen(object : MyScreen(Text.of("预览中，请自行调整游戏内视角"),this){
+    val previewButton get() = ButtonWidget.builder(Text.translatable("screen.my_screen.preview_button")){
+        client?.setScreen(object : MyScreen(Text.translatable("screen.my_screen.view_angle_tip"),this){
             val rememberHudStatus = MinecraftClient.getInstance().options.hudHidden
             init { MinecraftClient.getInstance().options.hudHidden = true }
             override fun close() {
@@ -50,7 +51,7 @@ open class MyScreen(title: Text, val parent:Screen): Screen(title) {
                 super.init()
             }
         })
-    }.width(200).build().also { it.active = client?.world != null } tooltip "清空界面，便于预览（仅游戏内）"
+    }.width(200).build().also { it.active = client?.world != null } tooltip Text.translatable("screen.my_screen.preview_button_tooltip")
 
 
     val done get() = ButtonWidget.builder(ScreenTexts.DONE) {
@@ -81,5 +82,5 @@ open class MyScreen(title: Text, val parent:Screen): Screen(title) {
             }
         }
     }
-    infix fun ClickableWidget.tooltip(string:String) = apply { tooltip = Tooltip.of(Text.of(string)) }
+    infix fun ClickableWidget.tooltip(string: MutableText?) = apply { tooltip = Tooltip.of(string) }
 }
