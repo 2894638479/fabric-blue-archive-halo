@@ -1,18 +1,15 @@
-package name.bluearchivehalo
+package name.bluearchivehalo.render
 
-import name.bluearchivehalo.BeaconHaloRenderer.Companion.ArgbFloat.Companion.white
-import name.bluearchivehalo.BlueArchiveHaloClient.texture
+import io.github.u2894638479.kotlinmcui.math.Color
+import name.bluearchivehalo.BlueArchiveHaloClient
 import name.bluearchivehalo.config.Config
-import name.bluearchivehalo.config.LevelConfig
 import name.bluearchivehalo.config.RingStyle
-import name.bluearchivehalo.config.RingStyle.Companion.FLAT
-import name.bluearchivehalo.config.RingStyle.Companion.PULSE
-import name.bluearchivehalo.config.RingStyle.Companion.SPACING
-import name.bluearchivehalo.config.RingStyle.Companion.STATIC
 import net.minecraft.block.Blocks
 import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.render.*
+import net.minecraft.client.render.RenderLayer
+import net.minecraft.client.render.VertexConsumer
+import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
 import net.minecraft.client.util.math.MatrixStack
@@ -20,7 +17,11 @@ import net.minecraft.util.math.RotationAxis
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.random.LocalRandom
 import org.joml.Matrix4f
-import kotlin.math.*
+import kotlin.math.PI
+import kotlin.math.absoluteValue
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.sin
 
 class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlockEntityRenderer(ctx) {
     override fun render(
@@ -30,7 +31,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         val segments = entity.beamSegments.ifEmpty { return }
         val world = entity.world ?: return
         val rand = LocalRandom(seed(entity))
-        fun ring(r:Float,cycleTicks:Int,color:ArgbFloat,height:Float,thickness:Float,style: RingStyle){
+        fun ring(r: Double, cycleTicks:Int, color: Color, height: Double, thickness: Double, style: RingStyle){
             val rotation = run {
                 if(cycleTicks == 0) 0.0
                 else {
@@ -38,40 +39,17 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
                     val mod = world.time % cycleTicks + tickDelta
                     val rad = mod / abs * 2 * PI
                     if(cycleTicks > 0) rad
-                    else 2*PI - rad
+                    else 2* PI - rad
                 }
             }.toFloat()
             val angleCount = run {
                 val cameraPos = MinecraftClient.getInstance().gameRenderer.camera.pos
                 val entityPos = entity.pos.toCenterPos()
-                val distance = entityPos.add(0.0,height.toDouble(),0.0).distanceTo(cameraPos)
+                val distance = entityPos.add(0.0, height,0.0).distanceTo(cameraPos)
                 if(distance <= (height + r)) r.toInt()
-                else max(10,((height + r)*r / distance).toInt())
+                else max(10, ((height + r) * r / distance).toInt())
             }
-            val colorBy0to1:(Double)-> ArgbFloat = when(style){
-                PULSE -> {
-                    val baseAlpha = Config.instance.baseAlpha.get
-                    val pulseTail = Config.instance.pulseTail.get
-                    val b = (1-baseAlpha)/pulseTail
-                    {
-                        val pulseAlpha = if(cycleTicks<0) 1-b*(1-it) else 1-b*it
-                        val alpha = max(Config.instance.baseAlpha.get,pulseAlpha.toFloat())
-                        color.alpha(alpha)
-                    }
-                }
-                SPACING -> {
-                    val spaceCount = Config.instance.spacingCount.get
-                    val alpha1 = Config.instance.spacingMidAlpha.get
-                    val alpha2 = Config.instance.spacingAlpha.get
-                    {
-                        val bl = ((it*spaceCount*2).toInt() % 2) != 0
-                        color.alpha(if(bl) alpha2 else alpha1)
-                    }
-                }
-                FLAT -> { color.alpha(Config.instance.baseAlpha.get).run{{this}} }
-                STATIC -> {{color}}
-                else -> return
-            }
+            val colorBy0to1:(Double)-> Color = { style.color(it,color) }
             matrices.stack {
                 matrices.translate(0.5, rand.nextDouble() + height, 0.5)
                 matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation))
@@ -79,21 +57,19 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             }
         }
         val levelShrink = entity.levelShrink
-        fun color(index:Int):ArgbFloat{
+        fun color(index:Int): Color {
             var sum = 0
-            val mixWhite = Config.instance.mixWhite.get
+            fun FloatArray.toColor() = Color(get(0), get(1), get(2))
             segments.forEach {
                 sum += it.height
-                if(sum > (index + levelShrink)) return ArgbFloat(it.color).mix(white,mixWhite)
+                if(sum > (index + levelShrink)) return it.color.toColor()
             }
-            return ArgbFloat(segments.last().color).mix(white,mixWhite)
+            return segments.last().color.toColor()
         }
         val renderLevel = entity.level - levelShrink
         if (renderLevel > 0){
-            val conf = Config.instance.levels.get[renderLevel] ?: LevelConfig(renderLevel)
-            conf.rings.get.forEach {
-                val colorFrom = (conf.size - it.ringIndex)*conf.colorSpacing.get
-                ring(it.radius.get,it.rotateCycle.get,color(colorFrom),conf.height.get,it.width.get,it.style.get)
+            Config.instance.rings(renderLevel).forEachIndexed { i, it ->
+                ring(it.radius,it.cycle,color(i),100.0,it.width,it.style)
             }
         }
         super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
@@ -110,7 +86,6 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
     companion object {
         inline fun MatrixStack.stack(block:()->Unit){ push();block();pop() }
         val BeaconBlockEntity.levelShrink : Int get() {
-            BlueArchiveHaloClient.shrinker?.let { return it(this) }
             var shrink = 0
             val world = world ?: return 0
             val pos = pos ?: return 0
@@ -123,44 +98,26 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             return shrink
         }
         fun seed(entity: BeaconBlockEntity) = entity.level * 9439L + entity.pos.run { (x*31+y)*31+z }
-        class ArgbFloat(val a:Float,val r:Float,val g:Float,val b:Float){
-            constructor(arr:FloatArray):this(1f,arr[0],arr[1],arr[2])
-            companion object {
-                val white = ArgbFloat(1f,1f,1f,1f)
-            }
-            fun toInt():Int{
-                val alpha = (a * 255).toInt() shl 24
-                val red = (r * 255).toInt() shl 16
-                val green = (g * 255).toInt() shl 8
-                val blue = (b * 255).toInt()
-                return alpha or red or green or blue
-            }
-            operator fun times(other:ArgbFloat) = ArgbFloat(a*other.a,r*other.r,g*other.g,b*other.b)
-            fun alpha(alpha:Float) = ArgbFloat(alpha * a, r, g, b)
-            fun mix(other:ArgbFloat,rate:Float):ArgbFloat{
-                if(rate <= 0) return this
-                if(rate >= 1) return other
-                val thisRate = 1 - rate
-                return ArgbFloat(a*thisRate+other.a*rate,r*thisRate+other.r*rate,g*thisRate+other.g*rate,b*thisRate+other.b*rate)
-            }
-        }
+
         class AngleInfo(
-            val cos:Float,val sin:Float,val color:Int
+            val cos:Float,val sin:Float,val color: Color
         ){
-            class Scope(val consumer: VertexConsumer,val modelMatrix: Matrix4f){
+            class Scope(val consumer: VertexConsumer, val modelMatrix: Matrix4f){
                 fun AngleInfo.vertex(radius:Float,y:Float = 0f) = vertex(consumer,modelMatrix,radius,y)
                 fun AngleInfo.vertex2(radius:Float,y:Float = 0f) = repeat(2) { vertex(consumer, modelMatrix, radius, y) }
             }
-            fun vertex(consumer: VertexConsumer,modelMatrix: Matrix4f,radius:Float,y:Float){
-                consumer.vertex(modelMatrix,radius*cos,y,radius*sin).color(color).next()
+            fun vertex(consumer: VertexConsumer, modelMatrix: Matrix4f, radius:Float, y:Float){
+                consumer.vertex(modelMatrix,radius*cos,y,radius*sin).color(color.argbInt).next()
             }
         }
         fun renderHorizontalCircleRing(
             matrices: MatrixStack, consumerProvider: VertexConsumerProvider,
-            radius: Float, thickness: Float, segmentCount:Int,
-            colorBy0to1: (Double) -> ArgbFloat
+            radius: Double, thickness: Double, segmentCount:Int,
+            colorBy0to1: (Double) -> Color
         ) {
-            val consumer = consumerProvider.getBuffer(RenderLayer.getBeaconBeam(texture,true))
+            val radius = radius.toFloat()
+            val thickness = thickness.toFloat()
+            val consumer = consumerProvider.getBuffer(RenderLayer.getBeaconBeam(BlueArchiveHaloClient.Companion.texture,true))
             val modelMatrix = matrices.peek().positionMatrix
             val radiusInner = radius - thickness/2
             val radiusOuter = radius + thickness/2
@@ -172,7 +129,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             }.map {
                 val cos = cos(it).toFloat()
                 val sin = sin(it).toFloat()
-                val color = colorBy0to1(it / (2*PI)).toInt()
+                val color = colorBy0to1(it / (2* PI))
                 AngleInfo(cos,sin,color)
             }
             AngleInfo.Scope(consumer,modelMatrix).run {

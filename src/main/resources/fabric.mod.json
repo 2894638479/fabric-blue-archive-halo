@@ -16,15 +16,9 @@
 	"icon": "assets/blue-archive-halo/icon.png",
 	"environment": "client",
 	"entrypoints": {
-		"client": [
-			{
-				"value": "name.bluearchivehalo.BlueArchiveHaloClient",
-				"adapter": "kotlin"
-			}
-		],
 		"modmenu": [
 			{
-				"value": "name.bluearchivehalo.BlueArchiveHaloModMenu",
+				"value": "name.bluearchivehalo.BlueArchiveHaloClient",
 				"adapter": "kotlin"
 			}
 		]
@@ -35,10 +29,11 @@
 	"accessWidener": "bahalo.accesswidener",
 	"depends": {
 		"fabricloader": ">=0.16.14",
-		"minecraft": "~1.20.1",
+		"minecraft": "${minecraft_version}",
 		"java": ">=17",
 		"fabric-api": "*",
-		"fabric-language-kotlin": ">=${fabric_kotlin_version}"
+		"fabric-language-kotlin": ">=${fabric_kotlin_version}",
+		"kotlinmcui": "^${kotlinmcui_version}"
 	},
 	"suggests": {
 		"modmenu": "*",

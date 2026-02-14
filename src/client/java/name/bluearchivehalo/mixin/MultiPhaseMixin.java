@@ -26,6 +26,6 @@ public class MultiPhaseMixin {
         if(!Objects.equals(name, "beacon_beam")) return;
         if(!translucent) return;
         RenderLayer.MultiPhase multiPhase = (RenderLayer.MultiPhase)(Object)this;
-        BlueArchiveHaloClient.INSTANCE.modifyMultiPhase(multiPhase,name,vertexFormat,drawMode,expectedBufferSize,hasCrumbling,translucent,phases);
+        BlueArchiveHaloClient.Companion.modifyMultiPhase(multiPhase,name,vertexFormat,drawMode,expectedBufferSize,hasCrumbling,translucent,phases);
     }
 }

@@ -1,8 +1,11 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
 	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
-	id "org.jetbrains.kotlin.jvm" version "2.1.10"
-	id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.10'
+	id "org.jetbrains.kotlin.jvm" version "2.3.10"
+	id 'org.jetbrains.kotlin.plugin.serialization' version '2.3.10'
 }
 
 version = project.mod_version + '-' + project.minecraft_version
@@ -21,6 +24,7 @@ repositories {
 	maven {
 		url "https://maven.terraformersmc.com"
 	}
+	maven { url "https://jitpack.io" }
 }
 
 loom {
@@ -47,15 +51,22 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
 	modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
 	implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:${project.kotlin_serialization_version}"
+
+	implementation("com.github.2894638479:KotlinMCUI:v${kotlinmcui_version}")
+	modImplementation("com.github.2894638479:KotlinMCUI-backend:v${kotlinmcuibackend_version}-${loader}-${minecraft_version}")
 }
 
 processResources {
 	inputs.property "version", project.version
-    inputs.property "fabric_kotlin_version", project.fabric_kotlin_version
+	inputs.property "minecraft_version", project.minecraft_version
+	inputs.property "fabric_kotlin_version", project.fabric_kotlin_version
+	inputs.property "kotlinmcui_version", project.kotlinmcui_version
 	filesMatching("fabric.mod.json") {
 		expand (
                 "version": inputs.properties.version,
-                "fabric_kotlin_version": inputs.properties.fabric_kotlin_version
+				"minecraft_version": inputs.properties.minecraft_version,
+				"fabric_kotlin_version": inputs.properties.fabric_kotlin_version,
+				"kotlinmcui_version": inputs.properties.kotlinmcui_version
         )
 	}
 }
@@ -64,18 +75,13 @@ tasks.withType(JavaCompile).configureEach {
 	it.options.release = 17
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-	kotlinOptions {
-		jvmTarget = 17
-	}
+tasks.withType(KotlinCompile).configureEach {
+	compilerOptions.jvmTarget = JvmTarget.JVM_17
+	compilerOptions.freeCompilerArgs.add('-Xcontext-parameters')
 }
 
 java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
 	withSourcesJar()
-
 	sourceCompatibility = JavaVersion.VERSION_17
 	targetCompatibility = JavaVersion.VERSION_17
 }

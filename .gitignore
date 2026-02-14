@@ -40,3 +40,7 @@ replay_*.log
 *.jfr
 
 .kotlin/
+
+runs/
+
+.profileconfig.json
