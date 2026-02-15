@@ -18,7 +18,7 @@
 	"entrypoints": {
 		"modmenu": [
 			{
-				"value": "name.bluearchivehalo.BlueArchiveHaloClient",
+				"value": "io.github.u2894638479.BlueArchiveHaloClient",
 				"adapter": "kotlin"
 			}
 		]

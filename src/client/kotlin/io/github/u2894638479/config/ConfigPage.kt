@@ -1,4 +1,4 @@
-package name.bluearchivehalo.gui
+package io.github.u2894638479.config
 
 import io.github.u2894638479.kotlinmcui.context.DslTopContext
 import io.github.u2894638479.kotlinmcui.context.onClose
@@ -31,12 +31,9 @@ import io.github.u2894638479.kotlinmcui.math.px
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
 import io.github.u2894638479.kotlinmcui.modifier.height
 import io.github.u2894638479.kotlinmcui.modifier.padding
-import io.github.u2894638479.kotlinmcui.modifier.size
 import io.github.u2894638479.kotlinmcui.modifier.weight
 import io.github.u2894638479.kotlinmcui.prop.getValue
 import io.github.u2894638479.kotlinmcui.prop.setValue
-import name.bluearchivehalo.config.editor
-import name.bluearchivehalo.config.Config
 import net.minecraft.client.MinecraftClient
 
 private fun pages(hasBonus: Boolean) = mapOf<String, DslFunction>(

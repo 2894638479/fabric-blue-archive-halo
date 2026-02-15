@@ -1,6 +1,6 @@
-package name.bluearchivehalo.mixin;
+package io.github.u2894638479.mixin;
 
-import name.bluearchivehalo.BlueArchiveHaloClient;
+import io.github.u2894638479.BlueArchiveHaloClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexFormat;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,6 +26,6 @@ public class MultiPhaseMixin {
         if(!Objects.equals(name, "beacon_beam")) return;
         if(!translucent) return;
         RenderLayer.MultiPhase multiPhase = (RenderLayer.MultiPhase)(Object)this;
-        BlueArchiveHaloClient.Companion.modifyMultiPhase(multiPhase,name,vertexFormat,drawMode,expectedBufferSize,hasCrumbling,translucent,phases);
+        BlueArchiveHaloClient.Companion.modifyMultiPhase(multiPhase,name,phases);
     }
 }

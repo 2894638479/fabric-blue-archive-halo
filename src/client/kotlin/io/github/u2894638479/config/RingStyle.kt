@@ -1,4 +1,4 @@
-package name.bluearchivehalo.config
+package io.github.u2894638479.config
 
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled

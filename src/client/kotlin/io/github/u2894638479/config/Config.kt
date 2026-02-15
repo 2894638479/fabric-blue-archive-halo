@@ -1,9 +1,9 @@
-package name.bluearchivehalo.config
+package io.github.u2894638479.config
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import name.bluearchivehalo.BlueArchiveHaloClient
-import name.bluearchivehalo.BlueArchiveHaloClient.Companion.logger
+import io.github.u2894638479.BlueArchiveHaloClient
+import io.github.u2894638479.BlueArchiveHaloClient.Companion.logger
 import net.fabricmc.loader.api.FabricLoader
 import java.io.File
 import kotlin.io.path.pathString

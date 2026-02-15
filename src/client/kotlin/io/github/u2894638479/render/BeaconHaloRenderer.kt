@@ -1,9 +1,9 @@
-package name.bluearchivehalo.render
+package io.github.u2894638479.render
 
 import io.github.u2894638479.kotlinmcui.math.Color
-import name.bluearchivehalo.BlueArchiveHaloClient
-import name.bluearchivehalo.config.Config
-import name.bluearchivehalo.config.RingStyle
+import io.github.u2894638479.BlueArchiveHaloClient
+import io.github.u2894638479.config.Config
+import io.github.u2894638479.config.RingStyle
 import net.minecraft.block.Blocks
 import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.client.MinecraftClient

@@ -1,9 +1,8 @@
-package name.bluearchivehalo.config
+package io.github.u2894638479.config
 
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
 import io.github.u2894638479.kotlinmcui.functions.decorator.animateHeight
-import io.github.u2894638479.kotlinmcui.functions.decorator.animateWidth
 import io.github.u2894638479.kotlinmcui.functions.decorator.clickable
 import io.github.u2894638479.kotlinmcui.functions.translate
 import io.github.u2894638479.kotlinmcui.functions.ui.Button
@@ -24,7 +23,7 @@ class RingInfo {
     var radius = 100.0
     var cycle = 300 + Random.nextInt(0,100)
     var width = 2.0
-    var style: RingStyle = RingStyle.Pulse()
+    var style: RingStyle = RingStyle.Radar()
 
     var speed get() = if(cycle == 0) 0.0 else 400.0/cycle
         set(value) { cycle = if(value == 0.0) 0 else (400.0/value).toInt() }

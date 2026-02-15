@@ -1,4 +1,4 @@
-package name.bluearchivehalo
+package io.github.u2894638479
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory
 import com.terraformersmc.modmenu.api.ModMenuApi
@@ -7,8 +7,8 @@ import io.github.u2894638479.kotlinmcui.backend.createScreen
 import io.github.u2894638479.kotlinmcui.dslBackend
 import io.github.u2894638479.kotlinmcui.image.ImageHolder
 import io.github.u2894638479.kotlinmcui.math.px
-import name.bluearchivehalo.gui.ConfigPage
-import name.bluearchivehalo.render.BeaconHaloRenderer
+import io.github.u2894638479.config.ConfigPage
+import io.github.u2894638479.render.BeaconHaloRenderer
 import net.fabricmc.fabric.impl.client.rendering.BlockEntityRendererRegistryImpl
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.client.gui.screen.Screen
@@ -43,15 +43,7 @@ class BlueArchiveHaloClient: DslEntryService, ModMenuApi {
         val texture = Identifier(id, "textures/pure_white.png")
         val logger = LoggerFactory.getLogger(id)
 
-        fun MultiPhase.modifyMultiPhase (
-            name: String?,
-            vertexFormat: VertexFormat?,
-            drawMode: DrawMode?,
-            expectedBufferSize: Int,
-            hasCrumbling: Boolean,
-            translucent: Boolean,
-            phases: MultiPhaseParameters
-        ) {
+        fun MultiPhase.modifyMultiPhase(name: String?, phases: MultiPhaseParameters) {
             if (name != "beacon_beam") return
             if (phases.texture.id.get() != texture) return
             affectedOutline = Optional.empty()
