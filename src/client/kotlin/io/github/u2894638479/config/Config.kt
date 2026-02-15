@@ -35,35 +35,11 @@ class Config {
     }
 
     fun check() = apply {
-        levels.keys.removeIf { it <= 0 }
-        levels.entries.forEach { (level,list) ->
-            val max = ringNum(level)
-            if(list.size > max) list.subList(max,list.size).clear()
-        }
-    }
-
-    fun ringNum(level: Int): Int {
-        if(special.bonus) return level + 3
-        return level + 1
-    }
-
-    fun ringRadiusRange(level: Int) = 50.0..(ringNum(level) * 50 + 100.0)
-
-    fun ringHeightRange(level: Int) = 0.0..ringRadiusRange(level).endInclusive
-
-    fun defaultRings(level: Int) = MutableList(ringNum(level)) {
-        val range = ringRadiusRange(level)
-        val radius = range.start + it * (range.endInclusive - range.start) / ringNum(level)
-        RingInfo().also { it.radius = radius }
-    }
-
-    fun rings(level:Int) = levels[level] ?: run {
-        defaultRings(level).also{
-            levels[level] = it
-            save()
-        }
+        levels.check(special.bonus)
+        players.check(special.bonus)
     }
 
     val special = Special()
-    val levels = mutableMapOf<Int, MutableList<RingInfo>>()
+    val levels = BeaconLevelRings()
+    val players = PlayerRings()
 }

@@ -20,19 +20,17 @@ import io.github.u2894638479.kotlinmcui.prop.getValue
 import io.github.u2894638479.kotlinmcui.prop.setValue
 
 context(ctx: DslContext)
-fun MutableList<RingInfo>.editor(
+fun MutableList<out RingInfo>.editor(
     modifier: Modifier = Modifier,
     radiusRange: ClosedFloatingPointRange<Double>,
+    heightRange: ClosedFloatingPointRange<Double>,
+    widthRange: ClosedFloatingPointRange<Double>,
     maxSize: Int,
+    addLast:()-> Unit,
+    fixSampler: Boolean,
     id: Any
 ) = Column(modifier,id = id) {
-
     val visible by remember { this.toMutableList() }
-    fun add() {
-        val element = RingInfo()
-        this += element
-        visible += element
-    }
 
     if(!visible.containsAll(this)) {
         visible.clear()
@@ -49,7 +47,7 @@ fun MutableList<RingInfo>.editor(
                     TextFlatten { "remove".emit() }
                 }.clickable { remove(it) }
             }
-            if(unfold == it) it.editor(Modifier.padding(5.scaled),radiusRange)
+            if(unfold == it) it.editor(Modifier.padding(5.scaled),radiusRange,heightRange,widthRange,fixSampler)
         }.animateHeight().renderScissor().clickable {
             unfold = if(unfold == it) null else it
         }.highlightBox()
@@ -57,5 +55,10 @@ fun MutableList<RingInfo>.editor(
 
     Button(Modifier.height(20.scaled).padding(5.scaled)) {
         TextFlatten { "add".emit() }
-    }.clickable(size+1 <= maxSize) { if(size+1 <= maxSize) add() }
+    }.clickable(size+1 <= maxSize) {
+        if(size+1 <= maxSize) {
+            addLast()
+            visible += last()
+        }
+    }
 }

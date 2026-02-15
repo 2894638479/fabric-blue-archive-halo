@@ -25,7 +25,7 @@ class Special {
     var extraFarPlane = 0.0
 
     context(ctx: DslContext)
-    fun editor(modifier: Modifier = Modifier.Companion, hasBonus: Boolean) = Column(modifier, id = this) {
+    fun editor(modifier: Modifier = Modifier, hasBonus: Boolean) = Column(modifier, id = this) {
         context(ctx: DslContext)
         fun editBool(prop: StableRWProperty<Boolean>, text: String) =
             Button(Modifier.padding(5.scaled), id = text) {
@@ -45,8 +45,5 @@ class Special {
                 TextFlatten { "Extra far plane: ${String.format("%.2f", extraFarPlane)}".emit() }
             }
         }
-        Button(Modifier.height(20.scaled).padding(5.scaled)) {
-            TextFlatten { "reload config file".emit() }
-        }.clickable { Config.load() }
     }
 }

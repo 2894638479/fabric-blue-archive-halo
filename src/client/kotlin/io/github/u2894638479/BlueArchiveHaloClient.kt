@@ -19,6 +19,7 @@ import net.minecraft.client.render.RenderPhase
 import net.minecraft.client.render.VertexFormat
 import net.minecraft.client.render.VertexFormat.DrawMode
 import net.minecraft.client.render.VertexFormats
+import net.minecraft.client.render.entity.PlayerEntityRenderer
 import net.minecraft.util.Identifier
 import org.slf4j.LoggerFactory
 import java.util.Optional
