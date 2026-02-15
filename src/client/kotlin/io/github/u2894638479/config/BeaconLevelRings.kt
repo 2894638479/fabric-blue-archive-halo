@@ -39,7 +39,7 @@ value class BeaconLevelRings(
         return max(0,level + 1)
     }
 
-    fun ringRadiusRange(level: Int,bonus: Boolean) = 50.0..(ringNum(level,bonus) * 50 + 100.0)
+    fun ringRadiusRange(level: Int,bonus: Boolean) = 10.0..(ringNum(level,bonus) * 50 + 100.0)
 
     fun ringHeightRange(level: Int,bonus: Boolean) = 0.0..ringRadiusRange(level,bonus).endInclusive
 
@@ -83,13 +83,15 @@ value class BeaconLevelRings(
                         }.clickable { map.remove(level) }
                     }
                     if(unfold == level) Config.instance.run {
-                        list.editor(
-                            Modifier, ringRadiusRange(level,bonus),
-                            ringHeightRange(level,bonus),
-                            ringWidthRange(level,bonus),
-                            ringNum(level,bonus),
-                            {list += RingInfo()},false,level
-                        )
+                        list.editor(Modifier,ringNum(level,bonus),{RingInfo()}) {
+                            it.editor(
+                                Modifier.padding(5.scaled),
+                                ringRadiusRange(level,bonus),
+                                ringHeightRange(level,bonus),
+                                ringWidthRange(level,bonus),
+                                false,2
+                            )
+                        }
                     }
                     Spacer(Modifier.weight(Double.MAX_VALUE), Unit)
                 }.clickable {

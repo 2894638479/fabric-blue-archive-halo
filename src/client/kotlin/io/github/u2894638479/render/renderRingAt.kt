@@ -1,5 +1,6 @@
 package io.github.u2894638479.render
 
+import io.github.u2894638479.config.ColorSampler
 import io.github.u2894638479.config.RingInfo
 import io.github.u2894638479.kotlinmcui.math.Color
 import net.minecraft.client.MinecraftClient
@@ -14,8 +15,9 @@ fun renderRingAt(
     vertexConsumers: VertexConsumerProvider,
     matrices: MatrixStack,
     ringInfo: RingInfo,
-    rotation: Double,
-    color: Color,
+    tick: Long,
+    tickDelta: Double,
+    segments: List<ColorSampler.Segment>,
     pos: Vec3d,
     yaw:Double = 0.0,
     pitch:Double = 0.0
@@ -32,12 +34,28 @@ fun renderRingAt(
             else -> 200
         }
     }
+    val rotation = rotation(tick,tickDelta,ringInfo.cycle)
+    val color = ringInfo.sampler.sample(segments)
+
     matrices.push()
     matrices.multiply(RotationAxis.POSITIVE_Y.rotation(PI.toFloat()-yaw.toFloat()))
     matrices.multiply(RotationAxis.POSITIVE_X.rotation(-pitch.toFloat()))
     matrices.translate(0.0, height, 0.0)
-    matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation.toFloat().absoluteValue))
+
+    matrices.push()
+    matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation.toFloat()))
     if(rotation < 0) matrices.scale(-1f,1f,1f)
     renderRing(matrices, vertexConsumers, r, ringInfo.width,angleCount) { ringInfo.style.color(it, color) }
+    matrices.pop()
+
+    ringInfo.subRings.forEach {
+        matrices.push()
+        val rotation1 = rotation(tick,tickDelta,it.cycle)
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation1.toFloat()))
+        matrices.translate(0.0,0.01,ringInfo.radius)
+        renderRingAt(vertexConsumers,matrices,it.ringInfo,tick,tickDelta,segments,pos)
+        matrices.pop()
+    }
+
     matrices.pop()
 }

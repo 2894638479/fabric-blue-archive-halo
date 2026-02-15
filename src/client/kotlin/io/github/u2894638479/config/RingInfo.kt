@@ -9,13 +9,16 @@ import io.github.u2894638479.kotlinmcui.functions.ui.Button
 import io.github.u2894638479.kotlinmcui.functions.ui.Column
 import io.github.u2894638479.kotlinmcui.functions.ui.Row
 import io.github.u2894638479.kotlinmcui.functions.ui.SliderHorizontal
+import io.github.u2894638479.kotlinmcui.functions.ui.Spacer
 import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
 import io.github.u2894638479.kotlinmcui.math.Measure
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
 import io.github.u2894638479.kotlinmcui.modifier.height
 import io.github.u2894638479.kotlinmcui.modifier.padding
+import io.github.u2894638479.kotlinmcui.modifier.weight
 import io.github.u2894638479.kotlinmcui.modifier.width
 import io.github.u2894638479.kotlinmcui.prop.property
+import io.github.u2894638479.kotlinmcui.scope.DslChild
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
 
@@ -25,11 +28,17 @@ class RingInfo {
     var cycle = 300L + Random.nextInt(0,100)
     var width = 2.0
     var style: RingStyle = RingStyle.Radar()
-    var height = 100.0
+    var height = 0.0
     var sampler: ColorSampler = ColorSampler.Fixed()
 
     var speed get() = if(cycle == 0L) 0.0 else 400.0/cycle
         set(value) { cycle = if(value == 0.0) 0L else (400.0/value).toLong() }
+
+    val subRings = mutableListOf<SubRingInfo>()
+
+    fun subRingRadiusRange() = radius/100..radius/4
+    fun subRingWidthRange() = 0.0..width
+    fun subRingHeightRange() = -radius/8..radius/8
 
     context(ctx: DslContext)
     fun editor(
@@ -37,8 +46,9 @@ class RingInfo {
         radiusRange: ClosedFloatingPointRange<Double>,
         heightRange: ClosedFloatingPointRange<Double>,
         widthRange: ClosedFloatingPointRange<Double>,
-        fixSampler: Boolean
-    ) = Column(modifier, id = this) {
+        fixSampler: Boolean,
+        maxSubRingNum: Int
+    ): DslChild = Column(modifier, id = this) {
         Row(Modifier.height(Measure.AUTO_MIN)) {
             SliderHorizontal(Modifier.height(20.scaled).padding(1.scaled),
                 radiusRange, ::radius.property) {
@@ -77,5 +87,20 @@ class RingInfo {
                 is ColorSampler.Fixed -> ColorSampler.Sample()
             }
         }
+
+
+        if(maxSubRingNum > 0 || subRings.isNotEmpty()) {
+            TextFlatten(Modifier.padding(5.scaled)) { "subRings".emit() }
+            subRings.editor(Modifier,maxSubRingNum,{ SubRingInfo().apply {
+                ringInfo.radius = subRingRadiusRange().run { start + endInclusive } / 2
+                ringInfo.height = 0.0
+                ringInfo.width = subRingWidthRange().endInclusive
+            } }) {
+                it.speedEditor(Modifier.height(20.scaled).padding(h = 5.scaled))
+                it.ringInfo.editor(Modifier.padding(5.scaled),subRingRadiusRange(),
+                    subRingHeightRange(),subRingWidthRange(),fixSampler,maxSubRingNum - 1)
+            }
+        }
+        Spacer(Modifier.weight(Double.MAX_VALUE)) {}
     }
 }

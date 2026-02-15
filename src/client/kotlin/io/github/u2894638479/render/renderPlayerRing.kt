@@ -14,12 +14,11 @@ fun renderPlayerRing(
 ) {
     val infos = Config.instance.players[entity.name.string]
     infos.forEach {
-        val rotation = rotation(entity.world.time,tickDelta,it.cycle)
         val yaw = entity.yaw * PI / 180
         val pitch = entity.pitch * PI / 180
         ms.push()
         ms.translate(0.0,1.5,0.0)
-        renderRingAt(vc,ms,it,rotation,it.sampler.sample(listOf()),entity.pos,yaw,pitch)
+        renderRingAt(vc,ms,it,entity.world.time,tickDelta,listOf(),entity.pos,yaw,pitch)
         ms.pop()
     }
 }

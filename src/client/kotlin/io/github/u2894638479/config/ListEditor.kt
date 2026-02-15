@@ -3,6 +3,7 @@ package io.github.u2894638479.config
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
 import io.github.u2894638479.kotlinmcui.functions.decorator.animateHeight
+import io.github.u2894638479.kotlinmcui.functions.decorator.background
 import io.github.u2894638479.kotlinmcui.functions.decorator.clickable
 import io.github.u2894638479.kotlinmcui.functions.decorator.highlightBox
 import io.github.u2894638479.kotlinmcui.functions.decorator.renderScissor
@@ -12,6 +13,7 @@ import io.github.u2894638479.kotlinmcui.functions.ui.Button
 import io.github.u2894638479.kotlinmcui.functions.ui.Column
 import io.github.u2894638479.kotlinmcui.functions.ui.Row
 import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
+import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.math.Measure
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
 import io.github.u2894638479.kotlinmcui.modifier.height
@@ -20,23 +22,20 @@ import io.github.u2894638479.kotlinmcui.prop.getValue
 import io.github.u2894638479.kotlinmcui.prop.setValue
 
 context(ctx: DslContext)
-fun MutableList<out RingInfo>.editor(
+fun <T> MutableList<T>.editor(
     modifier: Modifier = Modifier,
-    radiusRange: ClosedFloatingPointRange<Double>,
-    heightRange: ClosedFloatingPointRange<Double>,
-    widthRange: ClosedFloatingPointRange<Double>,
     maxSize: Int,
-    addLast:()-> Unit,
-    fixSampler: Boolean,
-    id: Any
-) = Column(modifier,id = id) {
+    create:() -> T,
+    id: Any? = null,
+    unfolded: context(DslContext) (T)-> Unit
+) = Column(modifier,id = id ?: unfolded::class) {
     val visible by remember { this.toMutableList() }
 
     if(!visible.containsAll(this)) {
         visible.clear()
         visible.addAll(this)
     }
-    var unfold by remember<RingInfo?>(null)
+    var unfold by remember<T?>(null)
 
     visible.forEachWithId {
         Column(Modifier.padding(1.scaled)) {
@@ -47,18 +46,19 @@ fun MutableList<out RingInfo>.editor(
                     TextFlatten { "remove".emit() }
                 }.clickable { remove(it) }
             }
-            if(unfold == it) it.editor(Modifier.padding(5.scaled),radiusRange,heightRange,widthRange,fixSampler)
+            if(unfold === it) unfolded(it)
         }.animateHeight().renderScissor().clickable {
-            unfold = if(unfold == it) null else it
-        }.highlightBox()
+            unfold = if(unfold === it) null else it
+        }.highlightBox().background(Color(0, 200, 200, 30))
     }
 
     Button(Modifier.height(20.scaled).padding(5.scaled)) {
         TextFlatten { "add".emit() }
     }.clickable(size+1 <= maxSize) {
         if(size+1 <= maxSize) {
-            addLast()
-            visible += last()
+            val element = create()
+            add(element)
+            visible += element
         }
     }
 }

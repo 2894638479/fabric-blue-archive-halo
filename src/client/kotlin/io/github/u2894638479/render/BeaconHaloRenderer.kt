@@ -15,6 +15,8 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         entity: BeaconBlockEntity, tickDelta: Float, matrices: MatrixStack,
         vertexConsumers: VertexConsumerProvider, light: Int, overlay: Int
     ) {
+        fun sup() = super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
+        if (!Config.instance.special.clientCache) return sup()
         val segments = entity.beamSegments.ifEmpty { return }.map {
             ColorSampler.Segment(it.height, Color(it.color[0],it.color[1],it.color[2]))
         }
@@ -22,12 +24,11 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         matrices.push()
         matrices.translate(0.5, 0.0, 0.5)
         infos.forEach {
-            val rotation = rotation(entity.world?.time ?: return,tickDelta.toDouble(),it.cycle)
-            val color = it.sampler.sample(segments)
-            renderRingAt(vertexConsumers,matrices,it,rotation,color,entity.pos.toCenterPos())
+            renderRingAt(vertexConsumers,matrices,it,entity.world?.time ?: return,
+                tickDelta.toDouble(),segments,entity.pos.toCenterPos())
         }
         matrices.pop()
-        super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
+        sup()
     }
 
     override fun getRenderDistance() =  Int.MAX_VALUE

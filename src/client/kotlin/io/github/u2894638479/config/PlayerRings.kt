@@ -75,18 +75,21 @@ value class PlayerRings(
                         }.clickable { map.remove(name) }
                     }
                     if(unfold == name) Config.instance.run {
-                        list.editor(
-                            Modifier, ringRadiusRange(),
-                            ringHeightRange(),
-                            ringWidthRange(),
-                            ringNum(hasBonus),{
-                                list += RingInfo().apply {
-                                    height = 0.5
-                                    radius = 0.8
-                                    width = 0.05
-                                }
-                            },false,name
-                        )
+                        list.editor(Modifier,ringNum(hasBonus),{
+                            RingInfo().apply {
+                                height = 0.5
+                                radius = 0.8
+                                width = 0.05
+                            } },false
+                        ) {
+                            it.editor(
+                                Modifier.padding(5.scaled),
+                                ringRadiusRange(),
+                                ringHeightRange(),
+                                ringWidthRange(),
+                                true,2
+                            )
+                        }
                     }
                     Spacer(Modifier.weight(Double.MAX_VALUE), Unit)
                 }.clickable {

@@ -9,17 +9,19 @@ import io.github.u2894638479.kotlinmcui.image.ImageHolder
 import io.github.u2894638479.kotlinmcui.math.px
 import io.github.u2894638479.config.ConfigPage
 import io.github.u2894638479.render.BeaconHaloRenderer
+import io.github.u2894638479.render.ClientCacheBeacons
+import io.github.u2894638479.render.ClientCacheBeaconsRenderer
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.impl.client.rendering.BlockEntityRendererRegistryImpl
+import net.fabricmc.fabric.impl.client.rendering.EntityRendererRegistryImpl
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.render.GameRenderer
 import net.minecraft.client.render.RenderLayer.MultiPhase
 import net.minecraft.client.render.RenderLayer.MultiPhaseParameters
 import net.minecraft.client.render.RenderPhase
-import net.minecraft.client.render.VertexFormat
 import net.minecraft.client.render.VertexFormat.DrawMode
 import net.minecraft.client.render.VertexFormats
-import net.minecraft.client.render.entity.PlayerEntityRenderer
 import net.minecraft.util.Identifier
 import org.slf4j.LoggerFactory
 import java.util.Optional
@@ -37,12 +39,25 @@ class BlueArchiveHaloClient: DslEntryService, ModMenuApi {
             BlockEntityType.BEACON,
             ::BeaconHaloRenderer
         )
+        val entityType = ClientCacheBeacons.register()
+        EntityRendererRegistryImpl.register(entityType,::ClientCacheBeaconsRenderer)
+        ClientTickEvents.END_CLIENT_TICK.register { minecraft ->
+            if(entity?.let { it.world != minecraft.world || it.isRemoved } ?: true) {
+                minecraft.world?.let {
+                    entity = ClientCacheBeacons(entityType, it).apply { it.addEntity(id,this) }
+                } ?: run { entity = null }
+            }
+            minecraft.player?.let {
+                entity?.setPosition(it.eyePos)
+            }
+        }
     }
 
     companion object {
         val id = "blue-archive-halo"
         val texture = Identifier(id, "textures/pure_white.png")
         val logger = LoggerFactory.getLogger(id)
+        var entity: ClientCacheBeacons? = null
 
         fun MultiPhase.modifyMultiPhase(name: String?, phases: MultiPhaseParameters) {
             if (name != "beacon_beam") return
