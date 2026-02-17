@@ -3,24 +3,17 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
 	id 'fabric-loom' version "${loom_version}"
-	id 'maven-publish'
+	id "me.modmuss50.mod-publish-plugin" version "0.8.1"
 	id "org.jetbrains.kotlin.jvm" version "2.3.10"
 	id 'org.jetbrains.kotlin.plugin.serialization' version '2.3.10'
 }
 
-version = project.mod_version + '-' + project.minecraft_version
+version = "$mod_version+$minecraft_version+$loader"
 group = project.maven_group
 
-base {
-	archivesName = project.archives_base_name
-}
+base.archivesName = project.archives_base_name
 
 repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
 	maven {
 		url "https://maven.terraformersmc.com"
 	}
@@ -87,27 +80,72 @@ java {
 }
 
 jar {
-	inputs.property "archivesName", project.base.archivesName
+	inputs.property "archivesName", base.archivesName
 
 	from("LICENSE") {
 		rename { "${it}_${inputs.properties.archivesName}"}
 	}
 }
 
-// configure the maven publication
-publishing {
-	publications {
-		create("mavenJava", MavenPublication) {
-			artifactId = project.archives_base_name
-			from components.java
+
+def tag = "$mod_version-$minecraft_version-$loader"
+
+def shouldPublishProvider = providers.exec {
+	commandLine 'git', 'ls-remote', '--tags', 'origin', "refs/tags/${tag}"
+}.standardOutput.asText.map { it.trim().isEmpty() }
+
+tasks.configureEach {
+	if (group == 'publishing') {
+		enabled = shouldPublishProvider.get()
+	}
+}
+
+publishMods {
+	file = jar.archiveFile
+	additionalFiles = files(sourcesJar.archiveFile)
+	changelog = "no changelog."
+	if(mod_version.toUpperCase().contains("SNAPSHOT")) {
+		type = ALPHA
+	} else if(mod_version.toLowerCase().contains("alpha")) {
+		type = ALPHA
+	} else if(mod_version.toLowerCase().contains("beta")) {
+		type = BETA
+	} else {
+		type = STABLE
+	}
+	displayName = "KotlinMCUI-backend $loader-$mod_version"
+	modLoaders.add(loader)
+
+	modrinth {
+		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+		projectId = "rtLQjYeH"
+		optional("modmenu")
+		requires("kotlinmcui","fabric-language-kotlin")
+		minecraftVersionRange {
+			start = minecraft_version
+			end = minecraft_version
 		}
 	}
-
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
+	curseforge {
+		accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+		projectId = "1368384"
+		optional("modmenu")
+		requires("kotlinmcui","fabric-language-kotlin")
+		clientRequired = true
+		serverRequired = false
+		minecraftVersionRange {
+			start = minecraft_version
+			end = minecraft_version
+		}
+	}
+	github {
+		accessToken = providers.environmentVariable("GITHUB_TOKEN")
+		repository = "2894638479/fabric-blue-archive-halo"
+		if(loader == "fabric") {
+			commitish = minecraft_version
+		} else {
+			commitish = "$minecraft_version-$loader"
+		}
+		tagName = tag
 	}
 }
