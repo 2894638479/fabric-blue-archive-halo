@@ -1,6 +1,6 @@
 {
     "required": true,
-    "package": "io.github.u2894638479.mixin",
+    "package": "io.github.u2894638479.bahalo.mixin",
     "compatibilityLevel": "JAVA_17",
     "injectors": {
         "defaultRequire": 1
