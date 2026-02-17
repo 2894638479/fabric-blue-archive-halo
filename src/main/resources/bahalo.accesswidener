@@ -32,3 +32,6 @@ mutable field net/minecraft/client/render/RenderPhase beginAction Ljava/lang/Run
 mutable field net/minecraft/client/render/RenderPhase endAction Ljava/lang/Runnable;
 
 accessible method net/minecraft/client/render/block/entity/BeaconBlockEntityRenderer renderBeam (Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;FJII[F)V
+accessible method net/minecraft/block/entity/BeaconBlockEntity updateLevel (Lnet/minecraft/world/World;III)I
+accessible class net/minecraft/client/render/RenderPhase$WriteMaskState
+accessible class net/minecraft/client/render/RenderPhase$Transparency

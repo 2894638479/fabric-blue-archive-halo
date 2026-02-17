@@ -4,6 +4,7 @@ import com.terraformersmc.modmenu.api.ConfigScreenFactory
 import com.terraformersmc.modmenu.api.ModMenuApi
 import io.github.u2894638479.bahalo.cache.BeaconCacheMap
 import io.github.u2894638479.bahalo.cache.BeaconCacheMapMap
+import io.github.u2894638479.bahalo.config.Config
 import io.github.u2894638479.kotlinmcui.backend.DslEntryService
 import io.github.u2894638479.kotlinmcui.backend.createScreen
 import io.github.u2894638479.kotlinmcui.dslBackend
@@ -30,6 +31,7 @@ import net.minecraft.util.math.ChunkSectionPos
 import net.minecraft.world.chunk.ChunkStatus
 import org.slf4j.LoggerFactory
 import java.util.Optional
+import kotlin.math.sign
 
 class Entry: DslEntryService, ModMenuApi {
     override fun getModConfigScreenFactory() = ConfigScreenFactory {
@@ -60,11 +62,17 @@ class Entry: DslEntryService, ModMenuApi {
                 minecraft.world?.let { world ->
                     val modified = BeaconCacheMap.current?.keys?.removeIf {
                         val pos = it.toBlockPos()
-                        world.chunkManager.getChunk(
-                            ChunkSectionPos.getSectionCoord(pos.x),
-                            ChunkSectionPos.getSectionCoord(pos.z),
-                            ChunkStatus.FULL,false
-                        ) != null && world.getBlockEntity(pos) !is BeaconBlockEntity
+                        val x = ChunkSectionPos.getSectionCoord(pos.x)
+                        val z = ChunkSectionPos.getSectionCoord(pos.z)
+                        val loaded = (x-1..x+1).zip(z-1..z+1).all { (x,z) ->
+                            world.chunkManager.getChunk(x,z, ChunkStatus.FULL,false) != null
+                        }
+                        if(!loaded) return@removeIf false
+                        val beacon = world.getBlockEntity(pos) as? BeaconBlockEntity ?: return@removeIf true
+                        if(beacon.level == 0) {
+                            beacon.level = BeaconBlockEntity.updateLevel(world,beacon.pos.x,beacon.pos.y,beacon.pos.z)
+                        }
+                        false
                     }
                     if(modified == true) BeaconCacheMapMap.save()
                 }
@@ -83,12 +91,14 @@ class Entry: DslEntryService, ModMenuApi {
             if (name != "beacon_beam") return
             if (phases.texture.id.get() != texture) return
             affectedOutline = Optional.empty()
+            val config = Config.instance.special
             this.phases = MultiPhaseParameters.Builder()
                 .cull(RenderPhase.ENABLE_CULLING)
                 .lightmap(RenderPhase.DISABLE_LIGHTMAP)
                 .program(RenderPhase.ShaderProgram { GameRenderer.getRenderTypeBeaconBeamProgram() })
                 .texture(phases.texture)
-                .transparency(RenderPhase.TRANSLUCENT_TRANSPARENCY)
+                .transparency(if(config.transparency) RenderPhase.TRANSLUCENT_TRANSPARENCY else RenderPhase.GLINT_TRANSPARENCY)
+                .writeMaskState(if(config.depthWrite) RenderPhase.WriteMaskState.ALL_MASK else RenderPhase.WriteMaskState.COLOR_MASK)
                 .build(false)
             this.vertexFormat = VertexFormats.POSITION_COLOR
             this.drawMode = DrawMode.TRIANGLE_STRIP

@@ -49,7 +49,7 @@ fun <T> MutableList<T>.editor(
             if(unfold === it) unfolded(it)
         }.animateHeight().renderScissor().clickable {
             unfold = if(unfold === it) null else it
-        }.highlightBox().background(Color(0, 200, 200, 30))
+        }.highlightBox().background(Color(200, 100, 200, 60))
     }
 
     Button(Modifier.height(20.scaled).padding(5.scaled)) {

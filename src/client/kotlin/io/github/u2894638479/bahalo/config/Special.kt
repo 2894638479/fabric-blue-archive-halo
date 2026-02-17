@@ -20,6 +20,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class Special {
+    var transparency = true
     var depthWrite = true
     var clientCache = true
     var combineBeacon = false
@@ -31,25 +32,25 @@ class Special {
     fun editor(modifier: Modifier = Modifier, hasBonus: Boolean) = Column(modifier, id = this) {
         context(ctx: DslContext)
         fun editBool(prop: StableRWProperty<Boolean>, text: String) =
-            Button(Modifier.padding(5.scaled), id = text) {
+            Button(Modifier.height(20.scaled).padding(5.scaled), id = text) {
                 TextFlatten {
                     "$text : ".emit()
                     prop.value.toString().emit(if (prop.value) Color.GREEN else Color.RED)
                 }
             }.clickable { prop.value = !prop.value }
 
+
         Row(Modifier.height(30.scaled)) {
+            editBool(::transparency.property, "Transparency")
             editBool(::depthWrite.property, "Depth Write")
-            editBool(::clientCache.property, "Client Cache")
         }
-        if(clientCache) Row(Modifier.height(Measure.AUTO_MIN)) {
-            Button(Modifier.height(20.scaled).padding(5.scaled)) {
-                TextFlatten { "Combine Beacon:$combineBeacon".emit() }
-            }.clickable { combineBeacon = !combineBeacon }
-            if(combineBeacon) SliderHorizontal(Modifier.height(20.scaled).padding(5.scaled),
-                1.0..10.0,::combineRadius.property) {
-                TextFlatten { "Combine Radius:${String.format("%.2f",combineRadius)}".emit() }
-            }
+        Row(Modifier.height(30.scaled)) {
+            editBool(::clientCache.property, "Client Cache")
+            if(clientCache) editBool(::combineBeacon.property,"Combine Beacon")
+        }
+        if(combineBeacon) SliderHorizontal(Modifier.height(20.scaled).padding(5.scaled),
+            1.0..10.0,::combineRadius.property) {
+            TextFlatten { "Combine Radius:${String.format("%.2f",combineRadius)}".emit() }
         }
         Row(Modifier.height(30.scaled)) {
             if (hasBonus) editBool(::bonus.property, "Bonus")
