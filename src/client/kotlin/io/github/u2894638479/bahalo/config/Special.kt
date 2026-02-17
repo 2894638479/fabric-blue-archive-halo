@@ -48,7 +48,7 @@ class Special {
             editBool(::clientCache.property, "Client Cache")
             if(clientCache) editBool(::combineBeacon.property,"Combine Beacon")
         }
-        if(combineBeacon) SliderHorizontal(Modifier.height(20.scaled).padding(5.scaled),
+        if(clientCache && combineBeacon) SliderHorizontal(Modifier.height(20.scaled).padding(5.scaled),
             1.0..10.0,::combineRadius.property) {
             TextFlatten { "Combine Radius:${String.format("%.2f",combineRadius)}".emit() }
         }
