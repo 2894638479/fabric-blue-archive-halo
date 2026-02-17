@@ -9,9 +9,11 @@ import io.github.u2894638479.kotlinmcui.functions.ui.Row
 import io.github.u2894638479.kotlinmcui.functions.ui.SliderHorizontal
 import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
 import io.github.u2894638479.kotlinmcui.math.Color
+import io.github.u2894638479.kotlinmcui.math.Measure
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
 import io.github.u2894638479.kotlinmcui.modifier.height
 import io.github.u2894638479.kotlinmcui.modifier.padding
+import io.github.u2894638479.kotlinmcui.modifier.size
 import io.github.u2894638479.kotlinmcui.prop.StableRWProperty
 import io.github.u2894638479.kotlinmcui.prop.property
 import io.github.u2894638479.kotlinmcui.prop.value
@@ -21,6 +23,8 @@ import kotlinx.serialization.Serializable
 class Special {
     var depthWrite = true
     var clientCache = true
+    var combineBeacon = false
+    var combineRadius = 1.0
     var bonus = false
     var extraFarPlane = 0.0
 
@@ -38,6 +42,15 @@ class Special {
         Row(Modifier.height(30.scaled)) {
             editBool(::depthWrite.property, "Depth Write")
             editBool(::clientCache.property, "Client Cache")
+        }
+        if(clientCache) Row(Modifier.height(Measure.AUTO_MIN)) {
+            Button(Modifier.height(20.scaled).padding(5.scaled)) {
+                TextFlatten { "Combine Beacon:$combineBeacon".emit() }
+            }.clickable { combineBeacon = !combineBeacon }
+            if(combineBeacon) SliderHorizontal(Modifier.height(20.scaled).padding(5.scaled),
+                1.0..10.0,::combineRadius.property) {
+                TextFlatten { "Combine Radius:${String.format("%.2f",combineRadius)}".emit() }
+            }
         }
         Row(Modifier.height(30.scaled)) {
             if (hasBonus) editBool(::bonus.property, "Bonus")

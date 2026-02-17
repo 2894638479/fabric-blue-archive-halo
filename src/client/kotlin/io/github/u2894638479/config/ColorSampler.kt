@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface ColorSampler {
     @Serializable
-    class Segment(val height: Int,val color: Color)
+    data class Segment(val height: Int,val color: Color)
     fun sample(segments: List<Segment>): Color
 
     context(ctx: DslContext)

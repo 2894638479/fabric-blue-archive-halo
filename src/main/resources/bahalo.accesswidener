@@ -30,3 +30,5 @@ mutable field net/minecraft/client/render/RenderLayer hasCrumbling Z
 mutable field net/minecraft/client/render/RenderLayer translucent Z
 mutable field net/minecraft/client/render/RenderPhase beginAction Ljava/lang/Runnable;
 mutable field net/minecraft/client/render/RenderPhase endAction Ljava/lang/Runnable;
+
+accessible method net/minecraft/client/render/block/entity/BeaconBlockEntityRenderer renderBeam (Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;FJII[F)V

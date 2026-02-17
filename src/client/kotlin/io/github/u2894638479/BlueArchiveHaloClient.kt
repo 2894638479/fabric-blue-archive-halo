@@ -2,6 +2,9 @@ package io.github.u2894638479
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory
 import com.terraformersmc.modmenu.api.ModMenuApi
+import io.github.u2894638479.cache.BeaconCache
+import io.github.u2894638479.cache.BeaconCacheMap
+import io.github.u2894638479.cache.BeaconCacheMapMap
 import io.github.u2894638479.kotlinmcui.backend.DslEntryService
 import io.github.u2894638479.kotlinmcui.backend.createScreen
 import io.github.u2894638479.kotlinmcui.dslBackend
@@ -14,6 +17,7 @@ import io.github.u2894638479.render.ClientCacheBeaconsRenderer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.impl.client.rendering.BlockEntityRendererRegistryImpl
 import net.fabricmc.fabric.impl.client.rendering.EntityRendererRegistryImpl
+import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.render.GameRenderer
@@ -23,6 +27,8 @@ import net.minecraft.client.render.RenderPhase
 import net.minecraft.client.render.VertexFormat.DrawMode
 import net.minecraft.client.render.VertexFormats
 import net.minecraft.util.Identifier
+import net.minecraft.util.math.ChunkSectionPos
+import net.minecraft.world.chunk.ChunkStatus
 import org.slf4j.LoggerFactory
 import java.util.Optional
 
@@ -40,6 +46,7 @@ class BlueArchiveHaloClient: DslEntryService, ModMenuApi {
             ::BeaconHaloRenderer
         )
         val entityType = ClientCacheBeacons.register()
+        var ticks = 0L
         EntityRendererRegistryImpl.register(entityType,::ClientCacheBeaconsRenderer)
         ClientTickEvents.END_CLIENT_TICK.register { minecraft ->
             if(entity?.let { it.world != minecraft.world || it.isRemoved } ?: true) {
@@ -48,8 +55,22 @@ class BlueArchiveHaloClient: DslEntryService, ModMenuApi {
                 } ?: run { entity = null }
             }
             minecraft.player?.let {
-                entity?.setPosition(it.eyePos)
+                entity?.setPosition(it.pos)
             }
+            if(ticks % 20L == 0L) {
+                minecraft.world?.let { world ->
+                    val modified = BeaconCacheMap.current?.keys?.removeIf {
+                        val pos = it.toBlockPos()
+                        world.chunkManager.getChunk(
+                            ChunkSectionPos.getSectionCoord(pos.x),
+                            ChunkSectionPos.getSectionCoord(pos.z),
+                            ChunkStatus.FULL,false
+                        ) != null && world.getBlockEntity(pos) !is BeaconBlockEntity
+                    }
+                    if(modified == true) BeaconCacheMapMap.save()
+                }
+            }
+            ticks++
         }
     }
 

@@ -18,6 +18,7 @@ value class BeaconCacheMapMap(
     companion object {
         private val json = Json {
             ignoreUnknownKeys = true
+            allowStructuredMapKeys = true
         }
         val fileName = "${BlueArchiveHaloClient.id}-beacon-cache.json"
         val filePath = FabricLoader.getInstance().configDir.resolve(fileName)
