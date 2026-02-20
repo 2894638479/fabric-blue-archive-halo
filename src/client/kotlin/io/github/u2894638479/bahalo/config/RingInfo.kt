@@ -8,9 +8,10 @@ import io.github.u2894638479.kotlinmcui.functions.translate
 import io.github.u2894638479.kotlinmcui.functions.ui.Button
 import io.github.u2894638479.kotlinmcui.functions.ui.Column
 import io.github.u2894638479.kotlinmcui.functions.ui.Row
-import io.github.u2894638479.kotlinmcui.functions.ui.SliderHorizontal
+import io.github.u2894638479.kotlinmcui.functions.ui.Slider
 import io.github.u2894638479.kotlinmcui.functions.ui.Spacer
 import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
+import io.github.u2894638479.kotlinmcui.math.Axis
 import io.github.u2894638479.kotlinmcui.math.Measure
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
 import io.github.u2894638479.kotlinmcui.modifier.height
@@ -30,6 +31,8 @@ class RingInfo {
     var style: RingStyle = RingStyle.Radar()
     var height = 0.0
     var sampler: ColorSampler = ColorSampler.Fixed()
+    var sides = 3
+    var autoSide = true
 
     var speed get() = if(cycle == 0L) 0.0 else 400.0/cycle
         set(value) { cycle = if(value == 0.0) 0L else (400.0/value).toLong() }
@@ -50,20 +53,28 @@ class RingInfo {
         maxSubRingNum: Int
     ): DslChild = Column(modifier, id = this) {
         Row(Modifier.height(Measure.AUTO_MIN)) {
-            SliderHorizontal(Modifier.height(20.scaled).padding(1.scaled),
+            Slider(Modifier.height(20.scaled).padding(1.scaled),Axis.Horizontal,
                 radiusRange, ::radius.property) {
                 TextFlatten { "radius:${String.format("%.2f", radius)}".emit() }
             }
-            SliderHorizontal(Modifier.height(20.scaled).padding(1.scaled), widthRange, ::width.property) {
+            Slider(Modifier.height(20.scaled).padding(1.scaled),Axis.Horizontal, widthRange, ::width.property) {
                 TextFlatten { "width:${String.format("%.2f", width)}".emit() }
             }
         }
         Row(Modifier.height(Measure.AUTO_MIN)) {
-            SliderHorizontal(Modifier.height(20.scaled).padding(1.scaled),-5.0..5.0, ::speed.property) {
+            Slider(Modifier.height(20.scaled).padding(1.scaled),Axis.Horizontal,-5.0..5.0, ::speed.property) {
                 TextFlatten { "speed:${String.format("%.2f", speed)}".emit() }
             }
-            SliderHorizontal(Modifier.height(20.scaled).padding(1.scaled),heightRange, ::height.property) {
+            Slider(Modifier.height(20.scaled).padding(1.scaled),Axis.Horizontal,heightRange, ::height.property) {
                 TextFlatten { "height:${String.format("%.2f", height)}".emit() }
+            }
+        }
+        Row(Modifier.height(Measure.AUTO_MIN)) {
+            Button(Modifier.height(20.scaled).padding(1.scaled)) {
+                TextFlatten { "autoSide:$autoSide".emit() }
+            }.clickable { autoSide = !autoSide }
+            if(!autoSide) Slider(Modifier.height(20.scaled).padding(1.scaled),Axis.Horizontal,3..100, ::sides.property) {
+                TextFlatten { "sides:${String.format("%.2f", sides)}".emit() }
             }
         }
         Button {

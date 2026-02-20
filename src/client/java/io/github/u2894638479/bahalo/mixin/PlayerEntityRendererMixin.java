@@ -1,5 +1,6 @@
 package io.github.u2894638479.bahalo.mixin;
 
+import io.github.u2894638479.bahalo.render.RenderParam;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
@@ -22,10 +23,13 @@ public class PlayerEntityRendererMixin {
             CallbackInfo ci
     ) {
         io.github.u2894638479.bahalo.render.RenderPlayerRingKt.renderPlayerRing(
-                abstractClientPlayerEntity,
-                vertexConsumerProvider,
-                matrixStack,
-                g
+                new RenderParam(
+                        vertexConsumerProvider,
+                        matrixStack,
+                        abstractClientPlayerEntity.getWorld().getTime(),
+                        g
+                ),
+                abstractClientPlayerEntity
         );
     }
 }

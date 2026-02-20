@@ -4,8 +4,9 @@ import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
 import io.github.u2894638479.kotlinmcui.functions.ui.Column
 import io.github.u2894638479.kotlinmcui.functions.ui.Row
-import io.github.u2894638479.kotlinmcui.functions.ui.SliderHorizontal
+import io.github.u2894638479.kotlinmcui.functions.ui.Slider
 import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
+import io.github.u2894638479.kotlinmcui.math.Axis
 import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.math.Measure
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
@@ -45,22 +46,22 @@ sealed interface RingStyle {
         context(ctx: DslContext)
         override fun editor(modifier: Modifier) = Column(modifier, id = this) {
             Row(Modifier.height(Measure.AUTO_MIN)) {
-                SliderHorizontal(
-                    Modifier.height(20.scaled).padding(2.scaled),
+                Slider(
+                    Modifier.height(20.scaled).padding(2.scaled),Axis.Horizontal,
                     0.0..maxAlpha, ::minAlpha.property
                 ) {
                     TextFlatten { "minAlpha:${String.format("%.2f", minAlpha)}".emit() }
                 }
-                SliderHorizontal(
-                    Modifier.height(20.scaled).padding(2.scaled),
+                Slider(
+                    Modifier.height(20.scaled).padding(2.scaled),Axis.Horizontal,
                     minAlpha..1.0, ::maxAlpha.property
                 ) {
                     TextFlatten { "maxAlpha:${String.format("%.2f", maxAlpha)}".emit() }
                 }
             }
             Row(Modifier.height(Measure.AUTO_MIN)) {
-                SliderHorizontal(
-                    Modifier.height(20.scaled).padding(2.scaled),
+                Slider(
+                    Modifier.height(20.scaled).padding(2.scaled),Axis.Horizontal,
                     0.0..1.0, ::length.property
                 ) {
                     TextFlatten { "length:${String.format("%.2f", length)}".emit() }
@@ -89,22 +90,22 @@ sealed interface RingStyle {
         context(ctx: DslContext)
         override fun editor(modifier: Modifier) = Column(modifier) {
             Row(Modifier.height(Measure.AUTO_MIN)) {
-                SliderHorizontal(
-                    Modifier.height(20.scaled).padding(2.scaled),
+                Slider(
+                    Modifier.height(20.scaled).padding(2.scaled),Axis.Horizontal,
                     0.0..maxAlpha, ::minAlpha.property
                 ) {
                     TextFlatten { "minAlpha${String.format("%.2f", minAlpha)}".emit() }
                 }
-                SliderHorizontal(
-                    Modifier.height(20.scaled).padding(2.scaled),
+                Slider(
+                    Modifier.height(20.scaled).padding(2.scaled),Axis.Horizontal,
                     minAlpha..1.0, ::maxAlpha.property
                 ) {
                     TextFlatten { "maxAlpha${String.format("%.2f", maxAlpha)}".emit() }
                 }
             }
             Row(Modifier.height(Measure.AUTO_MIN)) {
-                SliderHorizontal(
-                    Modifier.height(20.scaled).padding(2.scaled),
+                Slider(
+                    Modifier.height(20.scaled).padding(2.scaled),Axis.Horizontal,
                     2..33, ::count.property
                 ) {
                     TextFlatten { "count:$count".emit() }

@@ -1,9 +1,10 @@
 package io.github.u2894638479.bahalo.config
 
 import io.github.u2894638479.kotlinmcui.context.DslContext
-import io.github.u2894638479.kotlinmcui.functions.ui.SliderHorizontal
+import io.github.u2894638479.kotlinmcui.functions.ui.Slider
 import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
 import io.github.u2894638479.kotlinmcui.identity.refId
+import io.github.u2894638479.kotlinmcui.math.Axis
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
 import io.github.u2894638479.kotlinmcui.prop.property
 import kotlinx.serialization.Serializable
@@ -19,7 +20,7 @@ class SubRingInfo {
     val ringInfo = RingInfo()
 
     context(ctx: DslContext)
-    fun speedEditor(modifier:Modifier) = SliderHorizontal(modifier,-5.0..5.0,::speed.property,id = refId) {
+    fun speedEditor(modifier:Modifier) = Slider(modifier,Axis.Horizontal,-5.0..5.0,::speed.property,id = refId) {
         TextFlatten { "revolution speed:${String.format("%.2f",speed)}".emit() }
     }
 }

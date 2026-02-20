@@ -22,27 +22,36 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         val segments = entity.beamSegments.ifEmpty { return }.map {
             ColorSampler.Segment(it.height, Color(it.color[0], it.color[1], it.color[2]))
         }
+        if(!shouldRender(entity,segments)) return
+        context(RenderParam(vertexConsumers,matrices,entity.world?.time ?: return,tickDelta)) {
+            render(entity,segments)
+        }
+        super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
+    }
+
+    fun shouldRender(entity: BeaconBlockEntity,segments: List<ColorSampler.Segment>): Boolean {
         if (Config.instance.special.clientCache) {
             val cachePos = Vec3L(entity.pos)
-            val map = BeaconCacheMap.current ?: return
+            val map = BeaconCacheMap.current ?: return false
             val newCache = BeaconCache(segments, entity.level)
             if (map[cachePos] != newCache) {
                 map[cachePos] = newCache
                 BeaconCacheMapMap.save()
             }
-            return
+            return false
         }
-        val infos = Config.instance.levels[entity.level]
-        matrices.push()
-        matrices.translate(0.5, 0.0, 0.5)
-        infos.forEach {
-            renderRingAt(
-                vertexConsumers, matrices, it, entity.world?.time ?: return,
-                tickDelta.toDouble(), segments, entity.pos.toCenterPos()
-            )
+        return true
+    }
+
+    context(rp: RenderParam)
+    fun render(entity: BeaconBlockEntity,segments:List<ColorSampler.Segment>) {
+        stack {
+            ms.translate(0.5, 0.0, 0.5)
+            val infos = Config.instance.levels[entity.level]
+            infos.forEach {
+                renderRingAt(it, segments, entity.pos.toCenterPos())
+            }
         }
-        matrices.pop()
-        super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
     }
 
     override fun getRenderDistance() =  Int.MAX_VALUE

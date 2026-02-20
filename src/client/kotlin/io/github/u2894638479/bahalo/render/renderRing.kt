@@ -3,28 +3,27 @@ package io.github.u2894638479.bahalo.render
 import io.github.u2894638479.bahalo.Entry
 import io.github.u2894638479.kotlinmcui.math.Color
 import net.minecraft.client.render.RenderLayer
-import net.minecraft.client.render.VertexConsumerProvider
-import net.minecraft.client.util.math.MatrixStack
 import kotlin.math.PI
+import kotlin.math.acos
 import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sin
 
+context(rp: RenderParam)
 fun renderRing(
-    matrices: MatrixStack, consumerProvider: VertexConsumerProvider,
-    radius: Double, thickness: Double, segmentCount:Int,
+    radius: Double,
+    width: Double,
+    sides: Int,
+    columnSides: Int,
     colorBy0to1: (Double) -> Color
 ) {
-    val radius = radius.toFloat()
-    val thickness = thickness.toFloat()
-    val consumer = consumerProvider.getBuffer(RenderLayer.getBeaconBeam(Entry.texture,true))
-    val modelMatrix = matrices.peek().positionMatrix
-    val radiusInner = radius - thickness/2
-    val radiusOuter = radius + thickness/2
-    val viewHeight = thickness * 2 / 3
+    val sides = max(sides,0)
+    val consumer = vc.getBuffer(RenderLayer.getBeaconBeam(Entry.texture,true))
+    val modelMatrix = ms.peek().positionMatrix
 
-
-    val angles = (0..segmentCount).map {
-        2 * PI * it / segmentCount
+    val angles = (0..sides).map {
+        2 * PI * it / sides
     }.map {
         val cos = cos(it).toFloat()
         val sin = sin(it).toFloat()
@@ -32,19 +31,16 @@ fun renderRing(
         AngleInfo(cos, sin, color)
     }
     AngleInfo.Scope(consumer,modelMatrix).run {
-        angles.firstOrNull()?.vertex2(radiusInner)
-        angles.forEach {
-            it.vertex(radiusInner)
-            it.vertex(radiusOuter)
+        val hScale = 1 / cos(PI / sides)
+        (0..columnSides).map {
+            2 * PI * it / columnSides
+        }.asReversed().zipWithNext { a, b ->
+            angles.ring(
+                radius + width * sin(a) * hScale,
+                radius + width * sin(b) * hScale,
+                width * cos(a),
+                width * cos(b),
+            )
         }
-        angles.forEach {
-            it.vertex(radiusOuter)
-            it.vertex(radius, viewHeight)
-        }
-        angles.forEach {
-            it.vertex(radius, viewHeight)
-            it.vertex(radiusInner)
-        }
-        angles.lastOrNull()?.vertex2(radiusInner)
     }
 }

@@ -9,52 +9,29 @@ import io.github.u2894638479.bahalo.math.Vec3D
 import io.github.u2894638479.bahalo.math.Vec3L
 import net.minecraft.client.render.Frustum
 import net.minecraft.client.render.VertexConsumerProvider
-import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
 import net.minecraft.client.render.entity.EntityRenderer
 import net.minecraft.client.render.entity.EntityRendererFactory
 import net.minecraft.client.util.math.MatrixStack
+import net.minecraft.entity.Entity
 import net.minecraft.util.math.Vec3d
-import kotlin.math.sqrt
 
 class ClientCacheBeaconsRenderer(ctx: EntityRendererFactory.Context?) : EntityRenderer<ClientCacheBeacons>(ctx) {
     override fun getTexture(entity: ClientCacheBeacons?) = Entry.texture
     override fun shouldRender(entity: ClientCacheBeacons?, frustum: Frustum?, x: Double, y: Double, z: Double) = true
-    override fun render(entity: ClientCacheBeacons, yaw: Float, tickDelta: Float, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider, light: Int) {
+    override fun render(entity: ClientCacheBeacons, yaw: Float, tickDelta: Float, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider, light: Int)
+    = context(RenderParam(vertexConsumers,matrices,entity.world?.time?:0L,tickDelta)){ render(entity) }
+
+    context(rp: RenderParam)
+    fun render(entity: Entity) {
         if(!Config.instance.special.clientCache) return
-        matrices.push()
-        val pos = entity.getLerpedPos(tickDelta)
-        matrices.translate(-pos.x,-pos.y,-pos.z)
-        cachedBeacons().forEach {
-            matrices.push()
-            matrices.translate(it.pos.x,it.pos.y,it.pos.z)
-            matrices.push()
-            val scale = sqrt(it.combineNum.toFloat())
-            matrices.scale(scale,1f,scale)
-            matrices.translate(-0.5,0.0,-0.5)
-            var k = 0
-            it.segments.forEachIndexed { index, segment ->
-                BeaconBlockEntityRenderer.renderBeam(matrices, vertexConsumers,
-                    tickDelta, entity.world.time, k,
-                    if(index == it.segments.size - 1) 1024 else segment.height,
-                    segment.run { floatArrayOf(color.rFloat,color.gFloat,color.bFloat) }
-                )
-                k += segment.height
+        stack {
+            val pos = entity.getLerpedPos(tickDelta.toFloat())
+            ms.translate(-pos.x,-pos.y,-pos.z)
+            cachedBeacons().forEach {
+                it.render()
+                it.renderBeam()
             }
-            matrices.pop()
-            Config.instance.levels[it.totalLevel].forEach { info ->
-                renderRingAt(
-                    vertexConsumers,
-                    matrices,
-                    info,
-                    entity.world.time,
-                    tickDelta.toDouble(),
-                    it.segments,
-                    it.pos.toVec3d()
-                )
-            }
-            matrices.pop()
         }
-        matrices.pop()
     }
 
     override fun getPositionOffset(entity: ClientCacheBeacons?, tickDelta: Float) = Vec3d(0.0,0.0,0.0)
