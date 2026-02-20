@@ -1,24 +1,15 @@
 package io.github.u2894638479.bahalo.config
 
+import io.github.u2894638479.bahalo.ui.BoolConfig
+import io.github.u2894638479.bahalo.ui.SliderConfig
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
 import io.github.u2894638479.kotlinmcui.functions.decorator.animateHeight
 import io.github.u2894638479.kotlinmcui.functions.decorator.clickable
 import io.github.u2894638479.kotlinmcui.functions.translate
-import io.github.u2894638479.kotlinmcui.functions.ui.Button
-import io.github.u2894638479.kotlinmcui.functions.ui.Column
-import io.github.u2894638479.kotlinmcui.functions.ui.Row
-import io.github.u2894638479.kotlinmcui.functions.ui.Slider
-import io.github.u2894638479.kotlinmcui.functions.ui.Spacer
-import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
-import io.github.u2894638479.kotlinmcui.math.Axis
+import io.github.u2894638479.kotlinmcui.functions.ui.*
 import io.github.u2894638479.kotlinmcui.math.Measure
-import io.github.u2894638479.kotlinmcui.modifier.Modifier
-import io.github.u2894638479.kotlinmcui.modifier.height
-import io.github.u2894638479.kotlinmcui.modifier.padding
-import io.github.u2894638479.kotlinmcui.modifier.weight
-import io.github.u2894638479.kotlinmcui.modifier.width
-import io.github.u2894638479.kotlinmcui.prop.property
+import io.github.u2894638479.kotlinmcui.modifier.*
 import io.github.u2894638479.kotlinmcui.scope.DslChild
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
@@ -52,30 +43,17 @@ class RingInfo {
         fixSampler: Boolean,
         maxSubRingNum: Int
     ): DslChild = Column(modifier, id = this) {
-        Row(Modifier.height(Measure.AUTO_MIN)) {
-            Slider(Modifier.height(20.scaled).padding(1.scaled),Axis.Horizontal,
-                radiusRange, ::radius.property) {
-                TextFlatten { "radius:${String.format("%.2f", radius)}".emit() }
-            }
-            Slider(Modifier.height(20.scaled).padding(1.scaled),Axis.Horizontal, widthRange, ::width.property) {
-                TextFlatten { "width:${String.format("%.2f", width)}".emit() }
-            }
+        Row {
+            SliderConfig(radiusRange, ::radius)
+            SliderConfig(widthRange, ::width)
+        }
+        Row {
+            SliderConfig(-5.0..5.0, ::speed)
+            SliderConfig(heightRange, ::height)
         }
         Row(Modifier.height(Measure.AUTO_MIN)) {
-            Slider(Modifier.height(20.scaled).padding(1.scaled),Axis.Horizontal,-5.0..5.0, ::speed.property) {
-                TextFlatten { "speed:${String.format("%.2f", speed)}".emit() }
-            }
-            Slider(Modifier.height(20.scaled).padding(1.scaled),Axis.Horizontal,heightRange, ::height.property) {
-                TextFlatten { "height:${String.format("%.2f", height)}".emit() }
-            }
-        }
-        Row(Modifier.height(Measure.AUTO_MIN)) {
-            Button(Modifier.height(20.scaled).padding(1.scaled)) {
-                TextFlatten { "autoSide:$autoSide".emit() }
-            }.clickable { autoSide = !autoSide }
-            if(!autoSide) Slider(Modifier.height(20.scaled).padding(1.scaled),Axis.Horizontal,3..100, ::sides.property) {
-                TextFlatten { "sides:${String.format("%.2f", sides)}".emit() }
-            }
+            BoolConfig(::autoSide)
+            if(!autoSide) SliderConfig(3..100, ::sides)
         }
         Button {
             Column {
@@ -106,6 +84,7 @@ class RingInfo {
                 ringInfo.radius = subRingRadiusRange().run { start + endInclusive } / 2
                 ringInfo.height = 0.0
                 ringInfo.width = subRingWidthRange().endInclusive
+                ringInfo.sampler = ColorSampler.Sample()
             } }) {
                 it.speedEditor(Modifier.height(20.scaled).padding(h = 5.scaled))
                 it.ringInfo.editor(Modifier.padding(5.scaled),subRingRadiusRange(),
