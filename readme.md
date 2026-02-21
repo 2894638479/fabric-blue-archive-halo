@@ -11,9 +11,9 @@
 ## 依赖（2.0+）
 [kotlinmcui](https://github.com/2894638479/KotlinMCUI)提供UI框架
 
-## 光影（2.0+）
+## 光影
 如果开启光影后看不到环：
-- 调大`special setting`-`Extra far plane`
+- 调大`special setting`-`Extra far plane`（2.0+）
 - 关闭光影自带的边界雾（border fog）
 - 调大光环的不透明度（alpha）
 
