@@ -4,17 +4,15 @@ import io.github.u2894638479.bahalo.config.ColorSampler
 import io.github.u2894638479.bahalo.config.Config
 import io.github.u2894638479.bahalo.config.RingInfo
 import net.minecraft.util.math.RotationAxis
-import net.minecraft.util.math.Vec3d
 import org.joml.Vector4f
 import kotlin.math.PI
 import kotlin.math.max
 
 
 context(rp: RenderParam)
-fun renderRingAt(
+fun renderRingInfo(
     ringInfo: RingInfo,
     segments: List<ColorSampler.Segment>,
-    pos: Vec3d,
     yaw:Double = 0.0,
     pitch:Double = 0.0
 ) {
@@ -45,7 +43,7 @@ fun renderRingAt(
                 val rotation1 = rotation(tick, tickDelta, it.cycle)
                 ms.multiply(RotationAxis.POSITIVE_Y.rotation(rotation1.toFloat()))
                 ms.translate(0.0, 0.01, ringInfo.radius)
-                renderRingAt(it.ringInfo,segments,pos)
+                renderRingInfo(it.ringInfo,segments)
             }
         }
     }

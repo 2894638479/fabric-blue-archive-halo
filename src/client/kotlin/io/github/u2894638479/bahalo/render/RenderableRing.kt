@@ -36,7 +36,7 @@ class RenderableRing(
         stack {
             ms.translate(pos.x, pos.y, pos.z)
             Config.instance.levels[totalLevel].forEach { info ->
-                renderRingAt(info, segments, pos.toVec3d())
+                renderRingInfo(info, segments)
             }
         }
     }

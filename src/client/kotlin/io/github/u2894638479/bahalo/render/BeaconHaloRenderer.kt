@@ -49,7 +49,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
             ms.translate(0.5, 0.0, 0.5)
             val infos = Config.instance.levels[entity.level]
             infos.forEach {
-                renderRingAt(it, segments, entity.pos.toCenterPos())
+                renderRingInfo(it, segments)
             }
         }
     }

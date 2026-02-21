@@ -11,7 +11,7 @@ fun renderPlayerRing(entity: AbstractClientPlayerEntity) {
         Config.instance.players[entity.name.string].forEach {
             val yaw = entity.yaw * PI / 180
             val pitch = entity.pitch * PI / 180
-            renderRingAt(it, listOf(), entity.pos, yaw, pitch)
+            renderRingInfo(it, listOf(), yaw, pitch)
         }
     }
 }
