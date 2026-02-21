@@ -1,37 +1,24 @@
-本模组为原生fabric模组，使用yarn mapping。目前已经适配原生forge和neoforge
+本模组为原生`fabric`模组，使用`yarn mapping`。目前已经适配原生`forge`和`neoforge`
 
-# forge版本仓库
-[已废弃的forge仓库](https://github.com/2894638479/forge-blue-archive-halo)
+服务端无需安装，装了也不会有效果。
+# 下载
+[GitHub release](https://github.com/2894638479/fabric-blue-archive-halo/releases)
 
-由于多分支维护比architectury框架更方便，上述仓库已经废弃。forge 以及 neoforge 都在本仓库中单独的分支中进行维护。
+[modrinth](https://modrinth.com/mod/blue-archive-halo/versions)
 
+[curseforge](https://www.curseforge.com/minecraft/mc-mods/blue-archive-halo/files/all?page=1&pageSize=20&showAlphaFiles=show)
 
-使用[architectury loom](https://github.com/architectury/architectury-loom)进行了yarn映射以及access widener的兼容
+## 依赖（2.0+）
+[kotlinmcui](https://github.com/2894638479/KotlinMCUI)提供UI框架
 
+## 光影（2.0+）
+如果开启光影后看不到环：
+- 调大`special setting`-`Extra far plane`
+- 关闭光影自带的边界雾（border fog）
+- 调大光环的不透明度（alpha）
 
-# 光影适配
-兼容大部分光影。可以调节透明度达到合适的显示效果。如果某光影无法出现渐变效果，请按照下列步骤排查后反馈。
-### 光影问题自查
-请做如下步骤后再来反馈光影问题：
-- 把 **视野距离** 调到最大，看光环是否出现
-  - 如调大后就出现了，说明可能是 **迷雾/Fog** 导致视距外的部分无法显示
-  - 如：complementary，需要把 **光影设置-大气-雾气-边界迷雾** 关闭
-  - 如：make up，需要把 **光影设置-高级设置-雾-启用雾** 关闭
-  - 如：rethinking voxels，需要把 **光影设置-Atmosphere-Fog-Border Fog** 关闭
-  - 也可以通过Distant Horizons等模组直接扩大视野距离
-- 观察光影是否能渲染出 **原版光柱外层的半透明皮**
-  - 如果显示不出，是光影自身问题所致，只能牺牲一些样式
-  - 如：bliss，把 **基本不透明度** 调到最大或者把光环样式调为 **不透明** 即可显示
-  - 如：photon，同上
-- 如果都显示不出，请在issue中反馈，虽然反馈了大概率也是光影自身问题，我不一定能修好
+## 客户端缓存（2.0+）
+默认开启`special setting`-`clientCache`。是为了视野距离外依然能被渲染。
 
-# 显示规则：
-### 等级
-光环样式会随信标等级变化，可以使用彩色玻璃染色。等级不一定等于光环数。
-### 等级衰减
-光环大小和圈数会随信标等阶增加，为控制实际显示圈数，等级会减去信标往上连续的 **无色透明玻璃/板** 个数。
-
-### 染色
-从前述的最后一个透明玻璃往上，每格 **信标光柱的颜色** ，依次从外环到内环染色。
-
-不使用玻璃本身的颜色而是光柱的颜色，是为了防止颜色变化过于突兀。
+## 信标合并（2.0+）
+开启`ClientCache`后开启`combineBeacon`。只会合并高度相同且光柱结构一样的信标。调节`combineRadius`更改触发合并的距离。
