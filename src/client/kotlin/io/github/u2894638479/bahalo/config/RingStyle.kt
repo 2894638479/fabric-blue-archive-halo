@@ -4,6 +4,7 @@ import io.github.u2894638479.bahalo.ui.SliderConfig
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.functions.ui.Column
 import io.github.u2894638479.kotlinmcui.functions.ui.Row
+import io.github.u2894638479.kotlinmcui.identity.refId
 import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.math.Measure
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
@@ -39,7 +40,7 @@ sealed interface RingStyle {
         var maxAlpha = 1.0
         var length = 0.25
         context(ctx: DslContext)
-        override fun editor(modifier: Modifier) = Column(modifier, id = this) {
+        override fun editor(modifier: Modifier) = Column(modifier, id = refId) {
             Row {
                 SliderConfig(0.0..maxAlpha, ::minAlpha)
                 SliderConfig(minAlpha..1.0, ::maxAlpha)
@@ -68,7 +69,7 @@ sealed interface RingStyle {
         var maxAlpha = 0.8
         var count = 8
         context(ctx: DslContext)
-        override fun editor(modifier: Modifier) = Column(modifier) {
+        override fun editor(modifier: Modifier) = Column(modifier,id = refId) {
             Row {
                 SliderConfig(0.0..maxAlpha, ::minAlpha)
                 SliderConfig(minAlpha..1.0, ::maxAlpha)

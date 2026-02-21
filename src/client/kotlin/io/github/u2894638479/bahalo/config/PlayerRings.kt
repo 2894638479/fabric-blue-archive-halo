@@ -1,5 +1,6 @@
 package io.github.u2894638479.bahalo.config
 
+import io.github.u2894638479.bahalo.ui.editor
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
 import io.github.u2894638479.kotlinmcui.functions.decorator.animateHeight
@@ -15,6 +16,7 @@ import io.github.u2894638479.kotlinmcui.functions.ui.TextAutoFold
 import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
 import io.github.u2894638479.kotlinmcui.functions.withId
 import io.github.u2894638479.kotlinmcui.identity.refId
+import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
 import io.github.u2894638479.kotlinmcui.modifier.height
 import io.github.u2894638479.kotlinmcui.modifier.padding
@@ -31,11 +33,13 @@ value class PlayerRings(
 
     fun ringNum(bonus: Boolean) = if(bonus) 3 else 2
 
-    fun ringRadiusRange() = 0.1..1.0
-
-    fun ringHeightRange() = 0.3..1.0
-
-    fun ringWidthRange() = 0.01..0.2
+    fun ringConstraint() = object : RingInfo.Constraint {
+        override val radiusRange get() = 0.1..1.0
+        override val heightRange get() = 0.3..1.0
+        override val widthRange get() = 0.01..0.2
+        override val fixSampler get() = true
+        override val maxSubRingNum get() = 2
+    }
 
     fun check(bonus: Boolean) = apply {
         values.forEach { list ->
@@ -45,7 +49,7 @@ value class PlayerRings(
     }
 
     fun defaultRings(bonus: Boolean) = MutableList(ringNum(bonus)) { index ->
-        val range = ringRadiusRange()
+        val range = ringConstraint().radiusRange
         val radius = range.start + index * (range.endInclusive - range.start) / ringNum(bonus)
         RingInfo().also {
             it.radius = radius
@@ -61,40 +65,12 @@ value class PlayerRings(
 
     context(ctx: DslContext)
     fun editor(modifier: Modifier,hasBonus: Boolean) = Column(modifier,id = map.refId) {
-        var unfold by remember<String?>(null)
-        forEach { (name,list) ->
-            withId(name) {
-                Column(Modifier.padding(5.scaled)) {
-                    Row {
-                        TextAutoFold(Modifier.padding(10.scaled)) {
-                            "rings for player $name".emit(size = 18.scaled)
-                        }
-                        Button(Modifier.height(20.scaled).weight(0.0)) {
-                            TextFlatten(Modifier.padding(2.scaled)) { "remove".emit() }
-                        }.clickable { map.remove(name) }
-                    }
-                    if(unfold == name) Config.instance.run {
-                        list.editor(Modifier,ringNum(hasBonus),{
-                            RingInfo().apply {
-                                height = 0.5
-                                radius = 0.8
-                                width = 0.05
-                            } },false
-                        ) {
-                            it.editor(
-                                Modifier.padding(5.scaled),
-                                ringRadiusRange(),
-                                ringHeightRange(),
-                                ringWidthRange(),
-                                true,2
-                            )
-                        }
-                    }
-                    Spacer(Modifier.weight(Double.MAX_VALUE), Unit)
-                }.clickable {
-                    unfold = if(unfold != name) name else null
-                }.renderScissor().highlightBox().animateHeight()
-            }
+        map.keys.editor(Modifier,{"rings for player $it"},0,{error("")},Color.TRANSPARENT_WHITE) { name ->
+            val list = map[name] ?: return@editor
+            val color = Color(200,100,200,60)
+            list.editor(Modifier, { "Player ring ${list.indexOf(it)}" },
+                ringNum(hasBonus),{ defaultRings(hasBonus).last() },color
+            ) { it.editor(Modifier.padding(5.scaled), ringConstraint(),color.changeHSV(h = color.hFloat + 1/6f)) }
         }
     }
 }

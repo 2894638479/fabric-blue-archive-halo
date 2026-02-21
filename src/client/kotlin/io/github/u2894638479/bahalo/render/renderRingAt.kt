@@ -30,7 +30,7 @@ fun renderRingAt(
                 val origin = Vector4f(0f, 0f, 0f, 1.0f)
                 val distance = origin.mul(currentMatrix).run { distance(0f,0f,0f,w) }.toDouble()
                 val double = Config.instance.special.lodPrecision * ringInfo.radius / max(distance,ringInfo.radius)
-                double.toInt() + 10
+                double.toInt() + 16
             } else ringInfo.sides
             val columnSides = Config.instance.special.columnSides
             val rotation = rotation(tick, tickDelta, ringInfo.cycle)

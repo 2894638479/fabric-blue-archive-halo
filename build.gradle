@@ -113,7 +113,7 @@ publishMods {
 	} else {
 		type = STABLE
 	}
-	displayName = "KotlinMCUI-backend $loader-$mod_version"
+	displayName = "Blue Archive Halo $loader-$mod_version"
 	modLoaders.add(loader)
 
 	modrinth {

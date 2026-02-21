@@ -2,12 +2,15 @@ package io.github.u2894638479.bahalo.config
 
 import io.github.u2894638479.bahalo.ui.BoolConfig
 import io.github.u2894638479.bahalo.ui.SliderConfig
+import io.github.u2894638479.bahalo.ui.editor
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
 import io.github.u2894638479.kotlinmcui.functions.decorator.animateHeight
 import io.github.u2894638479.kotlinmcui.functions.decorator.clickable
+import io.github.u2894638479.kotlinmcui.functions.decorator.renderScissor
 import io.github.u2894638479.kotlinmcui.functions.translate
 import io.github.u2894638479.kotlinmcui.functions.ui.*
+import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.math.Measure
 import io.github.u2894638479.kotlinmcui.modifier.*
 import io.github.u2894638479.kotlinmcui.scope.DslChild
@@ -30,65 +33,73 @@ class RingInfo {
 
     val subRings = mutableListOf<SubRingInfo>()
 
-    fun subRingRadiusRange() = radius/100..radius/4
-    fun subRingWidthRange() = 0.0..width
-    fun subRingHeightRange() = -radius/8..radius/8
+    interface Constraint {
+        val radiusRange: ClosedFloatingPointRange<Double>
+        val heightRange: ClosedFloatingPointRange<Double>
+        val widthRange: ClosedFloatingPointRange<Double>
+        val fixSampler: Boolean
+        val maxSubRingNum: Int
+    }
+
+    fun subRingConstraint(constraint: Constraint) = object: Constraint by constraint {
+        override val radiusRange get() = radius/100..radius/4
+        override val widthRange get() = 0.0..width
+        override val heightRange get() = -radius/8..radius/8
+        override val maxSubRingNum get() = constraint.maxSubRingNum - 1
+    }
 
     context(ctx: DslContext)
     fun editor(
         modifier: Modifier = Modifier.Companion,
-        radiusRange: ClosedFloatingPointRange<Double>,
-        heightRange: ClosedFloatingPointRange<Double>,
-        widthRange: ClosedFloatingPointRange<Double>,
-        fixSampler: Boolean,
-        maxSubRingNum: Int
+        constraint: Constraint,
+        color: Color
     ): DslChild = Column(modifier, id = this) {
         Row {
-            SliderConfig(radiusRange, ::radius)
-            SliderConfig(widthRange, ::width)
+            SliderConfig(constraint.radiusRange, ::radius)
+            SliderConfig(constraint.widthRange, ::width)
         }
         Row {
             SliderConfig(-5.0..5.0, ::speed)
-            SliderConfig(heightRange, ::height)
+            SliderConfig(constraint.heightRange, ::height)
         }
-        Row(Modifier.height(Measure.AUTO_MIN)) {
+        Row {
             BoolConfig(::autoSide)
             if(!autoSide) SliderConfig(3..100, ::sides)
         }
-        Button {
+        Button(Modifier.padding(2.scaled)) {
             Column {
                 TextFlatten(Modifier.padding(5.scaled)) { "style: ${translate(style.textKey)}".emit() }
                 style.editor(Modifier.padding(5.scaled))
-            }.animateHeight()
+            }.animateHeight().renderScissor()
         }.clickable { style = style.next }
 
-        Button {
+        Button(Modifier.padding(2.scaled)) {
             Column(Modifier.padding(5.scaled)) {
                 Row(Modifier.width(Measure.AUTO_MIN)) {
                     TextFlatten { "sampler:".emit() }
                     sampler.description(Modifier)
                 }
                 sampler.editor(Modifier)
-            }
-        }.clickable(!fixSampler) {
+            }.animateHeight().renderScissor()
+        }.clickable(!constraint.fixSampler) {
             sampler = when(sampler) {
                 is ColorSampler.Sample -> ColorSampler.Fixed()
                 is ColorSampler.Fixed -> ColorSampler.Sample()
             }
         }
 
-
-        if(maxSubRingNum > 0 || subRings.isNotEmpty()) {
+        if(constraint.maxSubRingNum > 0 || subRings.isNotEmpty()) {
             TextFlatten(Modifier.padding(5.scaled)) { "subRings".emit() }
-            subRings.editor(Modifier,maxSubRingNum,{ SubRingInfo().apply {
-                ringInfo.radius = subRingRadiusRange().run { start + endInclusive } / 2
+            subRings.editor(Modifier, { "Sub Ring ${subRings.indexOf(it)}" },
+                constraint.maxSubRingNum,{ SubRingInfo().apply {
+                val constraint = subRingConstraint(constraint)
+                ringInfo.radius = constraint.radiusRange.run { start + endInclusive } / 2
                 ringInfo.height = 0.0
-                ringInfo.width = subRingWidthRange().endInclusive
+                ringInfo.width = constraint.widthRange.run { start + endInclusive } / 2
                 ringInfo.sampler = ColorSampler.Sample()
-            } }) {
-                it.speedEditor(Modifier.height(20.scaled).padding(h = 5.scaled))
-                it.ringInfo.editor(Modifier.padding(5.scaled),subRingRadiusRange(),
-                    subRingHeightRange(),subRingWidthRange(),fixSampler,maxSubRingNum - 1)
+            } },color) {
+                SliderConfig(-5.0..5.0, it::revolutionSpeed)
+                it.ringInfo.editor(Modifier.padding(5.scaled),subRingConstraint(constraint),color.changeHSV(h = color.hFloat + 1/6f))
             }
         }
         Spacer(Modifier.weight(Double.MAX_VALUE)) {}
