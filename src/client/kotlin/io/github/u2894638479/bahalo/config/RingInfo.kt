@@ -3,6 +3,7 @@ package io.github.u2894638479.bahalo.config
 import io.github.u2894638479.bahalo.ui.BoolConfig
 import io.github.u2894638479.bahalo.ui.SliderConfig
 import io.github.u2894638479.bahalo.ui.editor
+import io.github.u2894638479.bahalo.ui.simpleTooltip
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
 import io.github.u2894638479.kotlinmcui.functions.decorator.animateHeight
@@ -68,7 +69,7 @@ class RingInfo {
         }
         Button(Modifier.padding(2.scaled)) {
             Column {
-                TextFlatten(Modifier.padding(5.scaled)) { "style: ${translate(style.textKey)}".emit() }
+                TextFlatten(Modifier.padding(5.scaled)) { "${translate("bahalo.style")}: ${translate(style.textKey)}".emit() }
                 style.editor(Modifier.padding(5.scaled))
             }.animateHeight().renderScissor()
         }.clickable { style = style.next }
@@ -76,8 +77,7 @@ class RingInfo {
         Button(Modifier.padding(2.scaled)) {
             Column(Modifier.padding(5.scaled)) {
                 Row(Modifier.width(Measure.AUTO_MIN)) {
-                    TextFlatten { "sampler:".emit() }
-                    sampler.description(Modifier)
+                    TextFlatten { "${translate("bahalo.sampler")}:${translate(sampler.textKey)}".emit() }
                 }
                 sampler.editor(Modifier)
             }.animateHeight().renderScissor()
@@ -86,11 +86,11 @@ class RingInfo {
                 is ColorSampler.Sample -> ColorSampler.Fixed()
                 is ColorSampler.Fixed -> ColorSampler.Sample()
             }
-        }
+        }.simpleTooltip(translate(sampler.textKey),translate(sampler.descKey))
 
         if(constraint.maxSubRingNum > 0 || subRings.isNotEmpty()) {
-            TextFlatten(Modifier.padding(5.scaled)) { "subRings".emit() }
-            subRings.editor(Modifier, { "Sub Ring ${subRings.indexOf(it)}" },
+            TextFlatten(Modifier.padding(5.scaled)) { translate("bahalo.ui.subrings").emit() }
+            subRings.editor(Modifier, { translate("bahalo.ui.subring",subRings.indexOf(it)) },
                 constraint.maxSubRingNum,{ SubRingInfo().apply {
                 val constraint = subRingConstraint(constraint)
                 ringInfo.radius = constraint.radiusRange.run { start + endInclusive } / 2

@@ -8,6 +8,7 @@ import io.github.u2894638479.kotlinmcui.functions.decorator.clickable
 import io.github.u2894638479.kotlinmcui.functions.decorator.highlightBox
 import io.github.u2894638479.kotlinmcui.functions.decorator.renderScissor
 import io.github.u2894638479.kotlinmcui.functions.remember
+import io.github.u2894638479.kotlinmcui.functions.translate
 import io.github.u2894638479.kotlinmcui.functions.ui.Button
 import io.github.u2894638479.kotlinmcui.functions.ui.Column
 import io.github.u2894638479.kotlinmcui.functions.ui.Row
@@ -65,10 +66,10 @@ value class PlayerRings(
 
     context(ctx: DslContext)
     fun editor(modifier: Modifier,hasBonus: Boolean) = Column(modifier,id = map.refId) {
-        map.keys.editor(Modifier,{"rings for player $it"},0,{error("")},Color.TRANSPARENT_WHITE) { name ->
+        map.keys.editor(Modifier,{ translate("bahalo.ui.ringsForPlayer",it) },0,{error("")},Color.TRANSPARENT_WHITE) { name ->
             val list = map[name] ?: return@editor
             val color = Color(200,100,200,60)
-            list.editor(Modifier, { "Player ring ${list.indexOf(it)}" },
+            list.editor(Modifier, { translate("bahalo.ui.playerRing",list.indexOf(it)) },
                 ringNum(hasBonus),{ defaultRings(hasBonus).last() },color
             ) { it.editor(Modifier.padding(5.scaled), ringConstraint(),color.changeHSV(h = color.hFloat + 1/6f)) }
         }

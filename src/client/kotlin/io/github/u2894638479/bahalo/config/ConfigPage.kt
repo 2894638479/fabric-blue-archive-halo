@@ -24,16 +24,19 @@ import io.github.u2894638479.kotlinmcui.text.DslCharStyle
 import net.minecraft.client.MinecraftClient
 
 private fun pages(hasBonus: Boolean) = mapOf<String, DslFunction>(
-    "beacon rings" to {
+    "beaconRings" to {
         Config.instance.levels.editor(Modifier, hasBonus)
         TextAutoFold(Modifier.padding(10.scaled)) {
-            "activate beacons to unlock settings for more levels.".emit()
+            translate("bahalo.ui.actbeacon").emit()
         }
     },
-    "player rings" to {
+    "playerRings" to {
         Config.instance.players.editor(Modifier,hasBonus)
+        TextAutoFold(Modifier.padding(10.scaled)) {
+            translate("bahalo.ui.actplayer").emit()
+        }
     },
-    "special settings" to {
+    "special" to {
         Config.instance.special.editor(Modifier, hasBonus)
     },
     "preview" to {
@@ -41,9 +44,9 @@ private fun pages(hasBonus: Boolean) = mapOf<String, DslFunction>(
             Spacer {}
             Button(Modifier.height(20.scaled).padding(5.scaled)) {
                 TextFlatten {
-                    "game time: ".emit()
-                    if(dataStore.pauseGame) "stopped".emit(Color.RED, style = DslCharStyle().italic)
-                    else "running".emit(Color.GREEN,style = DslCharStyle().italic)
+                    "${translate("bahalo.ui.gameTime")}: ".emit()
+                    if(dataStore.pauseGame) translate("bahalo.ui.paused").emit(Color.RED, style = DslCharStyle().italic)
+                    else translate("bahalo.ui.running").emit(Color.GREEN,style = DslCharStyle().italic)
                 }
             }.clickable { dataStore.pauseGame = !dataStore.pauseGame }
         }
@@ -52,6 +55,7 @@ private fun pages(hasBonus: Boolean) = mapOf<String, DslFunction>(
 
 context(ctx: DslTopContext)
 fun ConfigPage(hasBonus: Boolean) {
+    Tooltip(Unit)
     val hudHidden by remember {
         MinecraftClient.getInstance().options.hudHidden
     }
@@ -62,12 +66,12 @@ fun ConfigPage(hasBonus: Boolean) {
         MinecraftClient.getInstance().options.hudHidden = hudHidden
         defaultOnClose()
     }
-    val pages by remember { pages(hasBonus) }
+    val pages by remember { pages(hasBonus).mapKeys { translate("bahalo.page.${it.key}") } }
     val previewPage = pages.entries.last()
     var selected by pages.entries.first().remember
     Row {
         ScrollableColumn(Modifier.weight(0.4)) {
-            TextFlatten(Modifier.padding(5.scaled)) { "config page".emit() }
+            TextFlatten(Modifier.padding(5.scaled)) { translate("bahalo.configPage").emit() }
             pages.entries.forEachWithId {
                 var hovered by remember(false)
                 val size by autoAnimate(if(selected == it) 1.0 else if(hovered) 0.8 else 0.0)

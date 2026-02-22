@@ -22,6 +22,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface ColorSampler {
+    val textKey: String
+    val descKey: String get() = "$textKey.desc"
     @Serializable
     data class Segment(val height: Int,val color: Color)
     fun sample(segments: List<Segment>): Color
@@ -29,12 +31,10 @@ sealed interface ColorSampler {
     context(ctx: DslContext)
     fun editor(modifier: Modifier): DslChild
 
-    context(ctx: DslContext)
-    fun description(modifier: Modifier): DslChild
-
     @Serializable
     @SerialName("sample")
     class Sample: ColorSampler {
+        override val textKey get() = "bahalo.sampler.sample"
         var height = 1
         override fun sample(segments: List<Segment>): Color {
             if(segments.isEmpty()) return Color.WHITE
@@ -51,16 +51,12 @@ sealed interface ColorSampler {
             TextFlatten(Modifier.weight(0.0)) { "height:".emit() }
             EditableText(Modifier,::height.property.remap({it.toString()},{it.toIntOrNull() ?: height})) {}
         }.editBoxBackground()
-
-        context(ctx: DslContext)
-        override fun description(modifier: Modifier) = TextFlatten(modifier,id = this) {
-            "sample".emit()
-        }
     }
 
     @Serializable
     @SerialName("fixed")
     class Fixed: ColorSampler {
+        override val textKey get() = "bahalo.sampler.fixed"
         var color = Color.WHITE
         override fun sample(segments: List<Segment>) = color
 
@@ -95,11 +91,6 @@ sealed interface ColorSampler {
                     override fun setValue(value: String) { value.toIntOrNull()?.let { color = color.change(a = it) } }
                 }) {}
             }.editBoxBackground()
-        }
-
-        context(ctx: DslContext)
-        override fun description(modifier: Modifier) = TextFlatten(modifier,id = this) {
-            "fixed".emit()
         }
     }
 }

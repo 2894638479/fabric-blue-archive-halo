@@ -17,7 +17,6 @@ import kotlin.math.max
 @Serializable
 sealed interface RingStyle {
     val textKey: String
-    val descriptionKey: String
 
     val next get() = when(this) {
         is Radar -> Pulse()
@@ -33,8 +32,7 @@ sealed interface RingStyle {
     @Serializable
     @SerialName("radar")
     class Radar: RingStyle {
-        override val textKey get() = "config.radar"
-        override val descriptionKey get() = "config.radar_description"
+        override val textKey get() = "bahalo.style.radar"
 
         var minAlpha = 0.3
         var maxAlpha = 1.0
@@ -62,8 +60,7 @@ sealed interface RingStyle {
     @Serializable
     @SerialName("pulse")
     class Pulse: RingStyle {
-        override val textKey get() = "config.pulse"
-        override val descriptionKey get() = "config.pulse_description"
+        override val textKey get() = "bahalo.style.pulse"
 
         var minAlpha = 0.1
         var maxAlpha = 0.8

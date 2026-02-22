@@ -2,6 +2,7 @@ package io.github.u2894638479.bahalo.ui
 
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
+import io.github.u2894638479.kotlinmcui.functions.translate
 import io.github.u2894638479.kotlinmcui.functions.ui.Slider
 import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
 import io.github.u2894638479.kotlinmcui.math.Axis
@@ -23,9 +24,9 @@ fun SliderConfig(
     id = kProperty
 ) {
     TextFlatten {
-        "${kProperty.name}: ${kProperty.get()}".emit()
+        "${translate("bahalo.conf." + kProperty.name)}: ${kProperty.get()}".emit()
     }
-}
+}.confTooltip(kProperty.name)
 
 context(ctx: DslContext)
 fun SliderConfig(
@@ -39,6 +40,6 @@ fun SliderConfig(
     id = kProperty
 ) {
     TextFlatten {
-        "${kProperty.name}: ${String.format("%.2f",kProperty.get())}".emit()
+        "${translate("bahalo.conf." + kProperty.name)}: ${String.format("%.2f",kProperty.get())}".emit()
     }
-}
+}.confTooltip(kProperty.name)
