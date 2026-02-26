@@ -2,7 +2,7 @@
   "bahalo.sampler": "颜色采样",
   "bahalo.sampler.sample": "采样",
   "bahalo.sampler.fixed": "固定",
-  "bahalo.sampler.sample.desc": "从信标光柱采色",
+  "bahalo.sampler.sample.desc": "从信标光柱的指定高度采色",
   "bahalo.sampler.fixed.desc": "固定颜色",
   "bahalo.style": "样式",
   "bahalo.style.radar": "脉冲",

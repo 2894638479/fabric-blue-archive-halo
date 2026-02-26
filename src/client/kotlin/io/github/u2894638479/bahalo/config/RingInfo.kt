@@ -86,7 +86,7 @@ class RingInfo {
                 is ColorSampler.Sample -> ColorSampler.Fixed()
                 is ColorSampler.Fixed -> ColorSampler.Sample()
             }
-        }.simpleTooltip(translate(sampler.textKey),translate(sampler.descKey))
+        }
 
         if(constraint.maxSubRingNum > 0 || subRings.isNotEmpty()) {
             TextFlatten(Modifier.padding(5.scaled)) { translate("bahalo.ui.subrings").emit() }

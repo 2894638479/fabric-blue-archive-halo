@@ -63,7 +63,6 @@ fun <T> MutableCollection<T>.editor(
             }.highlightBox().background(color)
         }.animateHeight().change {  delegate ->
             object : DslComponent by delegate {
-                context(instance: DslComponent)
                 override fun layoutVertical() {
                     delegate.layoutVertical()
                     if(delegate.rect.height == 0.px) visible.remove(it)

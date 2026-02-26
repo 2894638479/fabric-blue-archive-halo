@@ -2,7 +2,7 @@
   "bahalo.sampler": "Color Sampler",
   "bahalo.sampler.sample": "Sample",
   "bahalo.sampler.fixed": "Fixed",
-  "bahalo.sampler.sample.desc": "Sample color from beacon beam.",
+  "bahalo.sampler.sample.desc": "Pick color from the specified height of the beacon beam.",
   "bahalo.sampler.fixed.desc": "Fixed color.",
   "bahalo.style": "Style",
   "bahalo.style.radar": "Radar",
