@@ -1,10 +1,9 @@
 package io.github.u2894638479.bahalo.config
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import io.github.u2894638479.bahalo.Entry
 import io.github.u2894638479.bahalo.Entry.Companion.logger
-import net.fabricmc.loader.api.FabricLoader
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.io.File
 import kotlin.io.path.pathString
 
@@ -15,9 +14,7 @@ class Config {
             ignoreUnknownKeys = true
             prettyPrint = true
         }
-        val fileName = "${Entry.id}-config.json"
-        val filePath = FabricLoader.getInstance().configDir.resolve(fileName)
-        val file get() = File(filePath.pathString)
+        val file get() = File(Entry.configPath.resolve("${Entry.id}-config.json").pathString)
 
         var instance = loadInstance()
             private set

@@ -5,18 +5,19 @@ import com.terraformersmc.modmenu.api.ModMenuApi
 import io.github.u2894638479.bahalo.cache.BeaconCacheMap
 import io.github.u2894638479.bahalo.cache.BeaconCacheMapMap
 import io.github.u2894638479.bahalo.config.Config
+import io.github.u2894638479.bahalo.config.ConfigPage
+import io.github.u2894638479.bahalo.render.BeaconHaloRenderer
+import io.github.u2894638479.bahalo.render.ClientCacheBeacons
+import io.github.u2894638479.bahalo.render.ClientCacheBeaconsRenderer
 import io.github.u2894638479.kotlinmcui.backend.DslEntryService
 import io.github.u2894638479.kotlinmcui.backend.createScreen
 import io.github.u2894638479.kotlinmcui.dslBackend
 import io.github.u2894638479.kotlinmcui.image.ImageHolder
 import io.github.u2894638479.kotlinmcui.math.px
-import io.github.u2894638479.bahalo.config.ConfigPage
-import io.github.u2894638479.bahalo.render.BeaconHaloRenderer
-import io.github.u2894638479.bahalo.render.ClientCacheBeacons
-import io.github.u2894638479.bahalo.render.ClientCacheBeaconsRenderer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.impl.client.rendering.BlockEntityRendererRegistryImpl
 import net.fabricmc.fabric.impl.client.rendering.EntityRendererRegistryImpl
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.client.gui.screen.Screen
@@ -26,12 +27,16 @@ import net.minecraft.client.render.RenderLayer.MultiPhaseParameters
 import net.minecraft.client.render.RenderPhase
 import net.minecraft.client.render.VertexFormat.DrawMode
 import net.minecraft.client.render.VertexFormats
+import net.minecraft.entity.EntityType
+import net.minecraft.entity.SpawnGroup
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.ChunkSectionPos
 import net.minecraft.world.chunk.ChunkStatus
 import org.slf4j.LoggerFactory
-import java.util.Optional
-import kotlin.math.sign
+import java.nio.file.Path
+import java.util.*
 
 class Entry: DslEntryService, ModMenuApi {
     override fun getModConfigScreenFactory() = ConfigScreenFactory {
@@ -46,7 +51,11 @@ class Entry: DslEntryService, ModMenuApi {
             BlockEntityType.BEACON,
             ::BeaconHaloRenderer
         )
-        val entityType = ClientCacheBeacons.register()
+        val entityType = Registry.register(
+            Registries.ENTITY_TYPE,
+            "${Entry.id}:${ClientCacheBeacons.id}",
+            EntityType.Builder.create(::ClientCacheBeacons, SpawnGroup.MISC).build(ClientCacheBeacons.id)
+        )
         var ticks = 0L
         EntityRendererRegistryImpl.register(entityType,::ClientCacheBeaconsRenderer)
         ClientTickEvents.END_CLIENT_TICK.register { minecraft ->
@@ -86,6 +95,7 @@ class Entry: DslEntryService, ModMenuApi {
         val texture = Identifier(id, "textures/pure_white.png")
         val logger = LoggerFactory.getLogger(id)
         var entity: ClientCacheBeacons? = null
+        val configPath: Path = FabricLoader.getInstance().configDir
 
         fun MultiPhase.modifyMultiPhase(name: String?, phases: MultiPhaseParameters) {
             if (name != "beacon_beam") return

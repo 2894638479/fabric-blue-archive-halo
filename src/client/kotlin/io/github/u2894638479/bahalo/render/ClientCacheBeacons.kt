@@ -15,11 +15,6 @@ class ClientCacheBeacons(entityType: EntityType<ClientCacheBeacons>, world: Worl
     override fun writeCustomDataToNbt(nbt: NbtCompound?) {}
     companion object {
         val id = "client_beacon_cache_renderer"
-        fun register() = Registry.register(
-            Registries.ENTITY_TYPE,
-            "${Entry.id}:$id",
-            EntityType.Builder.create(::ClientCacheBeacons, SpawnGroup.MISC).build(id)
-        )
     }
 
     override fun shouldRender(cameraX: Double, cameraY: Double, cameraZ: Double) = true
