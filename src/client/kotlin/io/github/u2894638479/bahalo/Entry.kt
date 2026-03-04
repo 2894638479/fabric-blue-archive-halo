@@ -1,7 +1,5 @@
 package io.github.u2894638479.bahalo
 
-import com.terraformersmc.modmenu.api.ConfigScreenFactory
-import com.terraformersmc.modmenu.api.ModMenuApi
 import io.github.u2894638479.bahalo.cache.BeaconCacheMap
 import io.github.u2894638479.bahalo.cache.BeaconCacheMapMap
 import io.github.u2894638479.bahalo.config.Config
@@ -14,12 +12,9 @@ import io.github.u2894638479.kotlinmcui.backend.createScreen
 import io.github.u2894638479.kotlinmcui.dslBackend
 import io.github.u2894638479.kotlinmcui.image.ImageHolder
 import io.github.u2894638479.kotlinmcui.math.px
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.fabricmc.fabric.impl.client.rendering.BlockEntityRendererRegistryImpl
-import net.fabricmc.fabric.impl.client.rendering.EntityRendererRegistryImpl
-import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.block.entity.BlockEntityType
+import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.render.GameRenderer
 import net.minecraft.client.render.RenderLayer.MultiPhase
@@ -27,41 +22,56 @@ import net.minecraft.client.render.RenderLayer.MultiPhaseParameters
 import net.minecraft.client.render.RenderPhase
 import net.minecraft.client.render.VertexFormat.DrawMode
 import net.minecraft.client.render.VertexFormats
+import net.minecraft.client.render.block.entity.BlockEntityRendererFactories
+import net.minecraft.client.render.entity.EntityRenderers
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.SpawnGroup
 import net.minecraft.registry.Registries
-import net.minecraft.registry.Registry
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.ChunkSectionPos
 import net.minecraft.world.chunk.ChunkStatus
+import net.minecraftforge.client.ConfigScreenHandler
+import net.minecraftforge.common.MinecraftForge.EVENT_BUS
+import net.minecraftforge.event.TickEvent
+import net.minecraftforge.fml.ModLoadingContext
+import net.minecraftforge.fml.common.Mod
+import net.minecraftforge.fml.loading.FMLConfig
+import net.minecraftforge.registries.DeferredRegister
 import org.slf4j.LoggerFactory
+import thedarkcolour.kotlinforforge.KotlinModLoadingContext
 import java.nio.file.Path
-import java.util.*
+import java.util.Optional
 
-class Entry: DslEntryService, ModMenuApi {
-    override fun getModConfigScreenFactory() = ConfigScreenFactory {
-        dslBackend.createScreen { ConfigPage(false) }.screen as Screen
-    }
+@Mod("blue_archive_halo")
+class Entry: DslEntryService {
     override val name = "Blue Archive Halo"
     override val id = Companion.id
     override val icon = ImageHolder("$id:icon.png",16.px,16.px)
     override fun createScreen() = dslBackend.createScreen { ConfigPage(true) }
+    init {
+        ModLoadingContext.get().registerExtensionPoint(
+            ConfigScreenHandler.ConfigScreenFactory::class.java)
+        { ConfigScreenHandler.ConfigScreenFactory { _,_ -> dslBackend.createScreen { ConfigPage(false) }.screen as Screen } }
+    }
     override fun initialize() {
-        BlockEntityRendererRegistryImpl.register(
+        BlockEntityRendererFactories.register(
             BlockEntityType.BEACON,
             ::BeaconHaloRenderer
         )
-        val entityType = Registry.register(
-            Registries.ENTITY_TYPE,
-            "${Entry.id}:${ClientCacheBeacons.id}",
-            EntityType.Builder.create(::ClientCacheBeacons, SpawnGroup.MISC).build(ClientCacheBeacons.id)
-        )
+        val entityTypeRegister = DeferredRegister.create(Registries.ENTITY_TYPE.key,id)
+        val entityType = entityTypeRegister.register(ClientCacheBeacons.id) {
+            EntityType.Builder.create(::ClientCacheBeacons, SpawnGroup.MISC).build(ClientCacheBeacons.id).also {
+                EntityRenderers.register(it,::ClientCacheBeaconsRenderer)
+            }
+        }
+        entityTypeRegister.register(KotlinModLoadingContext.get().getKEventBus())
         var ticks = 0L
-        EntityRendererRegistryImpl.register(entityType,::ClientCacheBeaconsRenderer)
-        ClientTickEvents.END_CLIENT_TICK.register { minecraft ->
+        EVENT_BUS.addListener { event: TickEvent.ServerTickEvent ->
+            if(event.phase != TickEvent.Phase.END) return@addListener
+            val minecraft = MinecraftClient.getInstance()
             if(entity?.let { it.world != minecraft.world || it.isRemoved } ?: true) {
                 minecraft.world?.let {
-                    entity = ClientCacheBeacons(entityType, it).apply { it.addEntity(id,this) }
+                    entity = ClientCacheBeacons(entityType.orElseGet { null } ?: return@let, it).apply { it.addEntity(id,this) }
                 } ?: run { entity = null }
             }
             minecraft.player?.let {
@@ -95,7 +105,7 @@ class Entry: DslEntryService, ModMenuApi {
         val texture = Identifier(id, "textures/pure_white.png")
         val logger = LoggerFactory.getLogger(id)
         var entity: ClientCacheBeacons? = null
-        val configPath: Path = FabricLoader.getInstance().configDir
+        val configPath: Path = FMLConfig.defaultConfigPath().let { Path.of(it) }
 
         fun MultiPhase.modifyMultiPhase(name: String?, phases: MultiPhaseParameters) {
             if (name != "beacon_beam") return

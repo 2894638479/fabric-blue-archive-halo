@@ -35,3 +35,10 @@ accessible method net/minecraft/client/render/block/entity/BeaconBlockEntityRend
 accessible method net/minecraft/block/entity/BeaconBlockEntity updateLevel (Lnet/minecraft/world/World;III)I
 accessible class net/minecraft/client/render/RenderPhase$WriteMaskState
 accessible class net/minecraft/client/render/RenderPhase$Transparency
+
+accessible field net/minecraft/client/render/RenderPhase ENABLE_CULLING Lnet/minecraft/client/render/RenderPhase$Cull;
+accessible field net/minecraft/client/render/RenderPhase DISABLE_LIGHTMAP Lnet/minecraft/client/render/RenderPhase$Lightmap;
+accessible field net/minecraft/client/render/RenderPhase TRANSLUCENT_TRANSPARENCY Lnet/minecraft/client/render/RenderPhase$Transparency;
+accessible field net/minecraft/client/render/RenderPhase GLINT_TRANSPARENCY Lnet/minecraft/client/render/RenderPhase$Transparency;
+accessible field net/minecraft/client/render/RenderPhase ALL_MASK Lnet/minecraft/client/render/RenderPhase$WriteMaskState;
+accessible field net/minecraft/client/render/RenderPhase COLOR_MASK Lnet/minecraft/client/render/RenderPhase$WriteMaskState;

@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	id 'dev.architectury.loom' version "${loom_version}"
 	id "me.modmuss50.mod-publish-plugin" version "0.8.1"
 	id "org.jetbrains.kotlin.jvm" version "2.3.10"
 	id 'org.jetbrains.kotlin.plugin.serialization' version '2.3.10'
@@ -14,54 +14,54 @@ group = project.maven_group
 base.archivesName = project.archives_base_name
 
 repositories {
-	maven {
-		url "https://maven.terraformersmc.com"
-	}
+    mavenCentral()
+    maven { url = "https://repo.spongepowered.org/maven" }
+    maven { url = 'https://thedarkcolour.github.io/KotlinForForge/' }
 	maven { url "https://jitpack.io" }
 }
 
 loom {
-	splitEnvironmentSourceSets()
-
-	mods {
-		"blue-archive-halo" {
-			sourceSet sourceSets.main
-			sourceSet sourceSets.client
-		}
-	}
-
 	accessWidenerPath = file("src/main/resources/bahalo.accesswidener")
+    forge {
+        convertAccessWideners = true
+        mixinConfig "blue-archive-halo-client.mixin.json"
+    }
+}
+
+sourceSets {
+    main {
+        java { srcDirs = ["src/main/java","src/client/java"] }
+        kotlin { srcDirs = ["src/main/kotlin","src/client/kotlin"] }
+        resources { srcDirs = ["src/main/resources","src/client/resources"] }
+    }
 }
 
 dependencies {
-	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    minecraft "net.minecraft:minecraft:${minecraft_version}"
+    forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    mappings "net.fabricmc:yarn:$yarn_mappings:v2"
 
-	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
-	modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
-	implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:${project.kotlin_serialization_version}"
+    implementation "thedarkcolour:kotlinforforge:$kff_version"
+    compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlin_serialization_version"
+    compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlin_serialization_version"
+    compileOnly "org.spongepowered:mixin:0.8.5"
+    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
 
 	implementation("com.github.2894638479:KotlinMCUI:v${kotlinmcui_version}")
-	modImplementation("com.github.2894638479:KotlinMCUI-backend:v${kotlinmcuibackend_version}-${loader}-${minecraft_version}")
+	modImplementation("com.github.2894638479:KotlinMCUI-backend:v${kotlinmcuibackend_version}-${loader}-${minecraft_version}@jar")
 }
 
 processResources {
-	inputs.property "version", project.version
-	inputs.property "minecraft_version", project.minecraft_version
-	inputs.property "fabric_kotlin_version", project.fabric_kotlin_version
-	inputs.property "kotlinmcui_version", project.kotlinmcui_version
-	filesMatching("fabric.mod.json") {
-		expand (
-                "version": inputs.properties.version,
-				"minecraft_version": inputs.properties.minecraft_version,
-				"fabric_kotlin_version": inputs.properties.fabric_kotlin_version,
-				"kotlinmcui_version": inputs.properties.kotlinmcui_version
-        )
-	}
+    var replaceProperties = [
+            minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
+            forge_version: forge_version, forge_version_range: forge_version_range,
+            mod_version: mod_version, kff_version: kff_version, kotlinmcui_version: kotlinmcui_version
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -119,8 +119,7 @@ publishMods {
 	modrinth {
 		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
 		projectId = "rtLQjYeH"
-		optional("modmenu")
-		requires("kotlinmcui","fabric-language-kotlin")
+		requires("kotlinmcui","kotlin-for-forge")
 		minecraftVersionRange {
 			start = minecraft_version
 			end = minecraft_version
@@ -129,8 +128,7 @@ publishMods {
 	curseforge {
 		accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
 		projectId = "1368384"
-		optional("modmenu")
-		requires("kotlinmcui","fabric-language-kotlin")
+		requires("kotlinmcui","kotlin-for-forge")
 		clientRequired = true
 		serverRequired = false
 		minecraftVersionRange {
