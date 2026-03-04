@@ -1,6 +1,7 @@
 package io.github.u2894638479.bahalo.config
 
 import io.github.u2894638479.kotlinmcui.context.DslTopContext
+import io.github.u2894638479.kotlinmcui.context.defaultOnClose
 import io.github.u2894638479.kotlinmcui.context.onClose
 import io.github.u2894638479.kotlinmcui.context.scaled
 import io.github.u2894638479.kotlinmcui.dslBackend
@@ -55,7 +56,6 @@ private fun pages(hasBonus: Boolean) = mapOf<String, DslFunction>(
 
 context(ctx: DslTopContext)
 fun ConfigPage(hasBonus: Boolean) {
-    Tooltip(Unit)
     val hudHidden by remember {
         MinecraftClient.getInstance().options.hudHidden
     }

@@ -4,19 +4,15 @@ import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
 import io.github.u2894638479.kotlinmcui.functions.ctxBackend
 import io.github.u2894638479.kotlinmcui.functions.decorator.tooltip
+import io.github.u2894638479.kotlinmcui.functions.decorator.tooltipBackground
 import io.github.u2894638479.kotlinmcui.functions.translate
 import io.github.u2894638479.kotlinmcui.functions.ui.ColorRect
 import io.github.u2894638479.kotlinmcui.functions.ui.Column
 import io.github.u2894638479.kotlinmcui.functions.ui.TextAutoFold
 import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
-import io.github.u2894638479.kotlinmcui.functions.ui.tooltipBackground
 import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.math.Measure
-import io.github.u2894638479.kotlinmcui.modifier.Modifier
-import io.github.u2894638479.kotlinmcui.modifier.height
-import io.github.u2894638479.kotlinmcui.modifier.minWidth
-import io.github.u2894638479.kotlinmcui.modifier.padding
-import io.github.u2894638479.kotlinmcui.modifier.width
+import io.github.u2894638479.kotlinmcui.modifier.*
 import io.github.u2894638479.kotlinmcui.scope.DslChild
 
 
