@@ -1,12 +1,8 @@
 package io.github.u2894638479.bahalo.render
 
-import io.github.u2894638479.bahalo.Entry
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityType
-import net.minecraft.entity.SpawnGroup
 import net.minecraft.nbt.NbtCompound
-import net.minecraft.registry.Registries
-import net.minecraft.registry.Registry
 import net.minecraft.world.World
 
 class ClientCacheBeacons(entityType: EntityType<ClientCacheBeacons>, world: World): Entity(entityType,world) {
@@ -17,6 +13,7 @@ class ClientCacheBeacons(entityType: EntityType<ClientCacheBeacons>, world: Worl
         val id = "client_beacon_cache_renderer"
     }
 
+    override fun isInvisible() = true
     override fun shouldRender(cameraX: Double, cameraY: Double, cameraZ: Double) = true
     override fun shouldRender(distance: Double) = true
 }
