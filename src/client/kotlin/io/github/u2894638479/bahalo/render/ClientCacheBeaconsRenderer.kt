@@ -24,6 +24,7 @@ class ClientCacheBeaconsRenderer(ctx: EntityRendererFactory.Context?) : EntityRe
     context(rp: RenderParam)
     fun render(entity: Entity) {
         if(!Config.instance.special.clientCache) return
+        if(!Config.instance.special.enableBeaconHalos) return
         stack {
             val pos = entity.getLerpedPos(tickDelta.toFloat())
             ms.translate(-pos.x,-pos.y,-pos.z)

@@ -5,6 +5,7 @@ import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
 import io.github.u2894638479.kotlinmcui.functions.translate
 import io.github.u2894638479.kotlinmcui.functions.ui.Column
+import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
 import io.github.u2894638479.kotlinmcui.identity.refId
 import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
@@ -62,6 +63,10 @@ value class BeaconLevelRings(
 
     context(ctx: DslContext)
     fun editor(modifier: Modifier, bonus: Boolean) = Column(modifier,id = map.refId) {
+        if(!Config.instance.special.enableBeaconHalos) {
+            TextFlatten { translate("bahalo.ui.beaconHalosDisabled").emit() }
+            return@Column
+        }
         map.keys.editor(Modifier, { translate("bahalo.ui.ringsForBeacon",it) },0,{error("")},Color.TRANSPARENT_WHITE) { level ->
             val list = map[level] ?: return@editor
             val color = Color(200,100,200,60)

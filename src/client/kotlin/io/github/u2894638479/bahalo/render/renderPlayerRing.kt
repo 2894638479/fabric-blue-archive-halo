@@ -6,6 +6,7 @@ import kotlin.math.PI
 
 context(rp: RenderParam)
 fun renderPlayerRing(entity: AbstractClientPlayerEntity) {
+    if(!Config.instance.special.enablePlayerHalos) return
     stack {
         ms.translate(0.0,1.5,0.0)
         Config.instance.players[entity.name.string].forEach {

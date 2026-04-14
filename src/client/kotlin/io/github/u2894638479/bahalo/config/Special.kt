@@ -19,6 +19,8 @@ class Special {
     var extraFarPlane = 0.0
     var lodPrecision = 100.0
     var columnSides = 3
+    var enablePlayerHalos = true
+    var enableBeaconHalos = true
 
     context(ctx: DslContext)
     fun editor(modifier: Modifier = Modifier, hasBonus: Boolean) = Column(modifier, id = this) {
@@ -42,6 +44,11 @@ class Special {
         Row {
             SliderConfig(10.0..300.0, ::lodPrecision)
             SliderConfig(3..24, ::columnSides)
+        }
+
+        Row {
+            BoolConfig(::enableBeaconHalos)
+            BoolConfig(::enablePlayerHalos)
         }
     }
 }
