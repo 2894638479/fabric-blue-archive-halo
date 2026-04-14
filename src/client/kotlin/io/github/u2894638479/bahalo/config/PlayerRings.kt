@@ -66,6 +66,10 @@ value class PlayerRings(
 
     context(ctx: DslContext)
     fun editor(modifier: Modifier,hasBonus: Boolean) = Column(modifier,id = map.refId) {
+        if(!Config.instance.special.enablePlayerHalos) {
+            TextFlatten { translate("bahalo.ui.playerHalosDisabled").emit() }
+            return@Column
+        }
         map.keys.editor(Modifier,{ translate("bahalo.ui.ringsForPlayer",it) },0,{error("")},Color.TRANSPARENT_WHITE) { name ->
             val list = map[name] ?: return@editor
             val color = Color(200,100,200,60)

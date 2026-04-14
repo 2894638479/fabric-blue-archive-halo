@@ -19,6 +19,7 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
         entity: BeaconBlockEntity, tickDelta: Float, matrices: MatrixStack,
         vertexConsumers: VertexConsumerProvider, light: Int, overlay: Int
     ) {
+        if(!Config.instance.special.enableBeaconHalos) return super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
         val segments = entity.beamSegments.ifEmpty { return }.map {
             ColorSampler.Segment(it.height, Color(it.color[0], it.color[1], it.color[2]))
         }

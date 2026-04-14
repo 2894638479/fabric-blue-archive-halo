@@ -21,6 +21,8 @@
   "bahalo.ui.subrings": "子环",
   "bahalo.ui.add": "增加",
   "bahalo.ui.remove": "删除",
+  "bahalo.ui.playerHalosDisabled": "玩家光环已禁用",
+  "bahalo.ui.beaconHalosDisabled": "信标光环已禁用",
   "bahalo.page.beaconRings": "信标光环",
   "bahalo.page.playerRings": "玩家光环",
   "bahalo.page.special": "特殊设置",
@@ -45,6 +47,8 @@
   "bahalo.conf.combineRadius": "合并半径",
   "bahalo.conf.extraFarPlane": "额外 Far Plane",
   "bahalo.conf.lodPrecision": "Lod 精度",
+  "bahalo.conf.enablePlayerHalos": "启用玩家光环",
+  "bahalo.conf.enableBeaconHalos": "启用信标光环",
   "bahalo.conf.transparency.desc": "关闭后会变丑，但是有可能改善光影兼容。可能需要重启生效。",
   "bahalo.conf.depthWrite.desc": "关闭后会变丑，但是有可能改善光影兼容。可能需要重启生效。",
   "bahalo.conf.clientCache.desc": "在本地缓存信标位置、等级、光柱信息。使视距外的信标也被渲染。对服务器世界也有效。需要信标在视野距离内才会刷新缓存。",
@@ -57,5 +61,7 @@
   "bahalo.conf.revolutionSpeed.desc": "公转速度",
   "bahalo.conf.combineRadius.desc": "信标两两间距在这个范围内才会触发合并。",
   "bahalo.conf.extraFarPlane.desc": "增加farPlane的同时增加边界雾的距离。对光影的边界雾无效。",
-  "bahalo.conf.lodPrecision.desc": "越高越接近圆，但是开销更大。"
+  "bahalo.conf.lodPrecision.desc": "越高越接近圆，但是开销更大。",
+  "bahalo.conf.enablePlayerHalos.desc": "玩家光环的全局开关",
+  "bahalo.conf.enableBeaconHalos.desc": "信标光环的全局开关"
 }

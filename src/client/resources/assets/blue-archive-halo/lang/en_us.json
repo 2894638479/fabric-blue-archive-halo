@@ -21,6 +21,8 @@
   "bahalo.ui.subrings": "Sub rings",
   "bahalo.ui.add": "Add",
   "bahalo.ui.remove": "Remove",
+  "bahalo.ui.playerHalosDisabled": "Player Halos Disabled",
+  "bahalo.ui.beaconHalosDisabled": "Beacon Halos Disabled",
   "bahalo.page.beaconRings": "Beacon Rings",
   "bahalo.page.playerRings": "Player Rings",
   "bahalo.page.special": "Special Settings",
@@ -45,6 +47,8 @@
   "bahalo.conf.combineRadius": "Combine Radius",
   "bahalo.conf.extraFarPlane": "Extra Far Plane",
   "bahalo.conf.lodPrecision": "Lod Precision",
+  "bahalo.conf.enablePlayerHalos": "Enable Player Halos",
+  "bahalo.conf.enableBeaconHalos": "Enable Beacon Halos",
   "bahalo.conf.transparency.desc": "Turning it off may make it look worse, but it could improve shader compatibility. A restart might be required for it to take effect.",
   "bahalo.conf.depthWrite.desc": "Turning it off may make it look worse, but it could improve shader compatibility. A restart might be required for it to take effect.",
   "bahalo.conf.clientCache.desc": "Cache beacon positions, levels, and beam segment information locally. This allows beacons outside the view distance to be rendered. It also works in the server world. The cache will only refresh when the beacon is within view distance.",
@@ -57,5 +61,7 @@
   "bahalo.conf.revolutionSpeed.desc": "Revolution speed",
   "bahalo.conf.combineRadius.desc": "Beacons will only trigger merging when the distance between them falls within this range.",
   "bahalo.conf.extraFarPlane.desc": "Increase the distance of the boundary fog while increasing the far plane. It has no effect on the boundary fog of shaders.",
-  "bahalo.conf.lodPrecision.desc": "The higher the value, the closer it is to a circle, but the greater the cost."
+  "bahalo.conf.lodPrecision.desc": "The higher the value, the closer it is to a circle, but the greater the cost.",
+  "bahalo.conf.enablePlayerHalos.desc": "The global switch of player halos",
+  "bahalo.conf.enableBeaconHalos.desc": "The global switch of beacon halos"
 }
