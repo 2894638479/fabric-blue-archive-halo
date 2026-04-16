@@ -5,7 +5,6 @@ import io.github.u2894638479.bahalo.cache.BeaconCacheMapMap
 import io.github.u2894638479.bahalo.config.Config
 import io.github.u2894638479.bahalo.config.ConfigPage
 import io.github.u2894638479.bahalo.render.BeaconHaloRenderer
-import io.github.u2894638479.bahalo.render.ClientCacheBeacons
 import io.github.u2894638479.bahalo.render.ClientCacheBeaconsRenderer
 import io.github.u2894638479.kotlinmcui.backend.DslEntryService
 import io.github.u2894638479.kotlinmcui.backend.createScreen
@@ -23,24 +22,19 @@ import net.minecraft.client.render.RenderPhase
 import net.minecraft.client.render.VertexFormat.DrawMode
 import net.minecraft.client.render.VertexFormats
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories
-import net.minecraft.client.render.entity.EntityRenderers
-import net.minecraft.entity.EntityType
-import net.minecraft.entity.SpawnGroup
-import net.minecraft.registry.Registries
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.ChunkSectionPos
 import net.minecraft.world.chunk.ChunkStatus
 import net.minecraftforge.client.ConfigScreenHandler
+import net.minecraftforge.client.event.RenderLevelStageEvent
 import net.minecraftforge.common.MinecraftForge.EVENT_BUS
 import net.minecraftforge.event.TickEvent
 import net.minecraftforge.fml.ModLoadingContext
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.loading.FMLConfig
-import net.minecraftforge.registries.DeferredRegister
 import org.slf4j.LoggerFactory
-import thedarkcolour.kotlinforforge.KotlinModLoadingContext
 import java.nio.file.Path
-import java.util.Optional
+import java.util.*
 
 @Mod("blue_archive_halo")
 class Entry: DslEntryService {
@@ -58,25 +52,9 @@ class Entry: DslEntryService {
             BlockEntityType.BEACON,
             ::BeaconHaloRenderer
         )
-        val entityTypeRegister = DeferredRegister.create(Registries.ENTITY_TYPE.key,id)
-        val entityType = entityTypeRegister.register(ClientCacheBeacons.id) {
-            EntityType.Builder.create(::ClientCacheBeacons, SpawnGroup.MISC).build(ClientCacheBeacons.id).also {
-                EntityRenderers.register(it,::ClientCacheBeaconsRenderer)
-            }
-        }
-        entityTypeRegister.register(KotlinModLoadingContext.get().getKEventBus())
         var ticks = 0L
         EVENT_BUS.addListener { event: TickEvent.ServerTickEvent ->
-            if(event.phase != TickEvent.Phase.END) return@addListener
             val minecraft = MinecraftClient.getInstance()
-            if(entity?.let { it.world != minecraft.world || it.isRemoved } ?: true) {
-                minecraft.world?.let {
-                    entity = ClientCacheBeacons(entityType.orElseGet { null } ?: return@let, it).apply { it.addEntity(id,this) }
-                } ?: run { entity = null }
-            }
-            minecraft.player?.let {
-                entity?.setPosition(it.pos)
-            }
             if(ticks % 20L == 0L) {
                 minecraft.world?.let { world ->
                     val modified = BeaconCacheMap.current?.keys?.removeIf {
@@ -100,13 +78,21 @@ class Entry: DslEntryService {
             }
             ticks++
         }
+        EVENT_BUS.addListener { event: RenderLevelStageEvent ->
+            if(event.stage != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return@addListener
+            event.poseStack.push()
+            val camera = event.camera.pos
+            event.poseStack.translate(-camera.x,-camera.y,-camera.z)
+            val vc = event.levelRenderer.bufferBuilders.entityVertexConsumers
+            ClientCacheBeaconsRenderer.render(MinecraftClient.getInstance().world?.time ?: return@addListener,event.partialTick,event.poseStack,vc)
+            event.poseStack.pop()
+        }
     }
 
     companion object {
         val id = "blue-archive-halo"
         val texture = Identifier(id, "textures/pure_white.png")
         val logger = LoggerFactory.getLogger(id)
-        var entity: ClientCacheBeacons? = null
         val configPath: Path = FMLConfig.defaultConfigPath().let { Path.of(it) }
 
         fun MultiPhase.modifyMultiPhase(name: String?, phases: MultiPhaseParameters) {

@@ -1,41 +1,29 @@
 package io.github.u2894638479.bahalo.render
 
-import io.github.u2894638479.bahalo.Entry
 import io.github.u2894638479.bahalo.cache.BeaconCache
 import io.github.u2894638479.bahalo.cache.BeaconCacheMap
 import io.github.u2894638479.bahalo.cache.WorldKey
 import io.github.u2894638479.bahalo.config.Config
 import io.github.u2894638479.bahalo.math.Vec3D
 import io.github.u2894638479.bahalo.math.Vec3L
-import net.minecraft.client.render.Frustum
 import net.minecraft.client.render.VertexConsumerProvider
-import net.minecraft.client.render.entity.EntityRenderer
-import net.minecraft.client.render.entity.EntityRendererFactory
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.entity.Entity
-import net.minecraft.util.math.Vec3d
 
-class ClientCacheBeaconsRenderer(ctx: EntityRendererFactory.Context?) : EntityRenderer<ClientCacheBeacons>(ctx) {
-    override fun getTexture(entity: ClientCacheBeacons?) = Entry.texture
-    override fun shouldRender(entity: ClientCacheBeacons?, frustum: Frustum?, x: Double, y: Double, z: Double) = true
-    override fun render(entity: ClientCacheBeacons, yaw: Float, tickDelta: Float, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider, light: Int)
-    = context(RenderParam(vertexConsumers,matrices,entity.world?.time?:0L,tickDelta)){ render(entity) }
+object ClientCacheBeaconsRenderer {
+    fun render(ticks: Long, tickDelta: Float, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider)
+    = context(RenderParam(vertexConsumers,matrices,ticks,tickDelta)){ render() }
 
     context(rp: RenderParam)
-    fun render(entity: Entity) {
+    fun render() {
         if(!Config.instance.special.clientCache) return
         if(!Config.instance.special.enableBeaconHalos) return
         stack {
-            val pos = entity.getLerpedPos(tickDelta.toFloat())
-            ms.translate(-pos.x,-pos.y,-pos.z)
             cachedBeacons().forEach {
                 it.render()
                 it.renderBeam()
             }
         }
     }
-
-    override fun getPositionOffset(entity: ClientCacheBeacons?, tickDelta: Float) = Vec3d(0.0,0.0,0.0)
 
     private fun cachedBeacons(): List<RenderableRing> {
         val map = BeaconCacheMap[WorldKey.current ?: return emptyList()]
