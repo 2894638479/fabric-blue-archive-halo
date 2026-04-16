@@ -7,7 +7,6 @@ import io.github.u2894638479.bahalo.cache.BeaconCacheMapMap
 import io.github.u2894638479.bahalo.config.Config
 import io.github.u2894638479.bahalo.config.ConfigPage
 import io.github.u2894638479.bahalo.render.BeaconHaloRenderer
-import io.github.u2894638479.bahalo.render.ClientCacheBeacons
 import io.github.u2894638479.bahalo.render.ClientCacheBeaconsRenderer
 import io.github.u2894638479.kotlinmcui.backend.DslEntryService
 import io.github.u2894638479.kotlinmcui.backend.createScreen
@@ -15,8 +14,8 @@ import io.github.u2894638479.kotlinmcui.dslBackend
 import io.github.u2894638479.kotlinmcui.image.ImageHolder
 import io.github.u2894638479.kotlinmcui.math.px
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.impl.client.rendering.BlockEntityRendererRegistryImpl
-import net.fabricmc.fabric.impl.client.rendering.EntityRendererRegistryImpl
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.entity.BeaconBlockEntity
 import net.minecraft.block.entity.BlockEntityType
@@ -27,10 +26,6 @@ import net.minecraft.client.render.RenderLayer.MultiPhaseParameters
 import net.minecraft.client.render.RenderPhase
 import net.minecraft.client.render.VertexFormat.DrawMode
 import net.minecraft.client.render.VertexFormats
-import net.minecraft.entity.EntityType
-import net.minecraft.entity.SpawnGroup
-import net.minecraft.registry.Registries
-import net.minecraft.registry.Registry
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.ChunkSectionPos
 import net.minecraft.world.chunk.ChunkStatus
@@ -51,22 +46,8 @@ class Entry: DslEntryService, ModMenuApi {
             BlockEntityType.BEACON,
             ::BeaconHaloRenderer
         )
-        val entityType = Registry.register(
-            Registries.ENTITY_TYPE,
-            "${Entry.id}:${ClientCacheBeacons.id}",
-            EntityType.Builder.create(::ClientCacheBeacons, SpawnGroup.MISC).build(ClientCacheBeacons.id)
-        )
         var ticks = 0L
-        EntityRendererRegistryImpl.register(entityType,::ClientCacheBeaconsRenderer)
         ClientTickEvents.END_CLIENT_TICK.register { minecraft ->
-            if(entity?.let { it.world != minecraft.world || it.isRemoved } ?: true) {
-                minecraft.world?.let {
-                    entity = ClientCacheBeacons(entityType, it).apply { it.addEntity(id,this) }
-                } ?: run { entity = null }
-            }
-            minecraft.player?.let {
-                entity?.setPosition(it.pos)
-            }
             if(ticks % 20L == 0L) {
                 minecraft.world?.let { world ->
                     val modified = BeaconCacheMap.current?.keys?.removeIf {
@@ -88,13 +69,19 @@ class Entry: DslEntryService, ModMenuApi {
             }
             ticks++
         }
+        WorldRenderEvents.AFTER_ENTITIES.register {
+            it.matrixStack().push()
+            val camera = it.camera().pos
+            it.matrixStack().translate(-camera.x,-camera.y,-camera.z)
+            ClientCacheBeaconsRenderer.render(it.world().time,it.tickDelta(),it.matrixStack(),it.consumers() ?: return@register)
+            it.matrixStack().pop()
+        }
     }
 
     companion object {
         val id = "blue-archive-halo"
         val texture = Identifier(id, "textures/pure_white.png")
         val logger = LoggerFactory.getLogger(id)
-        var entity: ClientCacheBeacons? = null
         val configPath: Path = FabricLoader.getInstance().configDir
 
         fun MultiPhase.modifyMultiPhase(name: String?, phases: MultiPhaseParameters) {
