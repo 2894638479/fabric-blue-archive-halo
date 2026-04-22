@@ -1,5 +1,6 @@
 package io.github.u2894638479.bahalo.config
 
+import io.github.u2894638479.bahalo.ui.myBackground
 import io.github.u2894638479.kotlinmcui.context.DslTopContext
 import io.github.u2894638479.kotlinmcui.context.defaultOnClose
 import io.github.u2894638479.kotlinmcui.context.onClose
@@ -89,8 +90,6 @@ fun ConfigPage(hasBonus: Boolean) {
         ScrollableColumn(Modifier,scroller,id = selected) { selected.value() }
         ScrollBarVertical(Modifier.width(10.scaled),scroller,id = selected)
     }.run {
-        if(!dslBackend.isInWorld) defaultBackground()
-        else if(selected != previewPage) background(Color(0,0,0,150))
-        else this
+        if(selected == previewPage) this else myBackground()
     }
 }

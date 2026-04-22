@@ -1,21 +1,26 @@
 package io.github.u2894638479.bahalo.config
 
 import io.github.u2894638479.bahalo.ui.BoolConfig
+import io.github.u2894638479.bahalo.ui.MyBackground
 import io.github.u2894638479.bahalo.ui.SliderConfig
 import io.github.u2894638479.bahalo.ui.editor
 import io.github.u2894638479.bahalo.ui.simpleTooltip
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
+import io.github.u2894638479.kotlinmcui.functions.dataStore
 import io.github.u2894638479.kotlinmcui.functions.decorator.animateHeight
 import io.github.u2894638479.kotlinmcui.functions.decorator.clickable
 import io.github.u2894638479.kotlinmcui.functions.decorator.renderScissor
+import io.github.u2894638479.kotlinmcui.functions.showScreen
 import io.github.u2894638479.kotlinmcui.functions.translate
 import io.github.u2894638479.kotlinmcui.functions.ui.*
 import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.math.Measure
 import io.github.u2894638479.kotlinmcui.modifier.*
 import io.github.u2894638479.kotlinmcui.scope.DslChild
+import io.github.u2894638479.kotlinmcui.utils.Simple
 import kotlinx.serialization.Serializable
+import kotlin.collections.all
 import kotlin.random.Random
 
 @Serializable
@@ -40,6 +45,12 @@ class RingInfo {
         val widthRange: ClosedFloatingPointRange<Double>
         val fixSampler: Boolean
         val maxSubRingNum: Int
+        operator fun contains(ring: RingInfo):Boolean = ring.height in heightRange
+                && ring.radius in radiusRange
+                && ring.width in widthRange
+                && ring.subRings.size <= maxSubRingNum
+                && (ring.sampler is ColorSampler.Fixed || !fixSampler)
+                && ring.subRings.all { it.ringInfo in ring.subRingConstraint(this) }
     }
 
     fun subRingConstraint(constraint: Constraint) = object: Constraint by constraint {
@@ -48,10 +59,50 @@ class RingInfo {
         override val heightRange get() = -radius/8..radius/8
         override val maxSubRingNum get() = constraint.maxSubRingNum - 1
     }
+    fun coerceIn(constraint: Constraint) {
+        radius = radius.coerceIn(constraint.radiusRange)
+        width = width.coerceIn(constraint.widthRange)
+        height = height.coerceIn(constraint.heightRange)
+        if(constraint.fixSampler && sampler !is ColorSampler.Fixed) sampler = ColorSampler.Fixed()
+        while(subRings.size > constraint.maxSubRingNum) subRings.removeLast()
+        subRings.forEach { it.ringInfo.coerceIn(subRingConstraint(constraint)) }
+    }
+    context(ctx: DslContext)
+    fun changer(modifier: Modifier = Modifier, constraint: Constraint, onChange: (RingInfo) -> Unit) = Row(modifier,id = this) {
+        Simple.Button("code") {
+            showScreen {
+                ConfigTextConvertPage(this) {
+                    it ?: return@ConfigTextConvertPage this
+                    if(it in constraint) {
+                        onChange(it)
+                        it
+                    } else {
+                        dataStore.onClose()
+                        showScreen {
+                            Column(Modifier.size(Measure.AUTO_MIN, Measure.AUTO_MIN)) {
+                                TextFlatten { "pasted content not in constraint".emit() }
+                                Spacer(Modifier.height(40.scaled)) {}
+                                Row {
+                                    Simple.Button("auto adapt") {
+                                        dataStore.onClose()
+                                        onChange(it.apply { coerceIn(constraint) })
+                                    }
+                                    Simple.Button("cancel") {}
+                                }
+                            }
+                            MyBackground()
+                        }
+                        this
+                    }
+                }
+                MyBackground()
+            }
+        }
+    }
 
     context(ctx: DslContext)
     fun editor(
-        modifier: Modifier = Modifier.Companion,
+        modifier: Modifier = Modifier,
         constraint: Constraint,
         color: Color
     ): DslChild = Column(modifier, id = this) {
@@ -76,10 +127,12 @@ class RingInfo {
 
         Button(Modifier.padding(2.scaled)) {
             Column(Modifier.padding(5.scaled)) {
-                Row(Modifier.width(Measure.AUTO_MIN)) {
-                    TextFlatten { "${translate("bahalo.sampler")}:${translate(sampler.textKey)}".emit() }
+                Column(Modifier.height(Measure.AUTO_MIN)) {
+                    Row(Modifier.width(Measure.AUTO_MIN)) {
+                        TextFlatten { "${translate("bahalo.sampler")}:${translate(sampler.textKey)}".emit() }
+                    }
+                    sampler.editor(Modifier)
                 }
-                sampler.editor(Modifier)
             }.animateHeight().renderScissor()
         }.clickable(!constraint.fixSampler) {
             sampler = when(sampler) {

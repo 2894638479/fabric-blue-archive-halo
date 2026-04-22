@@ -48,9 +48,9 @@ fun <T> MutableCollection<T>.editor(
     var unfold by remember<T?>(null)
 
     visible.forEachWithId {
-        Box {
-            if(it !in this) return@Box
-            Column(Modifier.padding(1.scaled)) {
+        Column {
+            if(it !in this) return@Column
+            Column(Modifier.padding(1.scaled).height(Measure.AUTO_MIN)) {
                 Row(Modifier.height(Measure.AUTO_MIN)) {
                     TextFlatten { text(it).emit() }
                     Button(Modifier.height(20.scaled).width(Measure.AUTO_MIN).padding(5.scaled)) {

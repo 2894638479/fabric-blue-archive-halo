@@ -72,6 +72,7 @@ value class BeaconLevelRings(
             val color = Color(200,100,200,60)
             list.editor(Modifier, { translate("bahalo.ui.beaconRing",list.indexOf(it)) },
                 ringNum(level,bonus),{ defaultRings(level,bonus).last() },color) {
+                it.changer(Modifier,ringConstraint(level,bonus)) { new -> list[list.indexOf(it)] = new }
                 it.editor(Modifier.padding(5.scaled), ringConstraint(level,bonus),color.changeHSV(h = color.hFloat + 1/6f))
             }
         }
