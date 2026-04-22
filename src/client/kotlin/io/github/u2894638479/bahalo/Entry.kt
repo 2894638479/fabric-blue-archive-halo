@@ -89,7 +89,9 @@ class Entry: DslEntryService {
                         if(!loaded) return@removeIf false
                         val beacon = world.getBlockEntity(pos) as? BeaconBlockEntity ?: return@removeIf true
                         if(beacon.level == 0) {
-                            beacon.level = BeaconBlockEntity.updateLevel(world,beacon.pos.x,beacon.pos.y,beacon.pos.z)
+                            val level = BeaconBlockEntity.updateLevel(world,beacon.pos.x,beacon.pos.y,beacon.pos.z)
+                            beacon.level = level
+                            if(level == 0) return@removeIf true
                         }
                         false
                     }
