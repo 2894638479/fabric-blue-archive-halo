@@ -75,7 +75,10 @@ value class PlayerRings(
             val color = Color(200,100,200,60)
             list.editor(Modifier, { translate("bahalo.ui.playerRing",list.indexOf(it)) },
                 ringNum(hasBonus),{ defaultRings(hasBonus).last() },color
-            ) { it.editor(Modifier.padding(5.scaled), ringConstraint(),color.changeHSV(h = color.hFloat + 1/6f)) }
+            ) {
+                it.changer(Modifier,ringConstraint()) { new -> list[list.indexOf(it)] = new }
+                it.editor(Modifier.padding(5.scaled), ringConstraint(),color.changeHSV(h = color.hFloat + 1/6f))
+            }
         }
     }
 }
