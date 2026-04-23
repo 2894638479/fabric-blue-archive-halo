@@ -1,5 +1,6 @@
 package io.github.u2894638479.bahalo.config
 
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.ByteArrayOutputStream
 import java.util.Base64

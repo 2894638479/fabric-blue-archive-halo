@@ -42,8 +42,6 @@ dependencies {
     mappings "net.fabricmc:yarn:$yarn_mappings:v2"
 
     implementation "thedarkcolour:kotlinforforge:$kff_version"
-    compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlin_serialization_version"
-    compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlin_serialization_version"
     compileOnly "org.spongepowered:mixin:0.8.5"
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
 
