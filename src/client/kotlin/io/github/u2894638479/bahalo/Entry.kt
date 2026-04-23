@@ -53,7 +53,8 @@ class Entry: DslEntryService {
             ::BeaconHaloRenderer
         )
         var ticks = 0L
-        EVENT_BUS.addListener { event: TickEvent.ServerTickEvent ->
+        EVENT_BUS.addListener { event: TickEvent.ClientTickEvent ->
+            if(event.phase != TickEvent.Phase.END) return@addListener
             val minecraft = MinecraftClient.getInstance()
             if(ticks % 20L == 0L) {
                 minecraft.world?.let { world ->
