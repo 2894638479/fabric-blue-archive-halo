@@ -1,0 +1,45 @@
+{
+  "text.fabric-blue-archive-halo.effect.pulse": "Pulse",
+  "text.fabric-blue-archive-halo.effect.spacing": "Spacing",
+  "text.fabric-blue-archive-halo.effect.flat": "Flat",
+  "text.fabric-blue-archive-halo.effect.static": "Static",
+  "text.fabric-blue-archive-halo.effect.unknown": "Unknown",
+
+  "text.fabric-blue-archive-halo.desc.pulse": "Pulse rotation effect. The highlight is controlled by alpha. The very tip of the pulse has an alpha of 1.",
+  "text.fabric-blue-archive-halo.desc.spacing": "Like a dashed line, flashes with intervals.",
+  "text.fabric-blue-archive-halo.desc.flat": "Only translucent base color, no other effects.",
+  "text.fabric-blue-archive-halo.desc.static": "Only opaque base color, no other effects.",
+  "text.fabric-blue-archive-halo.desc.unknown": "Unknown effect",
+
+  "text.fabric-blue-archive-halo.title.main": "Halo Settings",
+  "text.fabric-blue-archive-halo.button.choose_level": "Level-specific Settings",
+  "text.fabric-blue-archive-halo.tooltip.choose_level": "Specific configurations for different beacon levels",
+  "text.fabric-blue-archive-halo.slider.base_alpha": "Base Opacity",
+  "text.fabric-blue-archive-halo.slider.mix_white": "Whiteness Tint",
+  "text.fabric-blue-archive-halo.tooltip.mix_white": "Mixes in some white to make the visual effect brighter",
+  "text.fabric-blue-archive-halo.slider.pulse_tail": "Pulse Tail Length",
+  "text.fabric-blue-archive-halo.slider.spacing_mid_alpha": "Interval Mode Opacity",
+  "text.fabric-blue-archive-halo.tooltip.spacing_mid_alpha": "Opacity of the highlighted parts in interval mode",
+  "text.fabric-blue-archive-halo.slider.spacing_alpha": "Interval Opacity",
+  "text.fabric-blue-archive-halo.tooltip.spacing_alpha": "Opacity of the gap parts in interval mode",
+  "text.fabric-blue-archive-halo.slider.spacing_count": "Interval Count: %s",
+
+  "text.fabric-blue-archive-halo.title.level_choose": "Level-specific Settings",
+  "text.fabric-blue-archive-halo.button.beacon_level": "Beacon Level %s (Rings: %s)",
+  "text.fabric-blue-archive-halo.tooltip.mod_interaction": "This level does not exist in vanilla Minecraft. Requires integration with other server-side mods to work.",
+
+  "text.fabric-blue-archive-halo.title.level_config": "Beacon Level %s (Rings: %s)",
+  "text.fabric-blue-archive-halo.slider.color_spacing": "Color Sample Interval: %s",
+  "text.fabric-blue-archive-halo.tooltip.color_spacing": "The halo is tinted according to the beacon beam colors. From outer to inner rings, it samples the 1st, 2nd, 3rd, 4th... block of the beam color. If the interval is 2, it samples 2nd, 4th, 6th, 8th... block color, and so on.",
+  "text.fabric-blue-archive-halo.slider.height": "Halo Height: %s",
+  "text.fabric-blue-archive-halo.slider.radius": "Radius: %s",
+  "text.fabric-blue-archive-halo.slider.width": "Width: %s",
+  "text.fabric-blue-archive-halo.slider.speed": "Speed: %s",
+
+  "text.fabric-blue-archive-halo.button.paused": "Paused",
+  "text.fabric-blue-archive-halo.button.running": "Running",
+  "text.fabric-blue-archive-halo.tooltip.paused": "View dynamic effects (will run in-game time)",
+  "text.fabric-blue-archive-halo.button.preview": "Preview",
+  "text.fabric-blue-archive-halo.title.previewing": "Previewing, adjust your in-game perspective yourself",
+  "text.fabric-blue-archive-halo.tooltip.preview": "Clear the interface for a clean preview (In-game only)"
+}

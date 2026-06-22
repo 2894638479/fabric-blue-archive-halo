@@ -1,0 +1,45 @@
+{
+  "text.fabric-blue-archive-halo.effect.pulse": "Пульсация",
+  "text.fabric-blue-archive-halo.effect.spacing": "Интервал",
+  "text.fabric-blue-archive-halo.effect.flat": "Плоский",
+  "text.fabric-blue-archive-halo.effect.static": "Непрозрачный",
+  "text.fabric-blue-archive-halo.effect.unknown": "Неизвестно",
+
+  "text.fabric-blue-archive-halo.desc.pulse": "Эффект пульсирующего вращения. Подсвеченная часть контролируется прозрачностью. На самом пике пульсации непрозрачность равна 1.",
+  "text.fabric-blue-archive-halo.desc.spacing": "Подобно пунктирной линии, мигает с интервалами.",
+  "text.fabric-blue-archive-halo.desc.flat": "Только полупрозрачный фоновый цвет, без других эффектов.",
+  "text.fabric-blue-archive-halo.desc.static": "Только непрозрачный фоновый цвет, без других эффектов.",
+  "text.fabric-blue-archive-halo.desc.unknown": "Неизвестный эффект",
+
+  "text.fabric-blue-archive-halo.title.main": "Настройки нимбов",
+  "text.fabric-blue-archive-halo.button.choose_level": "Настройки по уровням",
+  "text.fabric-blue-archive-halo.tooltip.choose_level": "Специфические конфигурации для маяков разного уровня",
+  "text.fabric-blue-archive-halo.slider.base_alpha": "Базовая непрозрачность",
+  "text.fabric-blue-archive-halo.slider.mix_white": "Осветление оттенка",
+  "text.fabric-blue-archive-halo.tooltip.mix_white": "Подмешивает немного белого цвета, делая визуальный эффект ярче",
+  "text.fabric-blue-archive-halo.slider.pulse_tail": "Длина шлейфа пульсации",
+  "text.fabric-blue-archive-halo.slider.spacing_mid_alpha": "Непрозрачность режима интервалов",
+  "text.fabric-blue-archive-halo.tooltip.spacing_mid_alpha": "Непрозрачность подсвеченных частей в режиме интервалов",
+  "text.fabric-blue-archive-halo.slider.spacing_alpha": "Прозрачность интервалов",
+  "text.fabric-blue-archive-halo.tooltip.spacing_alpha": "Непрозрачность пустых промежутков в режиме интервалов",
+  "text.fabric-blue-archive-halo.slider.spacing_count": "Количество интервалов: %s",
+
+  "text.fabric-blue-archive-halo.title.level_choose": "Настройки по уровням",
+  "text.fabric-blue-archive-halo.button.beacon_level": "Уровень маяка %s (Колец: %s)",
+  "text.fabric-blue-archive-halo.tooltip.mod_interaction": "Этого уровня нет в ванильной игре. Требуется совместная работа с другими серверными модами.",
+
+  "text.fabric-blue-archive-halo.title.level_config": "Уровень маяка %s (Колец: %s)",
+  "text.fabric-blue-archive-halo.slider.color_spacing": "Интервал выборки цвета: %s",
+  "text.fabric-blue-archive-halo.tooltip.color_spacing": "Нимб окрашивается в соответствии с цветом луча маяка. От внешних колец к внутренним он берет цвет 1, 2, 3, 4... блока луча. Если интервал равен 2, то берется цвет 2, 4, 6, 8... блока луча и так далее.",
+  "text.fabric-blue-archive-halo.slider.height": "Высота нимба: %s",
+  "text.fabric-blue-archive-halo.slider.radius": "Радиус: %s",
+  "text.fabric-blue-archive-halo.slider.width": "Ширина: %s",
+  "text.fabric-blue-archive-halo.slider.speed": "Скорость: %s",
+
+  "text.fabric-blue-archive-halo.button.paused": "На паузе",
+  "text.fabric-blue-archive-halo.button.running": "Работает",
+  "text.fabric-blue-archive-halo.tooltip.paused": "Показать динамические эффекты (запустит игровое время)",
+  "text.fabric-blue-archive-halo.button.preview": "Предпросмотр",
+  "text.fabric-blue-archive-halo.title.previewing": "Режим предпросмотра, настройте угол обзора в игре самостоятельно",
+  "text.fabric-blue-archive-halo.tooltip.preview": "Скрыть интерфейс для удобного предпросмотра (только в игре)"
+}

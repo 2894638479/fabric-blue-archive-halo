@@ -10,7 +10,7 @@ import net.minecraft.text.Text
 
 
 
-class MainScreen(parent: Screen): MyScreen(Text.of("光环设置"),parent) {
+class MainScreen(parent: Screen): MyScreen(Text.translatable("text.fabric-blue-archive-halo.title.main"), parent) {
     override fun close() {
         client?.setScreen(parent)
         Config.save()
@@ -18,15 +18,17 @@ class MainScreen(parent: Screen): MyScreen(Text.of("光环设置"),parent) {
     override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
         super.render(context, mouseX, mouseY, delta)
     }
-    val chooseLevel = ButtonWidget.builder(Text.of("分等级设置")){
+    val chooseLevel = ButtonWidget.builder(Text.translatable("text.fabric-blue-archive-halo.button.choose_level")){
         client?.setScreen(LevelChooseScreen(this))
-    }.build() tooltip "不同等级的信标的特定配置"
-    val baseAlpha = slider(conf.baseAlpha,0f..1f) { Text.of("基本不透明度") }
-    val mixWhite = slider(conf.mixWhite,0f..1f) { Text.of("色调变白") } tooltip "混入一些白色，使得视觉效果更亮"
-    val pulseTail = slider(conf.pulseTail,0.1f..1f) { Text.of("脉冲拖尾长度") }
-    val spacingMidAlpha = slider(conf.spacingMidAlpha,0f..1f) { Text.of("间隔模式不透明度") } tooltip "间隔模式下，高亮部分的不透明度"
-    val spacingAlpha = slider(conf.spacingAlpha,0f..1f) { Text.of("间隔不透明度") } tooltip "间隔模式下，间隔部分的不透明度"
-    val spacingCount = slider(conf.spacingCount,4..20) { Text.of("间隔数量:${conf.spacingCount.get}") }
+    }.build() tooltip Text.translatable("text.fabric-blue-archive-halo.tooltip.choose_level").string
+
+    val baseAlpha = slider(conf.baseAlpha, 0f..1f) { Text.translatable("text.fabric-blue-archive-halo.slider.base_alpha") }
+    val mixWhite = slider(conf.mixWhite, 0f..1f) { Text.translatable("text.fabric-blue-archive-halo.slider.mix_white") } tooltip Text.translatable("text.fabric-blue-archive-halo.tooltip.mix_white").string
+    val pulseTail = slider(conf.pulseTail, 0.1f..1f) { Text.translatable("text.fabric-blue-archive-halo.slider.pulse_tail") }
+    val spacingMidAlpha = slider(conf.spacingMidAlpha, 0f..1f) { Text.translatable("text.fabric-blue-archive-halo.slider.spacing_mid_alpha") } tooltip Text.translatable("text.fabric-blue-archive-halo.tooltip.spacing_mid_alpha").string
+    val spacingAlpha = slider(conf.spacingAlpha, 0f..1f) { Text.translatable("text.fabric-blue-archive-halo.slider.spacing_alpha") } tooltip Text.translatable("text.fabric-blue-archive-halo.tooltip.spacing_alpha").string
+    val spacingCount = slider(conf.spacingCount, 4..20) { Text.translatable("text.fabric-blue-archive-halo.slider.spacing_count", conf.spacingCount.get) }
+
 
 
 

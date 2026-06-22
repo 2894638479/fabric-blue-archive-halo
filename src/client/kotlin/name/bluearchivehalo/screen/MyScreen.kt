@@ -22,13 +22,13 @@ open class MyScreen(title: Text, val parent:Screen): Screen(title) {
         super.render(context, mouseX, mouseY, delta)
         context.drawCenteredTextWithShadow(textRenderer,title,width / 2, 15, 16777215)
     }
-    val pauseButton get() = ButtonWidget.builder(Text.of("暂停中")){
+    val pauseButton get() = ButtonWidget.builder(Text.translatable("text.fabric-blue-archive-halo.button.paused")){
         pause = !pause
-        it.message = Text.of(if(pause) "暂停中" else "运行中")
-    }.width(200).build() tooltip "查看动态效果（会运行游戏内时间）"
+        it.message = Text.translatable(if(pause) "text.fabric-blue-archive-halo.button.paused" else "text.fabric-blue-archive-halo.button.running")
+    }.width(200).build() tooltip Text.translatable("text.fabric-blue-archive-halo.tooltip.paused").string
 
-    val previewButton get() = ButtonWidget.builder(Text.of("预览")){
-        client?.setScreen(object : MyScreen(Text.of("预览中，请自行调整游戏内视角"),this){
+    val previewButton get() = ButtonWidget.builder(Text.translatable("text.fabric-blue-archive-halo.button.preview")){
+        client?.setScreen(object : MyScreen(Text.translatable("text.fabric-blue-archive-halo.title.previewing"), this){
             val rememberHudStatus = MinecraftClient.getInstance().options.hudHidden
             init { MinecraftClient.getInstance().options.hudHidden = true }
             override fun close() {
@@ -39,17 +39,18 @@ open class MyScreen(title: Text, val parent:Screen): Screen(title) {
             override fun init() {
                 val left = width/2 - 155
                 addDrawableChild(pauseButton.also {
-                    it.setPosition(left,height - 32)
+                    it.setPosition(left, height - 32)
                     it.width = 150
                 })
                 addDrawableChild(done.also {
-                    it.setPosition(left + 160,height - 32)
+                    it.setPosition(left + 160, height - 32)
                     it.width = 150
                 })
                 super.init()
             }
         })
-    }.width(200).build().also { it.active = client?.world != null } tooltip "清空界面，便于预览（仅游戏内）"
+    }.width(200).build().also { it.active = client?.world != null } tooltip Text.translatable("text.fabric-blue-archive-halo.tooltip.preview").string
+
 
 
     val done get() = ButtonWidget.builder(ScreenTexts.DONE) {

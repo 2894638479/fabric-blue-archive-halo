@@ -11,6 +11,7 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.random.Random
 import kotlin.reflect.KProperty
 import kotlin.text.set
+import net.minecraft.text.Text
 
 @Serializable(with = Config.Serializer::class)
 class Config {
@@ -178,18 +179,21 @@ value class RingStyle(val value:Int){
     }
     val isValid get() = value in 0..3
     val next get() = RingStyle((value+1) % 4)
-    val text get() = when(this){
-        PULSE -> "脉冲"
-        SPACING -> "间隔"
-        FLAT -> "平凡"
-        STATIC -> "不透明"
-        else -> "未知"
+
+    val text get() = when(this) {
+        PULSE -> Text.translatable("text.fabric-blue-archive-halo.effect.pulse").string
+        SPACING -> Text.translatable("text.fabric-blue-archive-halo.effect.spacing").string
+        FLAT -> Text.translatable("text.fabric-blue-archive-halo.effect.flat").string
+        STATIC -> Text.translatable("text.fabric-blue-archive-halo.effect.static").string
+        else -> Text.translatable("text.fabric-blue-archive-halo.effect.unknown").string
     }
-    val description get() = when(this){
-        PULSE -> "脉冲旋转效果。高亮部分由不透明度控制。脉冲最尖端不透明度为1"
-        SPACING -> "像虚线一样，间隔亮灭"
-        FLAT -> "只有半透明底色，无其他效果"
-        STATIC -> "只有不透明底色，无其他效果"
-        else -> "未知效果"
+
+    val description get() = when(this) {
+        PULSE -> Text.translatable("text.fabric-blue-archive-halo.desc.pulse").string
+        SPACING -> Text.translatable("text.fabric-blue-archive-halo.desc.spacing").string
+        FLAT -> Text.translatable("text.fabric-blue-archive-halo.desc.flat").string
+        STATIC -> Text.translatable("text.fabric-blue-archive-halo.desc.static").string
+        else -> Text.translatable("text.fabric-blue-archive-halo.desc.unknown").string
     }
+
 }
