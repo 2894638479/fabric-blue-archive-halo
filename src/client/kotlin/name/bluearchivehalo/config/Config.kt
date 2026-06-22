@@ -11,7 +11,6 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.random.Random
 import kotlin.reflect.KProperty
 import kotlin.text.set
-import net.minecraft.text.Text
 
 @Serializable(with = Config.Serializer::class)
 class Config {
@@ -45,6 +44,7 @@ class Config {
     val spacingCount = Conf(8,rangeConstraint(4..20))
     val mixWhite = Conf(0.3f,rangeConstraint(0f..1f))
     val pulseTail = Conf(0.25f,rangeConstraint(0f..1f))
+
     class Serializer: SerializerWrapper<Config, Serializer.Desc>("Config",Desc()){
         class Desc: Descriptor<Config>() {
             val levels = "levels" from {levels.field}
@@ -67,14 +67,14 @@ class Config {
 
 class Conf<T : Any>(
     val defaultValue:T,
-    val constraint:(T)-> T? //if return null, fallback to defaultValue
+    val constraint:(T)-> T? = { it } // теперь constraint по умолчанию просто возвращает it
 ): ReadWriteProperty<Any?,T?>{
     var field: T? = null
         set(value) {
             if(value != null) constraint(value).let { field = it }
         }
     val get get() = field ?: defaultValue
-    fun confirm() { if(field == null) field = defaultValue }
+    fun confirm() { if (field == null) field = defaultValue }
     override fun getValue(thisRef: Any?, property: KProperty<*>) = field
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {field = value}
     infix fun set(value:T?) { field = value }
@@ -93,42 +93,90 @@ fun <T: Comparable<T>> rangeConstraint(range:()-> ClosedRange<T>):(T)->T = {
 }
 
 @Serializable(with = LevelConfig.Serializer::class)
-class LevelConfig(val level:Int){
+class LevelConfig(val level: Int) {
     companion object {
-        fun ringCount(level:Int) = if(level <= 0) 0 else
-            when(level){
-                1,2,3,4,5 -> level
-                6,7 -> 6
-                8,9,10 -> 7
-                11,12,13,14,15 -> 8
+        fun ringCount(level: Int) = if (level <= 0) 0 else
+            when (level) {
+                1, 2, 3, 4, 5 -> level
+                6, 7 -> 6
+                8, 9, 10 -> 7
+                11, 12, 13, 14, 15 -> 8
                 else -> 9
             }
     }
-    val size:Int get() = ringCount(level)
-    val maxRadius get() = level*50 + 100f
-    fun maxRadius(index:Int) = if(size == 0) maxRadius else maxRadius/size*(index+1)
 
-    val rings = Conf(MutableList(size){ RingConfig(it,maxRadius(it)) }){
-        it.forEach { it.maxRadius = maxRadius(it.ringIndex) }
-        if(it.size != size || (it.filterIndexed { index,it-> it.ringIndex != index }.isNotEmpty()))
-            MutableList(size){ index ->
-                it.firstOrNull { it.ringIndex == index } ?: RingConfig(index,maxRadius(index))
-            }
-        else it
+    // Объявляем как lateinit, чтобы можно было инициализировать позже
+    lateinit var rings: Conf<MutableList<RingConfig>>
+
+    init {
+        // Используем начальный размер, не зависящий от rings.field
+        val initialSize = ringCount(level)
+        val initialMaxRadius = level * 50 + 100f
+
+        // Функция для вычисления радиуса для индекса на основе начального размера
+        fun initialMaxRadiusForIndex(index: Int) =
+            if (initialSize == 0) initialMaxRadius
+            else initialMaxRadius / initialSize * (index + 1)
+
+        // Создаём список с правильными индексами и радиусами
+        val initialList = MutableList(initialSize) { index ->
+            RingConfig(index, initialMaxRadiusForIndex(index))
+        }
+
+        // Теперь инициализируем rings, используя созданный список
+        rings = Conf(initialList)
     }
 
-    val heightRange get() = 150+level*10f..200+level*10f
+    // size теперь безопасно использует rings.field (который уже инициализирован)
+    val size: Int get() = rings.field?.size ?: 0
 
-    val height = Conf(175+level*10f,rangeConstraint(heightRange))
+    // maxRadius для данного уровня
+    val maxRadius get() = level * 50 + 100f
 
-    val colorSpacing = Conf(1,rangeConstraint(1..10))
+    // maxRadius для конкретного кольца использует текущий size
+    fun maxRadius(index: Int) = if (size == 0) maxRadius else maxRadius / size * (index + 1)
 
-    class Serializer: SerializerWrapper<LevelConfig, Serializer.Desc>("LevelConfig",Desc()){
-        class Desc: Descriptor<LevelConfig>(){
-            val rings = "rings" from {rings.field}
-            val height = "henght" from {height.field}
-            val colorSpacing = "colorSpacing" from {colorSpacing.field}
-            val level = "level" from {level}
+    // Методы добавления/удаления
+    fun addRing() {
+        val list = rings.field ?: return
+        val newIndex = list.size
+        val newRing = RingConfig(newIndex, maxRadius(newIndex))
+        list.add(newRing)
+        list.forEachIndexed { i, ring -> ring.ringIndex = i }
+        list.forEach { it.maxRadius = maxRadius(it.ringIndex) }
+    }
+
+    fun removeRing(index: Int) {
+        println("removeRing called, index=$index")
+        val list = rings.field
+        if (list == null) {
+            println("removeRing: rings.field is null!")
+            return
+        }
+        println("Current size: ${list.size}")
+        if (list.size <= 1) {
+            println("Cannot remove last ring")
+            return
+        }
+        list.removeAt(index)
+        println("After removal, size: ${list.size}")
+        list.forEachIndexed { i, ring -> ring.ringIndex = i }
+        list.forEach { it.maxRadius = maxRadius(it.ringIndex) }
+        println("Indices updated")
+    }
+
+    // Остальные параметры (высота, интервал цвета)
+    val heightRange get() = 150 + level * 10f..200 + level * 10f
+    val height = Conf(175 + level * 10f, rangeConstraint(heightRange))
+    val colorSpacing = Conf(1, rangeConstraint(1..10))
+
+    // Сериализатор
+    class Serializer : SerializerWrapper<LevelConfig, Serializer.Desc>("LevelConfig", Desc()) {
+        class Desc : Descriptor<LevelConfig>() {
+            val rings = "rings" from { rings.field }
+            val height = "height" from { height.field }
+            val colorSpacing = "colorSpacing" from { colorSpacing.field }
+            val level = "level" from { level }
         }
         override fun Desc.generate() = LevelConfig(level.orElse(0)).also {
             it.rings set rings
@@ -139,7 +187,7 @@ class LevelConfig(val level:Int){
 }
 
 @Serializable(with = RingConfig.Serializer::class)
-class RingConfig(val ringIndex:Int,var maxRadius: Float){
+class RingConfig(var ringIndex: Int, var maxRadius: Float) {   // теперь оба var
 
     val radius = Conf(if(ringIndex%2 == 0) 95 + ringIndex*50f else 55 + ringIndex*50f,
         rangeConstraint{5f..maxRadius})
@@ -147,20 +195,20 @@ class RingConfig(val ringIndex:Int,var maxRadius: Float){
     val rotateCycle = Conf(Random(ringIndex).nextInt(300,400),
         rangeConstraint(-10000..10000))
 
-    val width = Conf(2f,rangeConstraint(1f..5f))
+    val width = Conf(2f, rangeConstraint(1f..5f))
 
     val style = Conf(PULSE){ it.takeIf { it.isValid } }
 
     class Serializer: SerializerWrapper<RingConfig, Serializer.Desc>("RingConfig",Desc()){
         class Desc: Descriptor<RingConfig>() {
-            val index = "index" from {ringIndex}
-            val maxRadius = "maxRadius" from {maxRadius}
-            val radius = "r" from {radius.field}
-            val rotateCycle = "cycle" from {rotateCycle.field}
-            val width = "width" from {width.field}
-            val style = "style" from {style.field?.value}
+            val index = "index" from { ringIndex }
+            val maxRadius = "maxRadius" from { maxRadius }
+            val radius = "r" from { radius.field }
+            val rotateCycle = "cycle" from { rotateCycle.field }
+            val width = "width" from { width.field }
+            val style = "style" from { style.field?.value }
         }
-        override fun Desc.generate() = RingConfig(index.orElse(0),maxRadius.orElse(1000f)).also {
+        override fun Desc.generate() = RingConfig(index.orElse(0), maxRadius.orElse(1000f)).also {
             it.radius set radius
             it.rotateCycle set rotateCycle
             it.width set width
@@ -170,7 +218,7 @@ class RingConfig(val ringIndex:Int,var maxRadius: Float){
 }
 
 @JvmInline
-value class RingStyle(val value:Int){
+value class RingStyle(val value: Int) {
     companion object {
         val PULSE = RingStyle(0)
         val SPACING = RingStyle(1)
@@ -178,22 +226,38 @@ value class RingStyle(val value:Int){
         val STATIC = RingStyle(3)
     }
     val isValid get() = value in 0..3
-    val next get() = RingStyle((value+1) % 4)
+    val next get() = RingStyle((value + 1) % 4)
 
-    val text get() = when(this) {
-        PULSE -> Text.translatable("text.fabric-blue-archive-halo.effect.pulse").string
-        SPACING -> Text.translatable("text.fabric-blue-archive-halo.effect.spacing").string
-        FLAT -> Text.translatable("text.fabric-blue-archive-halo.effect.flat").string
-        STATIC -> Text.translatable("text.fabric-blue-archive-halo.effect.static").string
-        else -> Text.translatable("text.fabric-blue-archive-halo.effect.unknown").string
+    // Старые поля (можно оставить для совместимости)
+    val text get() = when (this) {
+        PULSE -> "脉冲"
+        SPACING -> "间隔"
+        FLAT -> "平凡"
+        STATIC -> "不透明"
+        else -> "未知"
+    }
+    val description get() = when (this) {
+        PULSE -> "脉冲旋转效果。高亮部分由不透明度控制。脉冲最尖端不透明度为1"
+        SPACING -> "像虚线一样，间隔亮灭"
+        FLAT -> "只有半透明底色，无其他效果"
+        STATIC -> "只有不透明底色，无其他效果"
+        else -> "未知效果"
     }
 
-    val description get() = when(this) {
-        PULSE -> Text.translatable("text.fabric-blue-archive-halo.desc.pulse").string
-        SPACING -> Text.translatable("text.fabric-blue-archive-halo.desc.spacing").string
-        FLAT -> Text.translatable("text.fabric-blue-archive-halo.desc.flat").string
-        STATIC -> Text.translatable("text.fabric-blue-archive-halo.desc.static").string
-        else -> Text.translatable("text.fabric-blue-archive-halo.desc.unknown").string
+    // НОВЫЕ СВОЙСТВА ДЛЯ ЛОКАЛИЗАЦИИ
+    val translationKey: String get() = when (this) {
+        PULSE -> "text.fabric-blue-archive-halo.effect.pulse"
+        SPACING -> "text.fabric-blue-archive-halo.effect.spacing"
+        FLAT -> "text.fabric-blue-archive-halo.effect.flat"
+        STATIC -> "text.fabric-blue-archive-halo.effect.static"
+        else -> "text.fabric-blue-archive-halo.effect.unknown"
     }
 
+    val descriptionKey: String get() = when (this) {
+        PULSE -> "text.fabric-blue-archive-halo.desc.pulse"
+        SPACING -> "text.fabric-blue-archive-halo.desc.spacing"
+        FLAT -> "text.fabric-blue-archive-halo.desc.flat"
+        STATIC -> "text.fabric-blue-archive-halo.desc.static"
+        else -> "text.fabric-blue-archive-halo.desc.unknown"
+    }
 }

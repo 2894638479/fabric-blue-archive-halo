@@ -1,15 +1,14 @@
 {
-  "text.fabric-blue-archive-halo.effect.pulse": "Pulse",
-  "text.fabric-blue-archive-halo.effect.spacing": "Spacing",
-  "text.fabric-blue-archive-halo.effect.flat": "Flat",
-  "text.fabric-blue-archive-halo.effect.static": "Static",
-  "text.fabric-blue-archive-halo.effect.unknown": "Unknown",
-
-  "text.fabric-blue-archive-halo.desc.pulse": "Pulse rotation effect. The highlight is controlled by alpha. The very tip of the pulse has an alpha of 1.",
-  "text.fabric-blue-archive-halo.desc.spacing": "Like a dashed line, flashes with intervals.",
-  "text.fabric-blue-archive-halo.desc.flat": "Only translucent base color, no other effects.",
-  "text.fabric-blue-archive-halo.desc.static": "Only opaque base color, no other effects.",
-  "text.fabric-blue-archive-halo.desc.unknown": "Unknown effect",
+  "modmenu.descriptionTranslation.fabric-blue-archive-halo": "Adds floating halos in the style of Blue Archive above beacons.",
+  "text.autoconfig.fabric-blue-archive-halo.title": "Blue Archive Halo Settings",
+  "text.autoconfig.fabric-blue-archive-halo.option.alpha": "Halo Opacity",
+  "text.autoconfig.fabric-blue-archive-halo.option.clientCache": "Client Cache",
+  "text.autoconfig.fabric-blue-archive-halo.option.clientCache.@Tooltip": "Allows halos to render even if the beacon itself is beyond the render distance.",
+  "text.autoconfig.fabric-blue-archive-halo.option.combineBeacon": "Combine Beacons",
+  "text.autoconfig.fabric-blue-archive-halo.option.combineRadius": "Combine Radius",
+  "text.autoconfig.fabric-blue-archive-halo.option.combineRadius.@Tooltip": "The distance at which identical beacons will merge their halos.",
+  "text.autoconfig.fabric-blue-archive-halo.option.extraFarPlane": "Extra Far Plane",
+  "text.autoconfig.fabric-blue-archive-halo.option.extraFarPlane.@Tooltip": "Increase this value if the halo disappears when shaders are enabled.",
 
   "text.fabric-blue-archive-halo.title.main": "Halo Settings",
   "text.fabric-blue-archive-halo.button.choose_level": "Level-specific Settings",
@@ -26,12 +25,15 @@
 
   "text.fabric-blue-archive-halo.title.level_choose": "Level-specific Settings",
   "text.fabric-blue-archive-halo.button.beacon_level": "Beacon Level %s (Rings: %s)",
-  "text.fabric-blue-archive-halo.tooltip.mod_interaction": "This level does not exist in vanilla Minecraft. Requires integration with other server-side mods to work.",
+  "text.fabric-blue-archive-halo.tooltip.delete_level": "Delete this beacon level configuration",
+  "text.fabric-blue-archive-halo.button.add_level": "➕ Add New Beacon Level",
 
   "text.fabric-blue-archive-halo.title.level_config": "Beacon Level %s (Rings: %s)",
   "text.fabric-blue-archive-halo.slider.color_spacing": "Color Sample Interval: %s",
   "text.fabric-blue-archive-halo.tooltip.color_spacing": "The halo is tinted according to the beacon beam colors. From outer to inner rings, it samples the 1st, 2nd, 3rd, 4th... block of the beam color. If the interval is 2, it samples 2nd, 4th, 6th, 8th... block color, and so on.",
   "text.fabric-blue-archive-halo.slider.height": "Halo Height: %s",
+  "text.fabric-blue-archive-halo.button.add_ring": "➕",
+  "text.fabric-blue-archive-halo.button.remove_ring": "➖",
   "text.fabric-blue-archive-halo.slider.radius": "Radius: %s",
   "text.fabric-blue-archive-halo.slider.width": "Width: %s",
   "text.fabric-blue-archive-halo.slider.speed": "Speed: %s",
@@ -41,5 +43,18 @@
   "text.fabric-blue-archive-halo.tooltip.paused": "View dynamic effects (will run in-game time)",
   "text.fabric-blue-archive-halo.button.preview": "Preview",
   "text.fabric-blue-archive-halo.title.previewing": "Previewing, adjust your in-game perspective yourself",
-  "text.fabric-blue-archive-halo.tooltip.preview": "Clear the interface for a clean preview (In-game only)"
-}
+  "text.fabric-blue-archive-halo.tooltip.preview": "Clear the interface for a clean preview (In-game only)",
+
+  "text.fabric-blue-archive-halo.effect.pulse": "Pulse",
+  "text.fabric-blue-archive-halo.effect.spacing": "Spacing",
+  "text.fabric-blue-archive-halo.effect.flat": "Flat",
+  "text.fabric-blue-archive-halo.effect.static": "Static",
+  "text.fabric-blue-archive-halo.effect.unknown": "Unknown",
+  "text.fabric-blue-archive-halo.desc.pulse": "Pulse rotation effect. The highlight is controlled by alpha. The very tip of the pulse has an alpha of 1.",
+  "text.fabric-blue-archive-halo.desc.spacing": "Like a dashed line, flashes with intervals.",
+  "text.fabric-blue-archive-halo.desc.flat": "Only translucent base color, no other effects.",
+  "text.fabric-blue-archive-halo.desc.static": "Only opaque base color, no other effects.",
+  "text.fabric-blue-archive-halo.desc.unknown": "Unknown effect",
+  "text.fabric-blue-archive-halo.slider.ring_count": "Active Rings Count: %s",
+  "text.fabric-blue-archive-halo.tooltip.non_vanilla_level": "Levels above 4 require server-side mods"
+  }
