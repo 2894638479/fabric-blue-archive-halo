@@ -85,7 +85,6 @@ object Entry: DslEntryClient, DslEntryGui, ModMenuApi {
 
     val texture = Identifier(id, "textures/pure_white.png")
     val logger = LoggerFactory.getLogger(id)
-    val configPath: Path = FabricLoader.getInstance().configDir
 
     fun MultiPhase.modifyMultiPhase(name: String?, phases: MultiPhaseParameters) {
         if (name != "beacon_beam") return

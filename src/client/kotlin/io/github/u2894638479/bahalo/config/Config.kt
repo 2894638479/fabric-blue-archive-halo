@@ -2,6 +2,7 @@ package io.github.u2894638479.bahalo.config
 
 import io.github.u2894638479.bahalo.Entry
 import io.github.u2894638479.bahalo.Entry.logger
+import io.github.u2894638479.kotlinmcui.backend.dslBackend
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -14,7 +15,7 @@ class Config {
             ignoreUnknownKeys = true
             prettyPrint = true
         }
-        val file get() = File(Entry.configPath.resolve("${Entry.id}-config.json").pathString)
+        val file get() = File(dslBackend.configDir.resolve("${Entry.id}-config.json").pathString)
 
         var instance = loadInstance()
             private set
