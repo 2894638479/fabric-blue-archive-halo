@@ -2,14 +2,14 @@ package io.github.u2894638479.bahalo.config
 
 import io.github.u2894638479.bahalo.ui.SliderConfig
 import io.github.u2894638479.kotlinmcui.context.DslContext
-import io.github.u2894638479.kotlinmcui.functions.ui.Column
-import io.github.u2894638479.kotlinmcui.functions.ui.Row
+import io.github.u2894638479.kotlinmcui.dsl.ui.Column
+import io.github.u2894638479.kotlinmcui.dsl.ui.Row
 import io.github.u2894638479.kotlinmcui.identity.refId
 import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.math.Measure
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
 import io.github.u2894638479.kotlinmcui.modifier.height
-import io.github.u2894638479.kotlinmcui.scope.DslChild
+import io.github.u2894638479.kotlinmcui.container.DslChild
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.math.max

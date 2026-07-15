@@ -1,23 +1,23 @@
 package io.github.u2894638479.bahalo.config
 
+import io.github.u2894638479.bahalo.config.RingInfo.Constraint.Companion.contains
 import io.github.u2894638479.bahalo.ui.BoolConfig
 import io.github.u2894638479.bahalo.ui.MyBackground
 import io.github.u2894638479.bahalo.ui.SliderConfig
 import io.github.u2894638479.bahalo.ui.editor
-import io.github.u2894638479.bahalo.ui.simpleTooltip
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
-import io.github.u2894638479.kotlinmcui.functions.dataStore
-import io.github.u2894638479.kotlinmcui.functions.decorator.animateHeight
-import io.github.u2894638479.kotlinmcui.functions.decorator.clickable
-import io.github.u2894638479.kotlinmcui.functions.decorator.renderScissor
-import io.github.u2894638479.kotlinmcui.functions.showScreen
-import io.github.u2894638479.kotlinmcui.functions.translate
-import io.github.u2894638479.kotlinmcui.functions.ui.*
+import io.github.u2894638479.kotlinmcui.dsl.decorator.animateHeight
+import io.github.u2894638479.kotlinmcui.dsl.decorator.clickable
+import io.github.u2894638479.kotlinmcui.dsl.decorator.renderScissor
+import io.github.u2894638479.kotlinmcui.dsl.showScreen
+import io.github.u2894638479.kotlinmcui.dsl.translate
+import io.github.u2894638479.kotlinmcui.dsl.ui.*
 import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.math.Measure
 import io.github.u2894638479.kotlinmcui.modifier.*
-import io.github.u2894638479.kotlinmcui.scope.DslChild
+import io.github.u2894638479.kotlinmcui.container.DslChild
+import io.github.u2894638479.kotlinmcui.context.closeScreen
 import io.github.u2894638479.kotlinmcui.utils.Simple
 import kotlinx.serialization.Serializable
 import kotlin.collections.all
@@ -45,12 +45,14 @@ class RingInfo {
         val widthRange: ClosedFloatingPointRange<Double>
         val fixSampler: Boolean
         val maxSubRingNum: Int
-        operator fun contains(ring: RingInfo):Boolean = ring.height in heightRange
-                && ring.radius in radiusRange
-                && ring.width in widthRange
-                && ring.subRings.size <= maxSubRingNum
-                && (ring.sampler is ColorSampler.Fixed || !fixSampler)
-                && ring.subRings.all { it.ringInfo in ring.subRingConstraint(this) }
+        companion object {
+            operator fun Constraint.contains(ring: RingInfo):Boolean = ring.height in heightRange
+                    && ring.radius in radiusRange
+                    && ring.width in widthRange
+                    && ring.subRings.size <= maxSubRingNum
+                    && (ring.sampler is ColorSampler.Fixed || !fixSampler)
+                    && ring.subRings.all { it.ringInfo in ring.subRingConstraint(this) }
+        }
     }
 
     fun subRingConstraint(constraint: Constraint) = object: Constraint by constraint {
@@ -71,28 +73,31 @@ class RingInfo {
     fun changer(modifier: Modifier = Modifier, constraint: Constraint, onChange: (RingInfo) -> Unit) = Row(modifier,id = this) {
         Simple.Button("code") {
             showScreen {
-                ConfigTextConvertPage(this) {
-                    it ?: return@ConfigTextConvertPage this
+                ConfigTextConvertPage(this@RingInfo) {
+                    it ?: return@ConfigTextConvertPage this@RingInfo
                     if(it in constraint) {
                         onChange(it)
+                        closeScreen()
                         it
                     } else {
-                        dataStore.onClose()
+                        closeScreen()
                         showScreen {
                             Column(Modifier.size(Measure.AUTO_MIN, Measure.AUTO_MIN)) {
                                 TextFlatten { "pasted content not in constraint".emit() }
                                 Spacer(Modifier.height(40.scaled)) {}
                                 Row {
                                     Simple.Button("auto adapt") {
-                                        dataStore.onClose()
+                                        closeScreen()
                                         onChange(it.apply { coerceIn(constraint) })
                                     }
-                                    Simple.Button("cancel") {}
+                                    Simple.Button("cancel") {
+                                        closeScreen()
+                                    }
                                 }
                             }
                             MyBackground()
                         }
-                        this
+                        this@RingInfo
                     }
                 }
                 MyBackground()

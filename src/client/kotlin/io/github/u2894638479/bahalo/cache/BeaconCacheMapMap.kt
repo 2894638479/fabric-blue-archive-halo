@@ -1,7 +1,7 @@
 package io.github.u2894638479.bahalo.cache
 
 import io.github.u2894638479.bahalo.Entry
-import io.github.u2894638479.bahalo.Entry.Companion.logger
+import io.github.u2894638479.bahalo.Entry.logger
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File

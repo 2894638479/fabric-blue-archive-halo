@@ -4,10 +4,15 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
 	id 'dev.architectury.loom' version "${loom_version}"
 	id "me.modmuss50.mod-publish-plugin" version "0.8.1"
-	id "org.jetbrains.kotlin.jvm" version "2.3.10"
-	id 'org.jetbrains.kotlin.plugin.serialization' version '2.3.10'
+	id "org.jetbrains.kotlin.jvm" version "2.4.0"
+	id 'org.jetbrains.kotlin.plugin.serialization' version '2.4.0'
 }
-
+apply plugin: 'idea'
+idea {
+	module {
+		downloadSources = true
+	}
+}
 version = "$mod_version+$minecraft_version+$loader"
 group = project.maven_group
 
@@ -46,7 +51,7 @@ dependencies {
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
 
 	implementation("com.github.2894638479:KotlinMCUI:v${kotlinmcui_version}")
-	modImplementation("com.github.2894638479:KotlinMCUI-backend:v${kotlinmcuibackend_version}-${loader}-${minecraft_version}@jar")
+	modImplementation("com.github.2894638479:KotlinMCUI-backend:v${kotlinmcuibackend_version}-${loader}-kff-${minecraft_version}@jar")
 }
 
 processResources {
@@ -68,7 +73,6 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.withType(KotlinCompile).configureEach {
 	compilerOptions.jvmTarget = JvmTarget.JVM_17
-	compilerOptions.freeCompilerArgs.add('-Xcontext-parameters')
 }
 
 java {
