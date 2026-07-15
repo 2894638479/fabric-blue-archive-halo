@@ -3,20 +3,20 @@ package io.github.u2894638479.bahalo.ui
 import io.github.u2894638479.kotlinmcui.component.DslComponent
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
-import io.github.u2894638479.kotlinmcui.functions.decorator.animateHeight
-import io.github.u2894638479.kotlinmcui.functions.decorator.background
-import io.github.u2894638479.kotlinmcui.functions.decorator.clickable
-import io.github.u2894638479.kotlinmcui.functions.decorator.highlightBox
-import io.github.u2894638479.kotlinmcui.functions.decorator.renderScissor
-import io.github.u2894638479.kotlinmcui.functions.forEachWithId
-import io.github.u2894638479.kotlinmcui.functions.remember
-import io.github.u2894638479.kotlinmcui.functions.translate
-import io.github.u2894638479.kotlinmcui.functions.ui.Box
-import io.github.u2894638479.kotlinmcui.functions.ui.Button
-import io.github.u2894638479.kotlinmcui.functions.ui.Column
-import io.github.u2894638479.kotlinmcui.functions.ui.Row
-import io.github.u2894638479.kotlinmcui.functions.ui.Spacer
-import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
+import io.github.u2894638479.kotlinmcui.dsl.decorator.animateHeight
+import io.github.u2894638479.kotlinmcui.dsl.decorator.background
+import io.github.u2894638479.kotlinmcui.dsl.decorator.clickable
+import io.github.u2894638479.kotlinmcui.dsl.decorator.highlightBox
+import io.github.u2894638479.kotlinmcui.dsl.decorator.renderScissor
+import io.github.u2894638479.kotlinmcui.dsl.forEachWithId
+import io.github.u2894638479.kotlinmcui.dsl.local
+import io.github.u2894638479.kotlinmcui.dsl.translate
+import io.github.u2894638479.kotlinmcui.dsl.ui.Box
+import io.github.u2894638479.kotlinmcui.dsl.ui.Button
+import io.github.u2894638479.kotlinmcui.dsl.ui.Column
+import io.github.u2894638479.kotlinmcui.dsl.ui.Row
+import io.github.u2894638479.kotlinmcui.dsl.ui.Spacer
+import io.github.u2894638479.kotlinmcui.dsl.ui.TextFlatten
 import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.math.Measure
 import io.github.u2894638479.kotlinmcui.math.px
@@ -39,13 +39,13 @@ fun <T> MutableCollection<T>.editor(
     id: Any? = null,
     unfolded: context(DslContext) (T)-> Unit
 ) = Column(modifier,id = id ?: unfolded::class) {
-    val visible by remember { this.toMutableList() }
+    val visible by local { this@editor.toMutableList() }
 
     if(!visible.containsAll(this)) {
         visible.clear()
         visible.addAll(this)
     }
-    var unfold by remember<T?>(null)
+    var unfold by local<T?> { null }
 
     visible.forEachWithId {
         Column {
@@ -61,7 +61,7 @@ fun <T> MutableCollection<T>.editor(
             }.renderScissor().clickable {
                 unfold = if(unfold === it) null else it
             }.highlightBox().background(color)
-        }.animateHeight().change {  delegate ->
+        }.animateHeight().renderScissor().change { delegate ->
             object : DslComponent by delegate {
                 override fun layoutVertical() {
                     delegate.layoutVertical()

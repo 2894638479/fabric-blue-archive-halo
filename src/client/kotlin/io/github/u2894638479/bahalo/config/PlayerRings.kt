@@ -3,27 +3,13 @@ package io.github.u2894638479.bahalo.config
 import io.github.u2894638479.bahalo.ui.editor
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
-import io.github.u2894638479.kotlinmcui.functions.decorator.animateHeight
-import io.github.u2894638479.kotlinmcui.functions.decorator.clickable
-import io.github.u2894638479.kotlinmcui.functions.decorator.highlightBox
-import io.github.u2894638479.kotlinmcui.functions.decorator.renderScissor
-import io.github.u2894638479.kotlinmcui.functions.remember
-import io.github.u2894638479.kotlinmcui.functions.translate
-import io.github.u2894638479.kotlinmcui.functions.ui.Button
-import io.github.u2894638479.kotlinmcui.functions.ui.Column
-import io.github.u2894638479.kotlinmcui.functions.ui.Row
-import io.github.u2894638479.kotlinmcui.functions.ui.Spacer
-import io.github.u2894638479.kotlinmcui.functions.ui.TextAutoFold
-import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
-import io.github.u2894638479.kotlinmcui.functions.withId
+import io.github.u2894638479.kotlinmcui.dsl.translate
+import io.github.u2894638479.kotlinmcui.dsl.ui.Column
+import io.github.u2894638479.kotlinmcui.dsl.ui.TextFlatten
 import io.github.u2894638479.kotlinmcui.identity.refId
 import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
-import io.github.u2894638479.kotlinmcui.modifier.height
 import io.github.u2894638479.kotlinmcui.modifier.padding
-import io.github.u2894638479.kotlinmcui.modifier.weight
-import io.github.u2894638479.kotlinmcui.prop.getValue
-import io.github.u2894638479.kotlinmcui.prop.setValue
 import kotlinx.serialization.Serializable
 
 @Serializable

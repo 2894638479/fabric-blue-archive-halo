@@ -2,10 +2,10 @@ package io.github.u2894638479.bahalo.ui
 
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
-import io.github.u2894638479.kotlinmcui.functions.decorator.clickable
-import io.github.u2894638479.kotlinmcui.functions.translate
-import io.github.u2894638479.kotlinmcui.functions.ui.Button
-import io.github.u2894638479.kotlinmcui.functions.ui.TextFlatten
+import io.github.u2894638479.kotlinmcui.dsl.decorator.clickable
+import io.github.u2894638479.kotlinmcui.dsl.translate
+import io.github.u2894638479.kotlinmcui.dsl.ui.Button
+import io.github.u2894638479.kotlinmcui.dsl.ui.TextFlatten
 import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
 import io.github.u2894638479.kotlinmcui.modifier.minHeight

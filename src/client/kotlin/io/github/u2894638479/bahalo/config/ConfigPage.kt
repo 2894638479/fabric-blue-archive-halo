@@ -1,20 +1,15 @@
 package io.github.u2894638479.bahalo.config
 
 import io.github.u2894638479.bahalo.ui.myBackground
-import io.github.u2894638479.kotlinmcui.context.DslTopContext
-import io.github.u2894638479.kotlinmcui.context.defaultOnClose
-import io.github.u2894638479.kotlinmcui.context.onClose
+import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
-import io.github.u2894638479.kotlinmcui.dslBackend
-import io.github.u2894638479.kotlinmcui.functions.*
-import io.github.u2894638479.kotlinmcui.functions.decorator.background
-import io.github.u2894638479.kotlinmcui.functions.decorator.clickable
-import io.github.u2894638479.kotlinmcui.functions.decorator.onHovered
-import io.github.u2894638479.kotlinmcui.functions.ui.*
+import io.github.u2894638479.kotlinmcui.dsl.*
+import io.github.u2894638479.kotlinmcui.dsl.decorator.clickable
+import io.github.u2894638479.kotlinmcui.dsl.decorator.onHovered
+import io.github.u2894638479.kotlinmcui.dsl.ui.*
 import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.math.Scroller
 import io.github.u2894638479.kotlinmcui.math.align.Aligner
-import io.github.u2894638479.kotlinmcui.math.px
 import io.github.u2894638479.kotlinmcui.modifier.Modifier
 import io.github.u2894638479.kotlinmcui.modifier.height
 import io.github.u2894638479.kotlinmcui.modifier.padding
@@ -55,38 +50,37 @@ private fun pages(hasBonus: Boolean) = mapOf<String, DslFunction>(
     }
 )
 
-context(ctx: DslTopContext)
+context(ctx: DslContext)
 fun ConfigPage(hasBonus: Boolean) {
-    val hudHidden by remember {
-        MinecraftClient.getInstance().options.hudHidden
+    val hudHidden by local {
+        MinecraftClient.getInstance().options.hudHidden.also {
+            MinecraftClient.getInstance().options.hudHidden = true
+        }
     }
-    hudHidden
-    MinecraftClient.getInstance().options.hudHidden = true
-    onClose {
+    local.dispose {
         Config.save()
         MinecraftClient.getInstance().options.hudHidden = hudHidden
-        defaultOnClose()
     }
-    val pages by remember { pages(hasBonus).mapKeys { translate("bahalo.page.${it.key}") } }
+    val pages by local { pages(hasBonus).mapKeys { translate("bahalo.page.${it.key}") } }
     val previewPage = pages.entries.last()
-    var selected by pages.entries.first().remember
+    var selected by local { pages.entries.first() }
     Row {
         ScrollableColumn(Modifier.weight(0.4)) {
             TextFlatten(Modifier.padding(5.scaled)) { translate("bahalo.configPage").emit() }
             pages.entries.forEachWithId {
-                var hovered by remember(false)
-                val size by autoAnimate(if(selected == it) 1.0 else if(hovered) 0.8 else 0.0)
-                val padding by autoAnimate(if(hovered) 5.scaled else 0.px)
+                var hovered by local { false }
+                val size by local.autoAnimate { if(selected == it) 1.0 else if(hovered) 0.8 else 0.0 }
+                val padding by local.autoAnimate { if(hovered) 5.0 else 0.0 }
                 Row(alignerHorizontal = Aligner.weightedExtend) {
-                    Button(Modifier.height(30.scaled).padding(3.scaled).padding(v = padding)) {
+                    Button(Modifier.height(30.scaled).padding(3.scaled).padding(v = padding.scaled)) {
                         TextFlatten { it.key.emit() }
-                    }.clickable(selected != it && !(it == previewPage && !ctxBackend.isInWorld)) {
+                    }.clickable(selected != it && !(it == previewPage && !backend.isInWorld)) {
                         selected = it }.onHovered { hovered = it }
                     Spacer(Modifier.weight(0.5 - 0.5*size)) {}
                 }
             }
         }
-        val scroller by Scroller.empty.remember.property
+        val scroller = local { Scroller.empty }
         ScrollableColumn(Modifier,scroller,id = selected) { selected.value() }
         ScrollBarVertical(Modifier.width(10.scaled),scroller,id = selected)
     }.run {

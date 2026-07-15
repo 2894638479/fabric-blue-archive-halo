@@ -26,6 +26,6 @@ public class MultiPhaseMixin {
         if(!Objects.equals(name, "beacon_beam")) return;
         if(!translucent) return;
         RenderLayer.MultiPhase multiPhase = (RenderLayer.MultiPhase)(Object)this;
-        Entry.Companion.modifyMultiPhase(multiPhase,name,phases);
+        Entry.INSTANCE.modifyMultiPhase(multiPhase,name,phases);
     }
 }

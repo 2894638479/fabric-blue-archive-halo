@@ -2,14 +2,12 @@ package io.github.u2894638479.bahalo.ui
 
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.context.scaled
-import io.github.u2894638479.kotlinmcui.functions.decorator.clickable
-import io.github.u2894638479.kotlinmcui.functions.property
-import io.github.u2894638479.kotlinmcui.functions.remember
-import io.github.u2894638479.kotlinmcui.functions.ui.*
+import io.github.u2894638479.kotlinmcui.dsl.decorator.clickable
+import io.github.u2894638479.kotlinmcui.dsl.local
+import io.github.u2894638479.kotlinmcui.dsl.ui.*
 import io.github.u2894638479.kotlinmcui.math.Axis
 import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.math.Scroller
-import io.github.u2894638479.kotlinmcui.math.rect.width
 import io.github.u2894638479.kotlinmcui.modifier.*
 import io.github.u2894638479.kotlinmcui.prop.StableRW
 import io.github.u2894638479.kotlinmcui.prop.getValue
@@ -31,7 +29,7 @@ fun ColorEdit(
     id: Any
 ) = Column(modifier,id = id) {
     var color by property
-    val mode by Mode.RGBAHSV_SLIDER.remember.property
+    val mode = local { Mode.RGBAHSV_SLIDER }
     context(ctx: DslContext)
     fun SFH(text: String, value: String, get:()-> Double, set:(Double)-> Unit) = Slider(
         Modifier.height(20.scaled).padding(1.scaled),Axis.Horizontal,
@@ -66,7 +64,7 @@ fun ColorEdit(
     }
     when(mode.value) {
         Mode.RGBAHSV_SLIDER -> {
-            val scrollerProp by Scroller.empty.remember.property
+            val scrollerProp = local { Scroller.empty }
             ScrollableRow(Modifier,scrollerProp) {
                 ColorRect(Modifier.minWidth(20.scaled).minHeight(40.scaled).padding(1.scaled),color) {}
                 SF("r",{ color.rDouble },{color = color.change(r = it)})
