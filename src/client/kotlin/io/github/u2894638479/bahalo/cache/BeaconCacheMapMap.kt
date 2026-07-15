@@ -2,6 +2,7 @@ package io.github.u2894638479.bahalo.cache
 
 import io.github.u2894638479.bahalo.Entry
 import io.github.u2894638479.bahalo.Entry.logger
+import io.github.u2894638479.kotlinmcui.backend.dslBackend
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -19,7 +20,7 @@ value class BeaconCacheMapMap(
             ignoreUnknownKeys = true
             allowStructuredMapKeys = true
         }
-        val file get() = File(Entry.configPath.resolve("${Entry.id}-beacon-cache.json").pathString)
+        val file get() = File(dslBackend.configDir.resolve("${Entry.id}-beacon-cache.json").pathString)
 
         var instance = loadInstance()
             private set
