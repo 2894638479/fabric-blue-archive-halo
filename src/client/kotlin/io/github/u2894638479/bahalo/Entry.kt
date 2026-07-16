@@ -1,9 +1,13 @@
 package io.github.u2894638479.bahalo
 
+import com.mojang.blaze3d.GpuFormat
+import com.mojang.blaze3d.PrimitiveTopology
 import com.mojang.blaze3d.pipeline.BlendFunction
 import com.mojang.blaze3d.pipeline.ColorTargetState
+import com.mojang.blaze3d.pipeline.DepthStencilState
+import com.mojang.blaze3d.pipeline.RenderPipeline
+import com.mojang.blaze3d.platform.CompareOp
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.VertexFormat.Mode
 import com.terraformersmc.modmenu.api.ConfigScreenFactory
 import com.terraformersmc.modmenu.api.ModMenuApi
 import io.github.u2894638479.bahalo.cache.BeaconCacheMap
@@ -20,14 +24,15 @@ import io.github.u2894638479.kotlinmcui.math.px
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.impl.client.rendering.BlockEntityRendererRegistryImpl
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.client.renderer.rendertype.RenderSetup
 import net.minecraft.core.SectionPos
 import net.minecraft.resources.Identifier
 import net.minecraft.world.level.block.entity.BeaconBlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityType
+import net.minecraft.world.level.block.entity.BlockEntityTypes
 import net.minecraft.world.level.chunk.status.ChunkStatus
 import org.slf4j.LoggerFactory
-import java.util.Optional
+import java.util.*
 
 object Entry: DslEntryClient, DslEntryGui, ModMenuApi {
     override fun getModConfigScreenFactory() = ConfigScreenFactory {
@@ -41,7 +46,7 @@ object Entry: DslEntryClient, DslEntryGui, ModMenuApi {
     override fun content() { ConfigPage(true) }
     override fun initializeClient() {
         BlockEntityRendererRegistryImpl.register(
-            BlockEntityType.BEACON,
+            BlockEntityTypes.BEACON,
             { BeaconHaloRenderer() }
         )
         var ticks = 0L
@@ -76,13 +81,18 @@ object Entry: DslEntryClient, DslEntryGui, ModMenuApi {
 
     fun RenderSetup.modifyRenderSetup(textures: Map<String, RenderSetup.TextureBinding>) {
         if (textures["Sampler0"]?.location != texture) return
-        pipeline.vertexFormat = DefaultVertexFormat.POSITION_COLOR
-        pipeline.vertexFormatMode = Mode.TRIANGLE_STRIP
+        pipeline = RenderPipeline.builder(RenderPipelines.BEACON_BEAM_SNIPPET)
+            .withLocation("pipeline/bahalo")
+            .withDepthStencilState(DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
+            .build()
+        pipeline.vertexFormatPerBuffer[0] = DefaultVertexFormat.POSITION_COLOR
+        pipeline.primitiveTopology = PrimitiveTopology.TRIANGLE_STRIP
         pipeline.cull = true
         useLightmap = false
+        sortOnUpload = false
         val config = Config.instance.special
         val biFunction = if(config.transparency) BlendFunction.TRANSLUCENT else BlendFunction.GLINT
         val colorMask = if(config.depthWrite) ColorTargetState.WRITE_ALL else ColorTargetState.WRITE_COLOR
-        pipeline.colorTargetState = ColorTargetState(Optional.of(biFunction),colorMask)
+        pipeline.colorTargetStates = arrayOf(ColorTargetState(Optional.of(biFunction), GpuFormat.RGBA8_UNORM,colorMask))
     }
 }

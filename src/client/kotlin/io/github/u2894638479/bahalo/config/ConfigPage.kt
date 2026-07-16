@@ -49,13 +49,13 @@ private fun pages(hasBonus: Boolean) = mapOf<String, DslFunction>(
 context(ctx: DslContext)
 fun ConfigPage(hasBonus: Boolean) {
     val hudHidden by local {
-        Minecraft.getInstance().options.hideGui.also {
-            Minecraft.getInstance().options.hideGui = true
+        Minecraft.getInstance().gui.hud.isHidden.also {
+            Minecraft.getInstance().gui.hud.isHidden = true
         }
     }
     local.dispose {
         Config.save()
-        Minecraft.getInstance().options.hideGui = hudHidden
+        Minecraft.getInstance().gui.hud.isHidden = hudHidden
     }
     val pages by local { pages(hasBonus).mapKeys { translate("bahalo.page.${it.key}") } }
     val previewPage = pages.entries.last()
