@@ -1,40 +1,71 @@
 package io.github.u2894638479.bahalo.render
 
+import com.mojang.blaze3d.vertex.PoseStack
 import io.github.u2894638479.bahalo.cache.BeaconCache
 import io.github.u2894638479.bahalo.cache.BeaconCacheMap
 import io.github.u2894638479.bahalo.cache.BeaconCacheMapMap
-import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.bahalo.config.ColorSampler
 import io.github.u2894638479.bahalo.config.Config
 import io.github.u2894638479.bahalo.math.Vec3L
-import net.minecraft.block.entity.BeaconBlockEntity
-import net.minecraft.client.render.VertexConsumerProvider
-import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
-import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.util.math.Vec3d
+import io.github.u2894638479.kotlinmcui.math.Color
+import net.minecraft.client.renderer.SubmitNodeCollector
+import net.minecraft.client.renderer.blockentity.BeaconRenderer
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
+import net.minecraft.client.renderer.blockentity.state.BeaconRenderState
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer
+import net.minecraft.client.renderer.state.level.CameraRenderState
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BeaconBlockEntity
+import net.minecraft.world.phys.Vec3
 
-class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlockEntityRenderer(ctx) {
-    override fun render(
-        entity: BeaconBlockEntity, tickDelta: Float, matrices: MatrixStack,
-        vertexConsumers: VertexConsumerProvider, light: Int, overlay: Int
+class BeaconHaloRenderer : BlockEntityRenderer<BeaconBlockEntity, BeaconHaloRenderer.State> {
+    val delegate = BeaconRenderer<BeaconBlockEntity>()
+    class State: BeaconRenderState() {
+        var level: Level? = null
+        var levels = 0
+        var tick = 0L
+        var tickDelta = 0.0
+    }
+    override fun createRenderState() = State()
+    override fun extractRenderState(
+        entity: BeaconBlockEntity,
+        state: State,
+        partialTicks: Float,
+        cameraPosition: Vec3,
+        breakProgress: ModelFeatureRenderer.CrumblingOverlay?
     ) {
-        if(!Config.instance.special.enableBeaconHalos) return super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
-        val segments = entity.beamSegments.ifEmpty { return }.map {
-            ColorSampler.Segment(it.height, Color(it.color[0], it.color[1], it.color[2]))
-        }
-        if(!shouldRender(entity,segments)) return
-        context(RenderParam(vertexConsumers,matrices,entity.world?.time ?: return,tickDelta)) {
-            render(entity,segments)
-        }
-        super.render(entity, tickDelta, matrices, vertexConsumers, light, overlay)
+        delegate.extractRenderState(entity,state,partialTicks, cameraPosition, breakProgress)
+        state.level = entity.level
+        state.levels = entity.levels
+        state.tick = entity.level?.gameTime ?: 0L
+        state.tickDelta = partialTicks.toDouble()
     }
 
-    fun shouldRender(entity: BeaconBlockEntity,segments: List<ColorSampler.Segment>): Boolean {
+    override fun submit(
+        state: State,
+        poseStack: PoseStack,
+        submitNodeCollector: SubmitNodeCollector,
+        camera: CameraRenderState
+    ) {
+        if(!Config.instance.special.enableBeaconHalos) {
+            return delegate.submit(state, poseStack, submitNodeCollector, camera)
+        }
+        val segments = state.sections.ifEmpty { return }.map {
+            ColorSampler.Segment(it.height, Color.ofARGB(it.color))
+        }
+        if(!shouldRender(state.blockPos,state.levels,segments)) return
+        context(RenderParam(submitNodeCollector,poseStack,state.tick,state.tickDelta)) {
+            render(state.levels,segments)
+        }
+        delegate.submit(state, poseStack, submitNodeCollector, camera)
+    }
+
+    fun shouldRender(pos: BlockPos, level: Int, segments: List<ColorSampler.Segment>): Boolean {
         if (Config.instance.special.clientCache) {
-            val cachePos = Vec3L(entity.pos)
+            val cachePos = Vec3L(pos)
             val map = BeaconCacheMap.current ?: return false
-            val newCache = BeaconCache(segments, entity.level)
+            val newCache = BeaconCache(segments, level)
             if (map[cachePos] != newCache) {
                 map[cachePos] = newCache
                 BeaconCacheMapMap.save()
@@ -45,17 +76,19 @@ class BeaconHaloRenderer(ctx: BlockEntityRendererFactory.Context?) : BeaconBlock
     }
 
     context(rp: RenderParam)
-    fun render(entity: BeaconBlockEntity,segments:List<ColorSampler.Segment>) {
+    fun render(level: Int,segments:List<ColorSampler.Segment>) {
         stack {
             ms.translate(0.5, 0.0, 0.5)
-            val infos = Config.instance.levels[entity.level]
+            val infos = Config.instance.levels[level]
             infos.forEach {
                 renderRingInfo(it, segments)
             }
         }
     }
 
-    override fun getRenderDistance() =  Int.MAX_VALUE
-    override fun isInRenderDistance(beaconBlockEntity: BeaconBlockEntity?, vec3d: Vec3d?) =
-        beaconBlockEntity?.isRemoved == false
+    override fun getViewDistance() = Int.MAX_VALUE
+    override fun shouldRender(blockEntity: BeaconBlockEntity, cameraPosition: Vec3): Boolean {
+        return !blockEntity.isRemoved
+    }
+    override fun shouldRenderOffScreen() = true
 }

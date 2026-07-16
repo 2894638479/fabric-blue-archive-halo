@@ -1,37 +1,19 @@
-accessWidener	v2	named
+accessWidener	v2	official
 
-accessible class net/minecraft/client/render/RenderPhase$ShaderProgram
-accessible field net/minecraft/block/entity/BeaconBlockEntity level I
-accessible class net/minecraft/client/render/RenderLayer$MultiPhaseParameters
-accessible method net/minecraft/client/render/RenderLayer$MultiPhaseParameters$Builder <init> ()V
-accessible class net/minecraft/client/render/RenderLayer$MultiPhase
-accessible class net/minecraft/client/render/RenderPhase$Texture
-
-accessible field net/minecraft/client/render/RenderLayer$MultiPhaseParameters phases Lcom/google/common/collect/ImmutableList;
-accessible method net/minecraft/client/render/RenderPhase$TextureBase getId ()Ljava/util/Optional;
-
-accessible field net/minecraft/client/render/RenderLayer$MultiPhaseParameters texture Lnet/minecraft/client/render/RenderPhase$TextureBase;
-accessible field net/minecraft/client/render/RenderLayer$MultiPhase affectedOutline Ljava/util/Optional;
-accessible field net/minecraft/client/render/RenderLayer$MultiPhase phases Lnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;
-accessible field net/minecraft/client/render/RenderLayer vertexFormat Lnet/minecraft/client/render/VertexFormat;
-accessible field net/minecraft/client/render/RenderLayer drawMode Lnet/minecraft/client/render/VertexFormat$DrawMode;
-accessible field net/minecraft/client/render/RenderLayer expectedBufferSize I
-accessible field net/minecraft/client/render/RenderLayer hasCrumbling Z
-accessible field net/minecraft/client/render/RenderLayer translucent Z
-accessible field net/minecraft/client/render/RenderPhase beginAction Ljava/lang/Runnable;
-accessible field net/minecraft/client/render/RenderPhase endAction Ljava/lang/Runnable;
-
-mutable field net/minecraft/client/render/RenderLayer$MultiPhase affectedOutline Ljava/util/Optional;
-mutable field net/minecraft/client/render/RenderLayer$MultiPhase phases Lnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;
-mutable field net/minecraft/client/render/RenderLayer vertexFormat Lnet/minecraft/client/render/VertexFormat;
-mutable field net/minecraft/client/render/RenderLayer drawMode Lnet/minecraft/client/render/VertexFormat$DrawMode;
-mutable field net/minecraft/client/render/RenderLayer expectedBufferSize I
-mutable field net/minecraft/client/render/RenderLayer hasCrumbling Z
-mutable field net/minecraft/client/render/RenderLayer translucent Z
-mutable field net/minecraft/client/render/RenderPhase beginAction Ljava/lang/Runnable;
-mutable field net/minecraft/client/render/RenderPhase endAction Ljava/lang/Runnable;
-
-accessible method net/minecraft/client/render/block/entity/BeaconBlockEntityRenderer renderBeam (Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;FJII[F)V
-accessible method net/minecraft/block/entity/BeaconBlockEntity updateLevel (Lnet/minecraft/world/World;III)I
-accessible class net/minecraft/client/render/RenderPhase$WriteMaskState
-accessible class net/minecraft/client/render/RenderPhase$Transparency
+accessible method net/minecraft/client/renderer/LevelRenderer extractVisibleEntities (Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;Lnet/minecraft/client/DeltaTracker;Lnet/minecraft/client/renderer/state/level/LevelRenderState;)V
+accessible field net/minecraft/world/level/block/entity/BeaconBlockEntity levels I
+accessible method net/minecraft/world/level/block/entity/BeaconBlockEntity updateBase (Lnet/minecraft/world/level/Level;III)I
+accessible method net/minecraft/client/renderer/blockentity/BeaconRenderer submitBeaconBeam (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;FFIII)V
+accessible class net/minecraft/client/renderer/rendertype/RenderSetup$TextureBinding
+accessible field net/minecraft/client/renderer/rendertype/RenderSetup pipeline Lcom/mojang/blaze3d/pipeline/RenderPipeline;
+accessible field com/mojang/blaze3d/pipeline/RenderPipeline vertexFormat Lcom/mojang/blaze3d/vertex/VertexFormat;
+accessible field com/mojang/blaze3d/pipeline/RenderPipeline vertexFormatMode Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;
+accessible field com/mojang/blaze3d/pipeline/RenderPipeline cull Z
+accessible field net/minecraft/client/renderer/rendertype/RenderSetup useLightmap Z
+accessible field com/mojang/blaze3d/pipeline/RenderPipeline colorTargetState Lcom/mojang/blaze3d/pipeline/ColorTargetState;
+mutable field net/minecraft/client/renderer/rendertype/RenderSetup pipeline Lcom/mojang/blaze3d/pipeline/RenderPipeline;
+mutable field com/mojang/blaze3d/pipeline/RenderPipeline vertexFormat Lcom/mojang/blaze3d/vertex/VertexFormat;
+mutable field com/mojang/blaze3d/pipeline/RenderPipeline vertexFormatMode Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;
+mutable field com/mojang/blaze3d/pipeline/RenderPipeline cull Z
+mutable field net/minecraft/client/renderer/rendertype/RenderSetup useLightmap Z
+mutable field com/mojang/blaze3d/pipeline/RenderPipeline colorTargetState Lcom/mojang/blaze3d/pipeline/ColorTargetState;

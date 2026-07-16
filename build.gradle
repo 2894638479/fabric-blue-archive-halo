@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id "me.modmuss50.mod-publish-plugin" version "0.8.1"
 	id "org.jetbrains.kotlin.jvm" version "2.4.0"
 	id 'org.jetbrains.kotlin.plugin.serialization' version '2.4.0'
@@ -41,17 +41,16 @@ loom {
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
-	modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
+	implementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
 	implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:${project.kotlin_serialization_version}"
 
 	implementation("com.github.2894638479:KotlinMCUI:v${kotlinmcui_version}")
-	modImplementation("com.github.2894638479:KotlinMCUI-backend:v${kotlinmcuibackend_version}-${loader}-${minecraft_version}")
+	implementation("com.github.2894638479:KotlinMCUI-backend:v${kotlinmcuibackend_version}-${loader}-${minecraft_version}")
 }
 
 processResources {
@@ -70,17 +69,17 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 17
+	it.options.release = 25
 }
 
 tasks.withType(KotlinCompile).configureEach {
-	compilerOptions.jvmTarget = JvmTarget.JVM_17
+	compilerOptions.jvmTarget = JvmTarget.JVM_25
 }
 
 java {
 	withSourcesJar()
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {
@@ -105,8 +104,8 @@ tasks.configureEach {
 }
 
 publishMods {
-	file = remapJar.archiveFile
-	additionalFiles = files(sourcesJar.archiveFile,jar.archiveFile)
+	file = jar.archiveFile
+	additionalFiles = files(sourcesJar.archiveFile)
 	changelog = "no changelog."
 	if(mod_version.toUpperCase().contains("SNAPSHOT")) {
 		type = ALPHA

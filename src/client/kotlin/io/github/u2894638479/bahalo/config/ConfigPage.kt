@@ -10,15 +10,11 @@ import io.github.u2894638479.kotlinmcui.dsl.ui.*
 import io.github.u2894638479.kotlinmcui.math.Color
 import io.github.u2894638479.kotlinmcui.math.Scroller
 import io.github.u2894638479.kotlinmcui.math.align.Aligner
-import io.github.u2894638479.kotlinmcui.modifier.Modifier
-import io.github.u2894638479.kotlinmcui.modifier.height
-import io.github.u2894638479.kotlinmcui.modifier.padding
-import io.github.u2894638479.kotlinmcui.modifier.weight
-import io.github.u2894638479.kotlinmcui.modifier.width
+import io.github.u2894638479.kotlinmcui.modifier.*
 import io.github.u2894638479.kotlinmcui.prop.getValue
 import io.github.u2894638479.kotlinmcui.prop.setValue
 import io.github.u2894638479.kotlinmcui.text.DslCharStyle
-import net.minecraft.client.MinecraftClient
+import net.minecraft.client.Minecraft
 
 private fun pages(hasBonus: Boolean) = mapOf<String, DslFunction>(
     "beaconRings" to {
@@ -53,13 +49,13 @@ private fun pages(hasBonus: Boolean) = mapOf<String, DslFunction>(
 context(ctx: DslContext)
 fun ConfigPage(hasBonus: Boolean) {
     val hudHidden by local {
-        MinecraftClient.getInstance().options.hudHidden.also {
-            MinecraftClient.getInstance().options.hudHidden = true
+        Minecraft.getInstance().options.hideGui.also {
+            Minecraft.getInstance().options.hideGui = true
         }
     }
     local.dispose {
         Config.save()
-        MinecraftClient.getInstance().options.hudHidden = hudHidden
+        Minecraft.getInstance().options.hideGui = hudHidden
     }
     val pages by local { pages(hasBonus).mapKeys { translate("bahalo.page.${it.key}") } }
     val previewPage = pages.entries.last()

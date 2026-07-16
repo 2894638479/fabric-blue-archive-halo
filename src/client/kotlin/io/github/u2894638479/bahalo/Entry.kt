@@ -1,5 +1,9 @@
 package io.github.u2894638479.bahalo
 
+import com.mojang.blaze3d.pipeline.BlendFunction
+import com.mojang.blaze3d.pipeline.ColorTargetState
+import com.mojang.blaze3d.vertex.DefaultVertexFormat
+import com.mojang.blaze3d.vertex.VertexFormat.Mode
 import com.terraformersmc.modmenu.api.ConfigScreenFactory
 import com.terraformersmc.modmenu.api.ModMenuApi
 import io.github.u2894638479.bahalo.cache.BeaconCacheMap
@@ -7,7 +11,6 @@ import io.github.u2894638479.bahalo.cache.BeaconCacheMapMap
 import io.github.u2894638479.bahalo.config.Config
 import io.github.u2894638479.bahalo.config.ConfigPage
 import io.github.u2894638479.bahalo.render.BeaconHaloRenderer
-import io.github.u2894638479.bahalo.render.ClientCacheBeaconsRenderer
 import io.github.u2894638479.kotlinmcui.backend.dslBackend
 import io.github.u2894638479.kotlinmcui.context.DslContext
 import io.github.u2894638479.kotlinmcui.entry.DslEntryClient
@@ -15,24 +18,16 @@ import io.github.u2894638479.kotlinmcui.entry.DslEntryGui
 import io.github.u2894638479.kotlinmcui.image.ImageHolder
 import io.github.u2894638479.kotlinmcui.math.px
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.impl.client.rendering.BlockEntityRendererRegistryImpl
-import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.block.entity.BeaconBlockEntity
-import net.minecraft.block.entity.BlockEntityType
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.render.GameRenderer
-import net.minecraft.client.render.RenderLayer.MultiPhase
-import net.minecraft.client.render.RenderLayer.MultiPhaseParameters
-import net.minecraft.client.render.RenderPhase
-import net.minecraft.client.render.VertexFormat.DrawMode
-import net.minecraft.client.render.VertexFormats
-import net.minecraft.util.Identifier
-import net.minecraft.util.math.ChunkSectionPos
-import net.minecraft.world.chunk.ChunkStatus
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.renderer.rendertype.RenderSetup
+import net.minecraft.core.SectionPos
+import net.minecraft.resources.Identifier
+import net.minecraft.world.level.block.entity.BeaconBlockEntity
+import net.minecraft.world.level.block.entity.BlockEntityType
+import net.minecraft.world.level.chunk.status.ChunkStatus
 import org.slf4j.LoggerFactory
-import java.nio.file.Path
-import java.util.*
+import java.util.Optional
 
 object Entry: DslEntryClient, DslEntryGui, ModMenuApi {
     override fun getModConfigScreenFactory() = ConfigScreenFactory {
@@ -47,24 +42,24 @@ object Entry: DslEntryClient, DslEntryGui, ModMenuApi {
     override fun initializeClient() {
         BlockEntityRendererRegistryImpl.register(
             BlockEntityType.BEACON,
-            ::BeaconHaloRenderer
+            { BeaconHaloRenderer() }
         )
         var ticks = 0L
         ClientTickEvents.END_CLIENT_TICK.register { minecraft ->
             if(ticks % 20L == 0L) {
-                minecraft.world?.let { world ->
+                minecraft.level?.let { world ->
                     val modified = BeaconCacheMap.current?.keys?.removeIf {
                         val pos = it.toBlockPos()
-                        val x = ChunkSectionPos.getSectionCoord(pos.x)
-                        val z = ChunkSectionPos.getSectionCoord(pos.z)
+                        val x = SectionPos.blockToSectionCoord(pos.x)
+                        val z = SectionPos.blockToSectionCoord(pos.z)
                         val loaded = (x-1..x+1).zip(z-1..z+1).all { (x,z) ->
-                            world.chunkManager.getChunk(x,z, ChunkStatus.FULL,false) != null
+                            world.chunkSource.getChunk(x,z, ChunkStatus.FULL,false) != null
                         }
                         if(!loaded) return@removeIf false
                         val beacon = world.getBlockEntity(pos) as? BeaconBlockEntity ?: return@removeIf true
-                        if(beacon.level == 0) {
-                            val level = BeaconBlockEntity.updateLevel(world,beacon.pos.x,beacon.pos.y,beacon.pos.z)
-                            beacon.level = level
+                        if(beacon.levels == 0) {
+                            val level = BeaconBlockEntity.updateBase(world,beacon.blockPos.x,beacon.blockPos.y,beacon.blockPos.z)
+                            beacon.levels = level
                             if(level == 0) return@removeIf true
                         }
                         false
@@ -74,34 +69,20 @@ object Entry: DslEntryClient, DslEntryGui, ModMenuApi {
             }
             ticks++
         }
-        WorldRenderEvents.AFTER_ENTITIES.register {
-            it.matrixStack().push()
-            val camera = it.camera().pos
-            it.matrixStack().translate(-camera.x,-camera.y,-camera.z)
-            ClientCacheBeaconsRenderer.render(it.world().time,it.tickDelta(),it.matrixStack(),it.consumers() ?: return@register)
-            it.matrixStack().pop()
-        }
     }
 
-    val texture = Identifier(id, "textures/pure_white.png")
+    val texture = Identifier.tryBuild(id, "textures/pure_white.png")!!
     val logger = LoggerFactory.getLogger(id)
 
-    fun MultiPhase.modifyMultiPhase(name: String?, phases: MultiPhaseParameters) {
-        if (name != "beacon_beam") return
-        if (phases.texture.id.get() != texture) return
-        affectedOutline = Optional.empty()
+    fun RenderSetup.modifyRenderSetup(textures: Map<String, RenderSetup.TextureBinding>) {
+        if (textures["Sampler0"]?.location != texture) return
+        pipeline.vertexFormat = DefaultVertexFormat.POSITION_COLOR
+        pipeline.vertexFormatMode = Mode.TRIANGLE_STRIP
+        pipeline.cull = true
+        useLightmap = false
         val config = Config.instance.special
-        this.phases = MultiPhaseParameters.Builder()
-            .cull(RenderPhase.ENABLE_CULLING)
-            .lightmap(RenderPhase.DISABLE_LIGHTMAP)
-            .program(RenderPhase.ShaderProgram { GameRenderer.getRenderTypeBeaconBeamProgram() })
-            .texture(phases.texture)
-            .transparency(if(config.transparency) RenderPhase.TRANSLUCENT_TRANSPARENCY else RenderPhase.GLINT_TRANSPARENCY)
-            .writeMaskState(if(config.depthWrite) RenderPhase.WriteMaskState.ALL_MASK else RenderPhase.WriteMaskState.COLOR_MASK)
-            .build(false)
-        this.vertexFormat = VertexFormats.POSITION_COLOR
-        this.drawMode = DrawMode.TRIANGLE_STRIP
-        beginAction = Runnable { this.phases.phases.forEach(RenderPhase::startDrawing) }
-        endAction = Runnable { this.phases.phases.forEach(RenderPhase::endDrawing) }
+        val biFunction = if(config.transparency) BlendFunction.TRANSLUCENT else BlendFunction.GLINT
+        val colorMask = if(config.depthWrite) ColorTargetState.WRITE_ALL else ColorTargetState.WRITE_COLOR
+        pipeline.colorTargetState = ColorTargetState(Optional.of(biFunction),colorMask)
     }
 }

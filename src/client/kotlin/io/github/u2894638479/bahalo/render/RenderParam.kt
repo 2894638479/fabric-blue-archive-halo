@@ -1,15 +1,15 @@
 package io.github.u2894638479.bahalo.render
 
-import net.minecraft.client.render.VertexConsumerProvider
-import net.minecraft.client.util.math.MatrixStack
+import com.mojang.blaze3d.vertex.PoseStack
+import net.minecraft.client.renderer.SubmitNodeCollector
 
 class RenderParam(
-    val vc: VertexConsumerProvider,
-    val ms: MatrixStack,
+    val vc: SubmitNodeCollector,
+    val ms: PoseStack,
     val tick: Long,
     val tickDelta: Double
 ) {
-    constructor(vc: VertexConsumerProvider, ms: MatrixStack, tick: Long, tickDelta: Float)
+    constructor(vc: SubmitNodeCollector, ms: PoseStack, tick: Long, tickDelta: Float)
             :this(vc,ms,tick,tickDelta.toDouble())
 }
 
@@ -27,8 +27,8 @@ val tickDelta get() = rp.tickDelta
 
 context(rp: RenderParam)
 inline fun stack(block:()-> Unit) = try {
-    ms.push()
+    ms.pushPose()
     block()
 } finally {
-    ms.pop()
+    ms.popPose()
 }

@@ -3,8 +3,8 @@ package io.github.u2894638479.bahalo.render
 import io.github.u2894638479.bahalo.config.ColorSampler
 import io.github.u2894638479.bahalo.config.Config
 import io.github.u2894638479.bahalo.math.Vec3D
-import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
-import kotlin.collections.forEach
+import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.blockentity.BeaconRenderer
 import kotlin.math.sqrt
 
 class RenderableRing(
@@ -21,11 +21,14 @@ class RenderableRing(
             ms.scale(scale, 1f, scale)
             ms.translate(-0.5, 0.0, -0.5)
             var k = 0
+            val mc = Minecraft.getInstance()
+            val ani = Math.floorMod(mc.level?.gameTime ?: return@stack, 40) +
+                    mc.deltaTracker.getGameTimeDeltaPartialTick(false)
             segments.forEachIndexed { index, segment ->
-                BeaconBlockEntityRenderer.renderBeam(
-                    ms, vc, tickDelta.toFloat(),tick, k,
+                BeaconRenderer.submitBeaconBeam(
+                    ms, vc, 1f,ani, k,
                     if(index == segments.size - 1) 1024 else segment.height,
-                    segment.run { floatArrayOf(color.rFloat,color.gFloat,color.bFloat) }
+                    segment.color.argbInt
                 )
                 k += segment.height
             }

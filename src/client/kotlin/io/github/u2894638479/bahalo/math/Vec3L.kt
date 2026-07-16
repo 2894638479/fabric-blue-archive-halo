@@ -1,7 +1,7 @@
 package io.github.u2894638479.bahalo.math
 
 import kotlinx.serialization.Serializable
-import net.minecraft.util.math.BlockPos
+import net.minecraft.core.BlockPos
 
 @Serializable
 data class Vec3L(

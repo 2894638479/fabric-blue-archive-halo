@@ -5,11 +5,10 @@
     "injectors": {
         "defaultRequire": 1
     },
-    "client": [
-        "BackgroundRendererMixin",
-        "FuckMojangWorldRendererDoubleRenderBug",
+    "mixins": [
         "GameRendererMixin",
-        "MultiPhaseMixin",
-        "PlayerEntityRendererMixin"
+        "LevelRendererMixin",
+        "LivingEntityRendererMixin",
+        "RenderSetupMixin"
     ]
 }

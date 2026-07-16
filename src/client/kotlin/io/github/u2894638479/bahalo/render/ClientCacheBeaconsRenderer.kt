@@ -6,13 +6,8 @@ import io.github.u2894638479.bahalo.cache.WorldKey
 import io.github.u2894638479.bahalo.config.Config
 import io.github.u2894638479.bahalo.math.Vec3D
 import io.github.u2894638479.bahalo.math.Vec3L
-import net.minecraft.client.render.VertexConsumerProvider
-import net.minecraft.client.util.math.MatrixStack
 
 object ClientCacheBeaconsRenderer {
-    fun render(ticks: Long, tickDelta: Float, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider)
-    = context(RenderParam(vertexConsumers,matrices,ticks,tickDelta)){ render() }
-
     context(rp: RenderParam)
     fun render() {
         if(!Config.instance.special.clientCache) return
