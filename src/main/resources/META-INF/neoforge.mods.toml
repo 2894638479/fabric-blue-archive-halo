@@ -28,5 +28,12 @@ versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
+[[dependencies.blue_archive_halo]]
+modId = "kotlinmcui"
+type = "required"
+versionRange = "${kotlinmcui_version}"
+ordering = "NONE"
+side = "BOTH"
+
 [[mixins]]
 config = "blue-archive-halo-client.mixin.json"
