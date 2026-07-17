@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
     id "dev.architectury.loom" version "${loom_version}"
@@ -34,6 +35,10 @@ repositories {
 
 loom {
 	accessWidenerPath = file("src/main/resources/bahalo.accesswidener")
+}
+
+tasks.named("remapJar",RemapJarTask) {
+	atAccessWideners.add("bahalo.accesswidener")
 }
 
 sourceSets {
