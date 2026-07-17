@@ -1,0 +1,85 @@
+package io.github.u2894638479.bahalo.config
+
+import io.github.u2894638479.bahalo.ui.SliderConfig
+import io.github.u2894638479.kotlinmcui.context.DslContext
+import io.github.u2894638479.kotlinmcui.dsl.ui.Column
+import io.github.u2894638479.kotlinmcui.dsl.ui.Row
+import io.github.u2894638479.kotlinmcui.identity.refId
+import io.github.u2894638479.kotlinmcui.math.Color
+import io.github.u2894638479.kotlinmcui.math.Measure
+import io.github.u2894638479.kotlinmcui.modifier.Modifier
+import io.github.u2894638479.kotlinmcui.modifier.height
+import io.github.u2894638479.kotlinmcui.container.DslChild
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlin.math.max
+
+@Serializable
+sealed interface RingStyle {
+    val textKey: String
+
+    val next get() = when(this) {
+        is Radar -> Pulse()
+        is Pulse -> Radar()
+    }
+
+    context(ctx: DslContext)
+    fun editor(modifier: Modifier = Modifier.Companion): DslChild
+
+    // direction: 0 to 1
+    fun color(direction: Double, color: Color): Color
+
+    @Serializable
+    @SerialName("radar")
+    class Radar: RingStyle {
+        override val textKey get() = "bahalo.style.radar"
+
+        var minAlpha = 0.3
+        var maxAlpha = 1.0
+        var length = 0.25
+        context(ctx: DslContext)
+        override fun editor(modifier: Modifier) = Column(modifier, id = refId) {
+            Row {
+                SliderConfig(0.0..maxAlpha, ::minAlpha)
+                SliderConfig(minAlpha..1.0, ::maxAlpha)
+            }
+            Row {
+                SliderConfig(0.0..1.0, ::length)
+            }
+        }
+
+        override fun color(direction: Double, color: Color): Color {
+            val alphaRange = maxAlpha - minAlpha
+            val radarAlpha = alphaRange * (1 - direction / length)
+            val alpha = max(minAlpha, radarAlpha)
+            return color.change(a = color.aDouble * alpha)
+        }
+
+    }
+
+    @Serializable
+    @SerialName("pulse")
+    class Pulse: RingStyle {
+        override val textKey get() = "bahalo.style.pulse"
+
+        var minAlpha = 0.1
+        var maxAlpha = 0.8
+        var count = 8
+        context(ctx: DslContext)
+        override fun editor(modifier: Modifier) = Column(modifier,id = refId) {
+            Row {
+                SliderConfig(0.0..maxAlpha, ::minAlpha)
+                SliderConfig(minAlpha..1.0, ::maxAlpha)
+            }
+            Row(Modifier.height(Measure.AUTO_MIN)) {
+                SliderConfig(2..33, ::count)
+            }
+        }
+
+        override fun color(direction: Double, color: Color): Color {
+            val highlight = ((direction * count * 2).toInt() % 2) != 0
+            return color.change(a = color.aDouble * if(highlight) maxAlpha else minAlpha)
+        }
+
+    }
+}
